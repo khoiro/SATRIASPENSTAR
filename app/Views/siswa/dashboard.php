@@ -75,18 +75,15 @@
 
             <!-- Info Absensi -->
             <div class="col-12 col-md-4 mb-3 mb-md-0">
-              <div class="card text-white" style="background: linear-gradient(90deg, #2196f3, #9c27b0);">
-                <div class="card-body">
-                  <h2 class="mb-3"><?= $tanggal_hari_ini; ?></h2>
-                  <p><strong>Masuk:</strong> <?= $jam_masuk ? $jam_masuk : '-'; ?></p>
-                  <p><strong>Keluar:</strong> <?= $jam_keluar ? $jam_keluar : '-'; ?></p>
-                  <a href="#" class="btn btn-outline-light mt-3">Lihat Riwayat <i class="fas fa-arrow-right"></i></a>
+                <div class="card text-white" style="background: linear-gradient(90deg, #2196f3, #9c27b0);">
+                    <div class="card-body">
+                        <h2 class="mb-3"><?= $tanggal_hari_ini; ?></h2>
+                        <p><strong>Masuk:</strong> <span id="display_jam_masuk"><?= $jam_masuk ? $jam_masuk : '-'; ?></span></p>
+                        <p><strong>Keluar:</strong> <span id="display_jam_keluar"><?= $jam_keluar ? $jam_keluar : '-'; ?></span></p>
+                        <a href="#" class="btn btn-outline-light mt-3">Lihat Riwayat <i class="fas fa-arrow-right"></i></a>
+                    </div>
                 </div>
-              </div>
             </div>
-
-            
-
 
             <!-- Peta -->
             <div class="col-12 col-md-5">
@@ -101,7 +98,6 @@
     </div>
   </div>
 </div>
-
 
 <script>
     // --- Variabel Global dan Konfigurasi ---
@@ -197,7 +193,7 @@
                 
                 L.marker([LOKASI_PUSAT.lat, LOKASI_PUSAT.lon])
                     .addTo(map)
-                    .bindPopup("SMPN 1 TARIK");
+                    .bindPopup("Lokasi Absensi");
 
                 // Marker Lokasi Pengguna
                 L.marker([lat, lon]).addTo(map)
@@ -282,19 +278,29 @@
     }
 
     // --- Fungsi Presensi (Submit) ---
-    function presensi() {
+    function presensi(){
         const $snapshot = $("#snapshot");
         const imageData = $snapshot.attr("src");
+        const $btnPresensi = $("#btnPresensi"); // Ambil elemen tombol
+        const status = window.statusPresensi; // 'masuk' atau 'keluar'
 
-        // Pastikan pengguna telah mengambil gambar
-        if (!imageData || imageData.length < 100) {
-             alert("Silakan ambil gambar (selfie) terlebih dahulu.");
-             return;
+        // 🚨 PENGAMANAN DOUBLE-CLICK INSTAN: Hentikan jika tombol sudah disabled
+        if ($btnPresensi.prop("disabled")) {
+            return; 
         }
+
+        // 1. Validasi Gambar
+        if (!imageData || imageData.length < 100) {
+            alert("Silakan ambil gambar (selfie) terlebih dahulu.");
+            return;
+        }
+
+        // 2. DISABLE SEGERA & Tampilkan status loading
+        $btnPresensi.prop("disabled", true).text("Memproses..."); 
 
         const latitude = $("#latitude_input").val();
         const longitude = $("#longitude_input").val();
-        const status = window.statusPresensi; // 'masuk' atau 'keluar'
+        
 
         $.ajax({
             url: "/siswa/absensi", // Ganti dengan endpoint API Anda
@@ -305,40 +311,46 @@
                 longitude: longitude,
                 status_presensi: status, // Kirim status ke backend
             },
-            beforeSend: function() {
-                // Tampilkan loading/disable tombol sebelum kirim
-                $("#btnPresensi").prop("disabled", true).text("Memproses...");
-            },
+            // beforeSend dihilangkan
             success: function(response) {
                 alert("Data presensi " + status + " berhasil dikirim!");
                 
-                // Update tampilan info absensi
+                // 🚀 LOGIKA UPDATE TAMPILAN WAKTU & STATUS
                 if (status === 'masuk' && response.jam_masuk) {
-                     // Asumsi Anda punya elemen dengan ID yang benar untuk menampilkan jam masuk/keluar
-                     // Jika tidak ada ID yang benar, gunakan penamaan yang sesuai
-                     $('#jam_masuk').text(response.jam_masuk); 
-                     $("#sudah_masuk").val('1'); // Update status
-                     window.statusPresensi = 'keluar'; // Pindah ke status keluar
-                     $("#btnPresensi").text("Absensi Keluar").prop("disabled", false);
+                    // 1. Update Waktu Masuk yang Ditampilkan
+                    $("#display_jam_masuk").text(response.jam_masuk); 
+                    
+                    // Update state untuk aksi berikutnya
+                    $("#sudah_masuk").val('1'); 
+                    window.statusPresensi = 'keluar'; 
+                    $btnPresensi.text("Absensi Keluar").prop("disabled", false); // Re-enable untuk absensi keluar
 
                 } else if (status === 'keluar' && response.jam_keluar) {
-                    $('#jam_keluar').text(response.jam_keluar); 
-                    $("#sudah_keluar").val('1'); // Update status
-                    window.statusPresensi = 'selesai'; // Pindah ke status selesai
-                    $("#btnPresensi").text("Sudah Absen Hari Ini").prop("disabled", true);
+                    // 2. Update Waktu Keluar yang Ditampilkan
+                    $("#display_jam_keluar").text(response.jam_keluar); 
+                    
+                    // Update state menjadi selesai
+                    $("#sudah_keluar").val('1'); 
+                    window.statusPresensi = 'selesai'; 
+                    $btnPresensi.text("Sudah Absen Hari Ini").prop("disabled", true); // Tetap disabled
+
                 } else {
-                    // Handle jika backend sukses tapi tidak mengembalikan data yang diharapkan
-                    alert("Presensi berhasil, tapi data update tidak ditemukan.");
+                    alert("Presensi berhasil, tapi data update tidak ditemukan. Silakan refresh.");
+                    // Jika ada masalah update status, kembalikan tombol ke keadaan semula agar bisa coba lagi
+                    const originalText = status === 'masuk' ? "Absensi Masuk" : "Absensi Keluar";
+                    $btnPresensi.prop("disabled", false).text(originalText); 
                 }
 
                 ambilUlang(); // Kembali ke tampilan video setelah sukses
 
             },
             error: function(xhr, status, error) {
-                alert("Gagal mengirim presensi: " + xhr.responseJSON.message || error);
-                console.error(xhr.responseText);
+                alert("Gagal mengirim presensi: " + (xhr.responseJSON ? xhr.responseJSON.message : error));
+                console.error("AJAX Error:", xhr.responseText);
+                
                 // Kembalikan tombol ke keadaan sebelum kirim agar bisa coba lagi
-                $("#btnPresensi").prop("disabled", false).text(status === 'masuk' ? "Absensi Masuk" : "Absensi Keluar"); 
+                const originalText = window.statusPresensi === 'masuk' ? "Absensi Masuk" : "Absensi Keluar";
+                $btnPresensi.prop("disabled", false).text(originalText); 
             }
         });
     }
