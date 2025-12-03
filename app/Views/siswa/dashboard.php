@@ -106,10 +106,10 @@
 <script>
     // --- Variabel Global dan Konfigurasi ---
     const LOKASI_PUSAT = {
-        lat: -7.44710975382454,
-        lon: 112.52221433900381
+        lat: <?= $lokasi_absensi['lat'] ?>, 
+        lon: <?= $lokasi_absensi['lon'] ?>
     };
-    const RADIUS_ABSENSI = 100; // dalam meter
+    const RADIUS_ABSENSI = <?= $lokasi_absensi['radius'] ?>; // dalam meter
 
     // Fungsi menghitung jarak dalam meter (Haversine formula)
     function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {

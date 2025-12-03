@@ -8,6 +8,7 @@ use App\Entities\Siswa as EntitiesSiswa;
 use App\Models\ArticleModel;
 use App\Models\SiswaModel;
 use App\Models\UserModel;
+use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -431,6 +432,57 @@ class Admin extends BaseController
         $existingUser = $userModel->where('email', $email)->first();
 
         return $this->response->setJSON(['exists' => $existingUser ? true : false]);
+    }
+
+    public function location()
+    {
+        // Pastikan hanya admin yang bisa mengakses
+        if (Services::login()->role !== 'admin') {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $model = new SettingModel();
+        
+        // Ambil data lokasi saat ini (atau default jika belum ada)
+        $lokasi = $model->getSetting('lokasi_absensi');
+
+        // Jika form disubmit
+        if ($this->request->getMethod() === 'POST') {
+            $validation = $this->validate([
+                'latitude' => 'required|numeric',
+                'longitude' => 'required|numeric',
+                'radius' => 'required|integer|greater_than[0]',
+            ]);
+
+            if ($validation) {
+                $newLokasi = [
+                    'lat' => $this->request->getPost('latitude'),
+                    'lng' => $this->request->getPost('longitude'),
+                    'radius' => $this->request->getPost('radius'),
+                ];
+
+                // Simpan data dalam bentuk JSON
+                $model->setSetting('lokasi_absensi', json_encode($newLokasi));
+                
+                session()->setFlashdata('success', 'Titik koordinat absensi berhasil diperbarui!');
+                return redirect()->to('/admin/location');
+            } else {
+                session()->setFlashdata('error', 'Validasi gagal. Pastikan Latitude, Longitude, dan Radius terisi dengan benar.');
+                return redirect()->back()->withInput();
+            }
+        }
+        
+        // Parse data lokasi (jika ada) atau gunakan default
+        $dataLokasi = $lokasi ? json_decode($lokasi, true) : [
+            'lat' => -7.44710975382454, // Default SMPN 1 Tarik
+            'lng' => 112.52221433900381,
+            'radius' => 100, // Default 100 meter
+        ];
+
+        return view('admin/location/edit', [
+            'page' => 'location', // Digunakan untuk menandai menu aktif di sidebar
+            'item' => $dataLokasi
+        ]);
     }
 
 

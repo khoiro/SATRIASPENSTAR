@@ -24,6 +24,9 @@ $routes->group('admin', function($routes) {
     $routes->get('cekemail', 'Admin::cekemail');
     $routes->post('importsiswa', 'Admin::importsiswa');
 
+    // Rute untuk Pengaturan Lokasi Absensi (GET & POST)
+    // Ini akan memanggil method 'location' di Admin Controller
+    $routes->match(['get', 'post'], 'location', 'Admin::location');
 
     // Rute untuk artikel - semua aksi ditangani oleh satu method
     $routes->match(['get', 'post'], 'article/(:any)/(:num)', 'Admin::article/$1/$2');

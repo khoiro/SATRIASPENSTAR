@@ -89,6 +89,15 @@
           </a>
         </li>
 
+        <li class="nav-item">
+            <a href="/admin/location" class="nav-link <?= ($page ?? '') === 'location' ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-map-marker-alt"></i> 
+                <p>
+                    Ubah Koordinat Lokasi
+                </p>
+            </a>
+        </li>
+
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

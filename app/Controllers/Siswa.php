@@ -7,6 +7,7 @@ use App\Entities\User as EntitiesUser;
 use App\Models\ArticleModel;
 use App\Models\UserModel;
 use App\Models\AbsensiModel;
+use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
 use CodeIgniter\I18n\Time;
@@ -35,17 +36,30 @@ class Siswa extends BaseController
 
 	public function index()
 	{
-		$now 		= Time::now();
-		$model 		= new AbsensiModel();
-		$tanggal	= $now->toDateString('Y-m-d');
-		$userId 	= Services::login()->id;
-		$status 	= $model->cekStatusAbsensi($userId,$tanggal);
+		$now 			= Time::now();
+		$model 			= new AbsensiModel();
+		$settingModel 	= new SettingModel();
+		$tanggal		= $now->toDateString('Y-m-d');
+		$userId 		= Services::login()->id;
+		$status 		= $model->cekStatusAbsensi($userId,$tanggal);
+		$lokasiJson 	= $settingModel->getSetting('lokasi_absensi');
+		// Gunakan default jika data tidak ada di database
+        $defaultLokasi = [
+            'lat' => -7.44710975382454,
+            'lng' => 112.52221433900381,
+            'radius' => 100,
+        ];
+		// Dekode JSON. Jika gagal atau kosong, gunakan default.
+        $lokasiAbsensi = $lokasiJson ? json_decode($lokasiJson, true) : $defaultLokasi;
+		$lokasiAbsensi['lon'] = $lokasiAbsensi['lng'];
+        unset($lokasiAbsensi['lng']);
 	
 		return view('siswa/dashboard', [
 			'page' => 'dashboard',
 			'tanggal_hari_ini' => $tanggal,
 			'jam_masuk' => $status['data']['jam_masuk'] ?? null,
-			'jam_keluar' => $status['data']['jam_keluar'] ?? null
+			'jam_keluar' => $status['data']['jam_keluar'] ?? null,
+			'lokasi_absensi' => $lokasiAbsensi,
 		]);
 	}
 
