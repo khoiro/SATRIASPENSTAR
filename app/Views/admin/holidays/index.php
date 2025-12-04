@@ -12,6 +12,10 @@
         color: #fff;
         opacity: 1;
     }
+    .spinner-border {
+        width: 1rem;
+        height: 1rem;
+    }
 </style>
 <?= view('shared/head') ?>
 <body>
@@ -151,13 +155,23 @@
         // ===============================
         $('#formHoliday').on('submit', function(e) {
             e.preventDefault();
-
+            const btn = $('#btnSimpanLibur');
+            // --- Tampilkan Loading ---
+            btn.prop('disabled', true);
+            btn.html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Menyimpan...
+            `);
             $.ajax({
                 url: "<?= site_url('admin/holiday/store') ?>",
                 type: "POST",
                 data: $(this).serialize(),
                 dataType: "json",
                 success: function(res) {
+
+                    // Pulihkan tombol
+                    btn.prop('disabled', false);
+                    btn.html(`<i class="fas fa-plus me-1"></i> Simpan`);
 
                     if (res.status === "success") {
 
@@ -201,6 +215,10 @@
 
                 },
                 error: function() {
+                    // Pulihkan tombol
+                    btn.prop('disabled', false);
+                    btn.html(`<i class="fas fa-plus me-1"></i> Simpan`);
+
                     Swal.fire({
                         icon: "error",
                         title: "Gagal!",
