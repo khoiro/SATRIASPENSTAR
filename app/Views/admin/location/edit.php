@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+    .spinner-border {
+        width: 1rem;
+        height: 1rem;
+    }
+</style>
 <?= view('shared/head') ?>
 
 <body>
@@ -41,13 +47,15 @@
                                 </button>
                             </div>
                         <?php endif; ?>
-
+                        
+                        <div id="resultAlert" class="mt-3"></div>
+                        
                         <div id="map"></div>
 
-                        <form method="post" action="/admin/location">
+                        <form id="formLokasi">
                             <?= csrf_field() ?>
                             
-                            <p class="text-info">💡 **Klik pada peta** untuk menentukan lokasi baru. Titik merah adalah lokasi yang tersimpan saat ini dan area radius yang diizinkan.</p>
+                            <p class="text-info">💡 Klik pada peta untuk menentukan lokasi baru.</p>
 
                             <div class="row">
                                 <div class="col-md-5 mb-3">
@@ -64,8 +72,12 @@
                                 </div>
                             </div>
                             
-                            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Simpan Koordinat Baru</button>
+                            <button type="submit" class="btn btn-success" id="btnSave">
+                                <i class="fas fa-save"></i> Simpan Koordinat Baru
+                            </button>
+
                         </form>
+
                     </div>
                 </div>
                 </div>
@@ -164,6 +176,63 @@
             setTimeout(() => {
                 map.invalidateSize();
             }, 300);
+
+            const form = document.getElementById('formLokasi');
+            const resultAlert = document.getElementById('resultAlert');
+
+            form.addEventListener('submit', function(e){
+                e.preventDefault(); // ❗ Mencegah reload halaman
+ 
+                const formData = new FormData(form);
+
+                // ---- Munculkan Loading ----
+                btnSave.disabled = true;
+                btnSave.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    Menyimpan...
+                `;
+
+                fetch("/admin/location", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+
+                    // Kembalikan tombol ke normal
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = `<i class="fas fa-save"></i> Simpan Koordinat Baru`;
+
+                    if (data.status === "success") {
+                        resultAlert.innerHTML = `
+                            <div class="alert alert-success alert-dismissible fade show">
+                                ${data.message}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>`;
+                    } 
+                    else {
+                        resultAlert.innerHTML = `
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                ${data.message}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>`;
+                    }
+                })
+                .catch(err => {
+                    // Kembalikan tombol
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = `<i class="fas fa-save"></i> Simpan Koordinat Baru`;
+                    
+                    resultAlert.innerHTML = `
+                        <div class="alert alert-danger">Terjadi kesalahan AJAX!</div>
+                    `;
+                });
+            });
+
         });
     </script>
 </body>

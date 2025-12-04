@@ -436,54 +436,56 @@ class Admin extends BaseController
 
     public function location()
     {
-        // Pastikan hanya admin yang bisa mengakses
         if (Services::login()->role !== 'admin') {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
         $model = new SettingModel();
-        
-        // Ambil data lokasi saat ini (atau default jika belum ada)
         $lokasi = $model->getSetting('lokasi_absensi');
 
-        // Jika form disubmit
+        // Jika POST (AJAX)
         if ($this->request->getMethod() === 'POST') {
+
             $validation = $this->validate([
                 'latitude' => 'required|numeric',
                 'longitude' => 'required|numeric',
                 'radius' => 'required|integer|greater_than[0]',
             ]);
 
-            if ($validation) {
-                $newLokasi = [
-                    'lat' => $this->request->getPost('latitude'),
-                    'lng' => $this->request->getPost('longitude'),
-                    'radius' => $this->request->getPost('radius'),
-                ];
-
-                // Simpan data dalam bentuk JSON
-                $model->setSetting('lokasi_absensi', json_encode($newLokasi));
-                
-                session()->setFlashdata('success', 'Titik koordinat absensi berhasil diperbarui!');
-                return redirect()->to('/admin/location');
-            } else {
-                session()->setFlashdata('error', 'Validasi gagal. Pastikan Latitude, Longitude, dan Radius terisi dengan benar.');
-                return redirect()->back()->withInput();
+            if (!$validation) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Validasi gagal. Pastikan semua data terisi dengan benar.'
+                ]);
             }
+
+            $newLokasi = [
+                'lat' => $this->request->getPost('latitude'),
+                'lng' => $this->request->getPost('longitude'),
+                'radius' => $this->request->getPost('radius'),
+            ];
+
+            $model->setSetting('lokasi_absensi', json_encode($newLokasi));
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Titik koordinat absensi berhasil diperbarui!'
+            ]);
         }
-        
-        // Parse data lokasi (jika ada) atau gunakan default
+
+        // Jika GET biasa (tampilkan halaman)
         $dataLokasi = $lokasi ? json_decode($lokasi, true) : [
-            'lat' => -7.44710975382454, // Default SMPN 1 Tarik
+            'lat' => -7.44710975382454,
             'lng' => 112.52221433900381,
-            'radius' => 100, // Default 100 meter
+            'radius' => 100,
         ];
 
         return view('admin/location/edit', [
-            'page' => 'location', // Digunakan untuk menandai menu aktif di sidebar
+            'page' => 'location',
             'item' => $dataLokasi
         ]);
     }
+
 
 
 
