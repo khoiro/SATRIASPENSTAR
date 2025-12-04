@@ -17,6 +17,7 @@ namespace App\Controllers;
 use CodeIgniter\Controller;
 use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Session\Session;
+use CodeIgniter\Validation\Validation;
 
 class BaseController extends Controller
 {
@@ -33,6 +34,9 @@ class BaseController extends Controller
 	protected $session;
 	/** @var BaseConnection */
 	protected $db;
+	// 👇 Tambahkan properti untuk Validasi
+    /** @var Validation */
+    protected $validation;
 
 	/**
 	 * Constructor.
@@ -47,6 +51,7 @@ class BaseController extends Controller
 		//--------------------------------------------------------------------
 		$this->session = \Config\Services::session();
 		$this->db = \Config\Database::connect();
+        $this->validation = \Config\Services::validation();
 	}
 
 	protected function checkAccess($allowedRoles = [])

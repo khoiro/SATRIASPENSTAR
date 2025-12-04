@@ -208,7 +208,7 @@ class Siswa extends BaseController
 				'jam_masuk'   => $jam,
 				'lokasi_lat'  => $latitude,
 				'lokasi_lng'  => $longitude,
-				'foto'        =>  'uploads/absensi' . $imageName,
+				'foto'        =>  'uploads/absensi/' . $imageName,
 			];
 
 			$model->insert($data);
@@ -223,7 +223,7 @@ class Siswa extends BaseController
 			// Jika sudah ada jam_masuk → UPDATE jam_keluar
 			$updateData = [
 				'jam_keluar'  => $jam,
-				'foto_keluar' => 'uploads/absensi' . $imageName, // jika ingin simpan foto saat keluar juga
+				'foto_keluar' => 'uploads/absensi/' . $imageName, // jika ingin simpan foto saat keluar juga
 				'lokasi_lat_keluar' => $latitude,
 				'lokasi_lng_keluar' => $longitude,
 			];

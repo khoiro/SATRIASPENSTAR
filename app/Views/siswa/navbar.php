@@ -63,12 +63,12 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link <?= ($page ?? '') === 'article' ? 'active' : '' ?>">
-            <i class="nav-icon fas fa-scroll"></i>
-            <p>
-              Report Absensi
-            </p>
-          </a>
+            <a href="<?= site_url('siswa/report') ?>" 
+              class="nav-link <?= ($page ?? '') === 'report_absensi' ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-history"></i> <p>
+                    Report Absensi
+                </p>
+            </a>
         </li>
       </ul>
     </nav>

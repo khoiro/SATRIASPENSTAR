@@ -98,6 +98,15 @@
             </a>
         </li>
 
+       <li class="nav-item">
+            <a href="/admin/holiday" class="nav-link <?= ($page ?? '') === 'holiday' ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-calendar-alt"></i> 
+                <p>
+                    Jadwal Libur
+                </p>
+            </a>
+        </li>
+
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

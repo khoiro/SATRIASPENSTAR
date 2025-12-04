@@ -80,7 +80,7 @@
                         <h2 class="mb-3"><?= $tanggal_hari_ini; ?></h2>
                         <p><strong>Masuk:</strong> <span id="display_jam_masuk"><?= $jam_masuk ? $jam_masuk : '-'; ?></span></p>
                         <p><strong>Keluar:</strong> <span id="display_jam_keluar"><?= $jam_keluar ? $jam_keluar : '-'; ?></span></p>
-                        <a href="#" class="btn btn-outline-light mt-3">Lihat Riwayat <i class="fas fa-arrow-right"></i></a>
+                        <a href="<?= site_url('siswa/report') ?>" class="btn btn-outline-light mt-3">Lihat Riwayat <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </div>

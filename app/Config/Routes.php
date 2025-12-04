@@ -23,10 +23,25 @@ $routes->group('admin', function($routes) {
     $routes->get('findsiswa/(:num)', 'Admin::findsiswa/$1');
     $routes->get('cekemail', 'Admin::cekemail');
     $routes->post('importsiswa', 'Admin::importsiswa');
+    $routes->post('holiday/datatable', 'HolidayController::datatable');
+
 
     // Rute untuk Pengaturan Lokasi Absensi (GET & POST)
     // Ini akan memanggil method 'location' di Admin Controller
     $routes->match(['get', 'post'], 'location', 'Admin::location');
+
+    // 👇 RUTE BARU UNTUK PENGATURAN JADWAL LIBUR
+    // Menggunakan nama controller 'HolidayController'
+    $routes->group('holiday', function($routes) {
+        // Tampilkan halaman index/kalender pengaturan libur (Read)
+        $routes->get('/', 'HolidayController::index');
+        // Proses penyimpanan libur baru (Create)
+        $routes->post('store', 'HolidayController::store');
+        // Proses penghapusan libur (Delete)
+        $routes->get('delete/(:num)', 'HolidayController::delete/$1');
+        $routes->get('events', 'HolidayController::getEvents');
+    });
+    // 👆 AKHIR RUTE JADWAL LIBUR
 
     // Rute untuk artikel - semua aksi ditangani oleh satu method
     $routes->match(['get', 'post'], 'article/(:any)/(:num)', 'Admin::article/$1/$2');
@@ -51,4 +66,6 @@ $routes->group('siswa', function($routes) {
     $routes->get('logout', 'Siswa::logout');
     $routes->post('profile', 'Siswa::profile');
     $routes->post('absensi', 'Siswa::absensi');
+    $routes->get('report', 'ReportController::index');
+    $routes->post('report/get_absensi', 'ReportController::get_absensi');
 });
