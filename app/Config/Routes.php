@@ -68,4 +68,10 @@ $routes->group('siswa', function($routes) {
     $routes->post('absensi', 'Siswa::absensi');
     $routes->get('report', 'ReportController::index');
     $routes->post('report/get_absensi', 'ReportController::get_absensi');
+    // =========================================
+    // RUTE BARU: HITUNG KEHADIRAN UNTUK SISWA
+    // =========================================
+    // Halaman menampilkan hitung kehadiran
+    $routes->get('kehadiran', 'Siswa::kehadiran');
+    $routes->get('kehadiran/data-ajax', 'Siswa::getKehadiranDataAjax');
 });

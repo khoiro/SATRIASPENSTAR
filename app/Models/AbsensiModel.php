@@ -33,4 +33,12 @@ class AbsensiModel extends Model
         ];
     }
 
+    public function getKehadiran($userId, $start, $end)
+    {
+        return $this->where('user_id', $userId)
+                    ->where('tanggal >=', $start)
+                    ->where('tanggal <=', $end)
+                    ->countAllResults();
+    }
+
 }

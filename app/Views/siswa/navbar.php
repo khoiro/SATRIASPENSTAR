@@ -70,6 +70,14 @@
                 </p>
             </a>
         </li>
+        <li class="nav-item">
+          <a href="<?= site_url('siswa/kehadiran') ?>" 
+            class="nav-link <?= ($page ?? '') === 'kehadiran' ? 'active' : '' ?>">
+              <i class="nav-icon fas fa-calculator"></i>
+              <p>Hitung Kehadiran</p>
+          </a>
+        </li>
+
       </ul>
     </nav>
     <!-- /.sidebar-menu -->
