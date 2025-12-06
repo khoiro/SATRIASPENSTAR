@@ -125,6 +125,30 @@
                     }
                 }
             ],
+            rowCallback: function(row, data) {
+                // Format jam pembanding
+                const batasWaktu = "06:45";
+
+                // Pastikan ada jam masuk
+                if (data.jam_masuk) {
+
+                    // Hitung selisih menit
+                    const jamMasuk = data.jam_masuk;
+                    const selisihMenit = hitungSelisihMenit(batasWaktu, jamMasuk);
+
+                    if (selisihMenit > 0) {
+                        // Tambahkan warna merah pada baris
+                        $(row).css("background-color", "#f8d7da");
+
+                        // Tambahkan keterangan di bawah jam masuk
+                        $('td:eq(2)', row).html(`
+                            ${jamMasuk}<br>
+                            <small class="text-danger">Terlambat ${selisihMenit} menit</small>
+                        `);
+                    }
+                }
+            },
+
             // ... pengaturan bahasa lainnya
         });
 
@@ -133,6 +157,16 @@
             e.preventDefault(); // Mencegah form submit default
             absensiTable.ajax.reload(null, false); // Muat ulang data Datatables dengan filter baru
         });
+
+        function hitungSelisihMenit(batas, jamMasuk) {
+            const [bh, bm] = batas.split(":").map(Number);
+            const [mh, mm] = jamMasuk.split(":").map(Number);
+            const totalBatas = bh * 60 + bm;
+            const totalMasuk = mh * 60 + mm;
+            return totalMasuk - totalBatas; // hasil bisa negatif
+        }
+
+
     });
 </script>
 
