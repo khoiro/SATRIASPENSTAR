@@ -283,6 +283,8 @@ class Siswa extends BaseController
 
 		$totalHariKerja = count($hari_kerja);
 		$totalHadir = $absensiModel->getKehadiran($userId, $start, $end);
+		$totalTerlambat = $absensiModel->getKeterlambatan($userId, $start, $end);
+
 
 		$persentase = $totalHariKerja > 0 ? round(($totalHadir / $totalHariKerja) * 100, 2) : 0;
 
@@ -294,6 +296,8 @@ class Siswa extends BaseController
 			'total_hadir' => $totalHadir,
 			'persentase' => $persentase,
 			'userId' => $userId,
+			'total_terlambat' => $totalTerlambat,
+
 		]);
 	}
 
@@ -347,6 +351,8 @@ class Siswa extends BaseController
 
 		$totalTidakHadir = $totalHariKerja - $totalHadir;
 		$persentase = $totalHariKerja > 0 ? round(($totalHadir / $totalHariKerja) * 100, 2) : 0;
+		$totalTerlambat = $absensiModel->getKeterlambatan($userId, $start, $end);
+
 
 		// Mengembalikan data sebagai JSON
 		return $this->response->setJSON([
@@ -354,6 +360,7 @@ class Siswa extends BaseController
 			'total_hadir' => $totalHadir,
 			'total_tidak_hadir' => $totalTidakHadir,
 			'persentase' => $persentase,
+			'total_terlambat' => $totalTerlambat,
 			'start' => $start,
 			'end' => $end,
 		]);

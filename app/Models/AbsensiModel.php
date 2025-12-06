@@ -41,4 +41,14 @@ class AbsensiModel extends Model
                     ->countAllResults();
     }
 
+    public function getKeterlambatan($userId, $start, $end)
+    {
+        return $this->where('user_id', $userId)
+                    ->where('tanggal >=', $start)
+                    ->where('tanggal <=', $end)
+                    ->where('jam_masuk >', '06:45:00')
+                    ->countAllResults();
+    }
+
+
 }
