@@ -7,7 +7,8 @@
     <li class="nav-item d-none d-sm-inline-block <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
       <a href="/siswa/" class="nav-link">Dashboard</a>
     </li>
-    <li class="nav-item d-none d-sm-inline-block <?= ($page ?? '') === 'profile' ? 'active' : '' ?>">
+    <!-- <li class="nav-item d-none d-sm-inline-block <?= ($page ?? '') === 'profile' ? 'active' : '' ?>"> -->
+    <li class="nav-item <?= ($page ?? '') === 'profile' ? 'active' : '' ?>">
       <a href="/siswa/profile/" class="nav-link">Edit Profile</a>
     </li>
   </ul>
