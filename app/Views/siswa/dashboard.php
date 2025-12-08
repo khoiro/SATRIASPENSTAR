@@ -64,7 +64,12 @@
 
 
               <!-- Tombol: Ambil Gambar -->
-              <button id="btnAmbil" class="btn btn-primary btn-block mt-2" onclick="ambilGambar()">Ambil Gambar</button>
+              <!-- <button id="btnAmbil" class="btn btn-primary btn-block mt-2" onclick="ambilGambar()">Ambil Gambar</button> -->
+              <button id="btnAmbil" class="btn btn-primary btn-block mt-2" onclick="ambilGambar()" disabled>
+                <span class="spinner-border spinner-border-sm me-2" id="spinLoad"></span>
+                Memuat Lokasi...
+              </button>
+
 
               <!-- Tombol: Ambil Ulang & Presensi Keluar (disembunyikan awalnya) -->
               <div id="afterCaptureButtons" class="d-none mt-2">
@@ -178,6 +183,10 @@
 
                 // --- Inisialisasi Peta Leaflet (Hanya setelah lokasi didapat) ---
                 const map = L.map('map').setView([lat, lon], 18);
+
+                // HILANGKAN SPINNER & AKTIFKAN TOMBOL
+                $("#spinLoad").remove();
+                $("#btnAmbil").prop("disabled", false).text("Ambil Gambar");
                 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors'
@@ -209,6 +218,9 @@
                 // Fungsi error Geolocation
                 alert("Gagal mendapatkan lokasi: " + error.message + ". Presensi tidak bisa dilakukan.");
                 $btnPresensi.prop("disabled", true); // Nonaktifkan presensi jika lokasi gagal
+                $("#spinLoad").remove();
+                $("#btnAmbil").prop("disabled", true).text("Lokasi Tidak Ditemukan");
+
             });
         } else {
             alert("Geolocation tidak didukung oleh browser ini. Presensi tidak bisa dilakukan.");
