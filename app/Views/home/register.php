@@ -6,7 +6,7 @@
 <body class="text-center" style="background: url(https://images.unsplash.com/photo-1608501078713-8e445a709b39?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1953&q=80) center/cover #7452bf; position: relative">
     <?= view('home/styling') ?>
     <div class="justify-content-center container d-flex flex-column" style="min-height: 100vh; max-width: 476px">
-        <p class="my-5"><a href="/"><img src="/logo_dark.png" alt="Logo" width="150px"></a></p>
+        <p class="my-5"><a href="/"><img src="/logo_smp.png" alt="Logo" width="150px"></a></p>
         <form method="POST" name="loginForm" class="container shadow d-flex flex-column justify-content-center pb-1 pt-3 text-white">
 
             <?= csrf_field() ?>
@@ -198,48 +198,48 @@
 
             // Cek email saat diketik
             $('input[name="email"]').on('input', function () {
-            let email = $(this).val();
-            let $error = $('#email-error');
+                let email = $(this).val();
+                let $error = $('#email-error');
 
-            if (email.length > 5) {
-                $.ajax({
-                url: '/home/cekemail',
-                method: 'GET',
-                data: { email: email },
-                dataType: 'json',
-                success: function (response) {
-                    if (response.exists) {
-                    $error.removeClass('d-none');
-                    $('input[name="email"]').addClass('is-invalid');
-                    emailValid = false;
-                    } else {
+                if (email.length > 5) {
+                    $.ajax({
+                    url: '/home/cekemail',
+                    method: 'GET',
+                    data: { email: email },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.exists) {
+                        $error.removeClass('d-none');
+                        $('input[name="email"]').addClass('is-invalid');
+                        emailValid = false;
+                        } else {
+                        $error.addClass('d-none');
+                        $('input[name="email"]').removeClass('is-invalid');
+                        emailValid = true;
+                        }
+                    }
+                    });
+                } else {
                     $error.addClass('d-none');
                     $('input[name="email"]').removeClass('is-invalid');
                     emailValid = true;
-                    }
                 }
-                });
-            } else {
-                $error.addClass('d-none');
-                $('input[name="email"]').removeClass('is-invalid');
-                emailValid = true;
-            }
             });
 
             // Cegah pindah field pakai Tab atau Enter
             $('input[name="email"]').on('keydown', function(e) {
-            if (!emailValid && (e.key === 'Tab' || e.key === 'Enter' || e.keyCode === 9 || e.keyCode === 13)) {
-                e.preventDefault();
-            }
+                if (!emailValid && (e.key === 'Tab' || e.key === 'Enter' || e.keyCode === 9 || e.keyCode === 13)) {
+                    e.preventDefault();
+                }
             });
 
             // Cegah pindah pakai mouse klik
             $('input, select, textarea').on('focusin', function (e) {
-            let activeField = document.activeElement;
-            if (!emailValid && activeField.name !== 'email') {
-                e.preventDefault();
-                $('input[name="email"]').focus();
-            }
+                let activeField = document.activeElement;
+                if (!emailValid && activeField.name !== 'email') {
+                    e.preventDefault();
+                    $('input[name="email"]').focus();
+                }
             });
 
 

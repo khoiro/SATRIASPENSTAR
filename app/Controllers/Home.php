@@ -133,7 +133,7 @@ class Home extends BaseController
 					if ($r = $this->request->getCookie('r')) {
 						$this->response->deleteCookie('r');
 					}
-					return $this->response->redirect(base_url($r ?: 'user'));
+					return $this->response->redirect(base_url($r ?: 'siswa'));
 				}
 			}
 			return redirect()->back()->withInput()->with('errors', $this->validator->listErrors());
@@ -220,7 +220,7 @@ class Home extends BaseController
 				// Cek apakah NISN sudah terdaftar di tabel user
 				$user = $userModel->where('nisn', $nisn)->first();
 
-				if ($user) {
+				if ($user && $user->status == '1') {
 					// NISN sudah terdaftar sebagai user
 					return $this->response->setJSON([
 						'success' => false,
