@@ -24,6 +24,9 @@ $routes->group('admin', function($routes) {
     $routes->get('cekemail', 'Admin::cekemail');
     $routes->post('importsiswa', 'Admin::importsiswa');
     $routes->post('holiday/datatable', 'HolidayController::datatable');
+    $routes->get('report', 'ReportAdminController::index');
+    $routes->post('report/get_absensi', 'ReportAdminController::get_absensi');
+    $routes->post('report/getSiswaByKelas', 'ReportAdminController::getSiswaByKelas');
 
 
     // Rute untuk Pengaturan Lokasi Absensi (GET & POST)

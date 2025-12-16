@@ -106,6 +106,14 @@
                 </p>
             </a>
         </li>
+        <li class="nav-item">
+            <a href="/admin/report" 
+              class="nav-link <?= ($page ?? '') === 'report_absensi' ? 'active' : '' ?>">
+                <i class="nav-icon fas fa-history"></i> <p>
+                    Report Absensi
+                </p>
+            </a>
+        </li>
 
       </ul>
     </nav>
