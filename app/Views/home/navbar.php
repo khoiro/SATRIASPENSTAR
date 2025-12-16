@@ -8,7 +8,7 @@
     <li class="nav-item d-none d-sm-inline-block <?= ($page ?? '') == 'home' ? 'active' : '' ?>">
       <a href="/" class="nav-link">Home</a>
     </li>
-    <li class="nav-item d-none d-sm-inline-block dropdown">
+    <!-- <li class="nav-item d-none d-sm-inline-block dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         About
       </a>
@@ -19,7 +19,7 @@
         <a class="dropdown-item" href="/article/4/privacy">Privacy</a>
         <a class="dropdown-item" href="/article/5/service">Service</a>
       </div>
-    </li>
+    </li> -->
   </ul>
 
   <!-- SEARCH FORM -->
@@ -49,8 +49,8 @@
 <aside class="main-sidebar sidebar-light-navy elevation-4">
   <!-- Brand Logo -->
   <a href="/" class="brand-link">
-    <img src="/logo_light.png" alt="AdminLTE Logo" class="brand-image" style="opacity: .8">
-    <span class="brand-text font-weight-light">Template</span>
+    <img src="/logo_smp_warna.png" alt="AdminLTE Logo" class="brand-image" style="opacity: .8">
+    <span class="brand-text font-weight-light">SPENSTAR</span>
   </a>
 
   <!-- Sidebar -->

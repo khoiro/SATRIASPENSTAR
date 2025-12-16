@@ -3,10 +3,10 @@
 <?= view('shared/head') ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<body class="text-center" style="background: url(https://images.unsplash.com/photo-1444723121867-7a241cacace9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80) center/cover #004494; position: relative">
+<body class="text-center" style="background: url(https://images.unsplash.com/photo-1764818958908-d5efcec563d1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D) center/cover #004494; position: relative">
     <?= view('home/styling') ?>
     <div class="justify-content-center container d-flex flex-column" style="min-height: 100vh; max-width: 476px">
-        <p class="mt-5"><a href="/"><img src="/logo_smp.png" alt="Logo" width="150px"></a></p>
+        <p class="mt-5"><a href="/"><img src="/logo_smp_warna.png" alt="Logo" width="150px"></a></p>
         <form method="POST" name="loginForm" class="container shadow d-flex flex-column justify-content-center pb-1 pt-3 text-white">
             <h1 class="mb-4">Enter to Portal</h1>
             <input type="text" name="email" placeholder="Email / Username" class="form-control mb-2">

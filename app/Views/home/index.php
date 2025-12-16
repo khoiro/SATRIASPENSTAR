@@ -9,14 +9,19 @@
       <div class="card my-3">
         <div class="row gutter-0">
           <div class="col-lg-4 p-4 d-flex flex-column justify-content-center">
-            <h2>CodeIgniter 4 - Admin LTE 3 Template</h2>
-            <p>With many scriptlets to boost your web development</p>
+            <h2>SMP NEGERI 1 TARIK</h2>
+            <p>RELIGIUS, BERKARAKTER, BERPRESTASI DAN BERWAWASAN LINGKUNGAN</p>
             <div><a href="/login/" class="btn btn-primary">Sign In Here</a></div>
           </div>
-          <div class="col-lg-8 d-none d-lg-block">
-            <div style="background: url(https://images.unsplash.com/photo-1591686224641-2e07b13c0b51?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1834&q=80) center/cover;
-        min-height: 400px;"></div>
-          </div>
+         <div class="col-lg-8 d-none d-lg-block">
+            <div
+                style="
+                    background: url('<?= base_url('assets/images/lentera-spenstar-scaled.jpg'); ?>') center center / cover no-repeat;
+                    min-height: 400px;
+                ">
+            </div>
+         </div>
+
         </div>
       </div>
       <div class="row">
@@ -36,7 +41,7 @@
           </div>
         <?php endforeach ?>
       </div>
-      <div class="card mb-3">
+      <!-- <div class="card mb-3">
         <div class="card-body">
           <h2>Template Colors</h2>
           <p>Admin LTE provides many colors to get your website theme looks great</p>
@@ -58,7 +63,7 @@
             <?php endforeach ?>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </body>
