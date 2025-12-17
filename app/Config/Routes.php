@@ -27,6 +27,8 @@ $routes->group('admin', function($routes) {
     $routes->get('report', 'ReportAdminController::index');
     $routes->post('report/get_absensi', 'ReportAdminController::get_absensi');
     $routes->post('report/getSiswaByKelas', 'ReportAdminController::getSiswaByKelas');
+    $routes->get('reportstatusabsensi', 'ReportAdminController::statusAbsensi');
+    $routes->get('reportajaxstatusabsensi', 'ReportAdminController::ajaxRekap');
 
 
     // Rute untuk Pengaturan Lokasi Absensi (GET & POST)

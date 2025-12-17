@@ -3,11 +3,13 @@
 namespace App\Controllers;
 
 use App\Models\ReportAdminModel;
+use App\Models\AbsensiModel;
 use CodeIgniter\I18n\Time;
 
 class ReportAdminController extends BaseController
 {
     protected $reportAdminModel;
+    protected $AbsensiModel;
 
     public function __construct()
     {
@@ -19,6 +21,7 @@ class ReportAdminController extends BaseController
         }
 
         $this->reportAdminModel = new ReportAdminModel();
+        $this->AbsensiModel = new AbsensiModel();
     }
 
     public function index()
@@ -119,6 +122,40 @@ class ReportAdminController extends BaseController
             ->getResultArray();
 
         return $this->response->setJSON($data);
+    }
+
+    public function statusAbsensi()
+    {
+        $data['kelasList'] = [
+            'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
+            'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
+            'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
+        ];
+
+
+        $bulan = $this->request->getGet('bulan') ?? date('m');
+        $tahun = $this->request->getGet('tahun') ?? date('Y');
+
+        $rekap = $this->AbsensiModel->getRekapAbsensiBulanan($bulan, $tahun);
+
+        return view('admin/report/reportstatusabsensi', [
+            'rekap' => $rekap,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'kelas' => $data['kelasList'],
+            'page' => 'reportstatusabsensi', 
+        ]);
+    }
+
+    public function ajaxRekap()
+    {
+        $bulan = $this->request->getGet('bulan');
+        $tahun = $this->request->getGet('tahun');
+
+        $model = new AbsensiModel();
+        $rekap = $model->getRekapAbsensiBulananAjax($bulan, $tahun);
+
+        return $this->response->setJSON($rekap);
     }
 
 
