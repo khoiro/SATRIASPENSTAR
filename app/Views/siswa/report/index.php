@@ -34,11 +34,13 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Tanggal</th>
+                                    <th>Status</th>
                                     <th>Jam Masuk</th>
                                     <th>Jam Keluar</th>
                                     <th>Lokasi Masuk</th>
                                     <th>Foto Masuk</th> 
                                     <th>Foto Keluar</th> 
+                                    <th>Foto IzinSakit</th> 
                                 </tr>
                             </thead>
                             <tbody>
@@ -75,6 +77,7 @@
             "columns": [
                 { "data": "no", "orderable": false },
                 { "data": "tanggal" },
+                { "data": "status" },
                 { "data": "jam_masuk" },
                 { "data": "jam_keluar" },
                 
@@ -123,6 +126,20 @@
                                     <img src="${photoUrl}" style="max-width: 80px; height: auto; border-radius: 4px;" alt="Foto Keluar">
                                 </a>`;
                     }
+                },
+                // 🚀 KOLOM FOTO IZIN SAKIT
+                { 
+                    "data": "foto_izin_sakit", 
+                    "orderable": false,
+                    "render": function(data, type, row) {
+                        if (!data) {
+                            return '-';
+                        }
+                        const photoUrl = BASE_URL_FOTO + data;
+                         return `<a href="${photoUrl}" target="_blank">
+                                    <img src="${photoUrl}" style="max-width: 80px; height: auto; border-radius: 4px;" alt="Foto Izin Sakit">
+                                </a>`;
+                    }
                 }
             ],
             rowCallback: function(row, data) {
@@ -141,7 +158,7 @@
                         $(row).css("background-color", "#f8d7da");
 
                         // Tambahkan keterangan di bawah jam masuk
-                        $('td:eq(2)', row).html(`
+                        $('td:eq(3)', row).html(`
                             ${jamMasuk}<br>
                             <small class="text-danger">Terlambat ${selisihMenit} menit</small>
                         `);

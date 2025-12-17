@@ -39,6 +39,7 @@ class ReportController extends BaseController
             // Header untuk Datatables Server-Side
             'columns' => [
                 'tanggal' => 'Tanggal',
+                'status' => 'Status',
                 'jam_masuk' => 'Masuk',
                 'jam_keluar' => 'Keluar',
                 'lokasi_lat' => 'Lokasi Masuk',
@@ -69,6 +70,7 @@ class ReportController extends BaseController
                 $no++;
                 $data[] = [
                     'no' => $no,
+                    'status' => $row->status,
                     'tanggal' => Time::parse($row->tanggal)->toLocalizedString('d MMMM yyyy'),
                     'jam_masuk' => $row->jam_masuk ?? '-',
                     'jam_keluar' => $row->jam_keluar ?? '-',
@@ -80,6 +82,7 @@ class ReportController extends BaseController
                     // 🚀 TAMBAHKAN FOTO DAN FOTO KELUAR
                     'foto_masuk' => $row->foto,
                     'foto_keluar' => $row->foto_keluar,
+                    'foto_izin_sakit' => $row->foto_izin_sakit,
                 ];
             }
 
