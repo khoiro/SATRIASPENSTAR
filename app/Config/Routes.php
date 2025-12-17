@@ -79,4 +79,5 @@ $routes->group('siswa', function($routes) {
     // Halaman menampilkan hitung kehadiran
     $routes->get('kehadiran', 'Siswa::kehadiran');
     $routes->get('kehadiran/data-ajax', 'Siswa::getKehadiranDataAjax');
+    $routes->post('izin-sakit', 'Siswa::absensiIzinSakit');
 });

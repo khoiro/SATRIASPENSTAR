@@ -1,373 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
-<style>
-  #map {
-    height: 240px;
-    width: 100%;
-  }
-
-  #video,
-  #snapshot {
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  .fade-out {
-    opacity: 0;
-    transform: scale(0.95);
-    pointer-events: none;
-  }
-
-  .fade-in {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .d-none {
-    display: none !important;
-  }
-  #video, #snapshot {
-    max-height: 240px;
-    object-fit: cover;
-    width: 100%;
-    border-radius: 8px;
-  }
-
-</style>
 <?= view('shared/head') ?>
+
+<style>
+    #map { height: 240px; width: 100% }
+    #video, #snapshot { max-height: 240px; width: 100%; object-fit: cover; border-radius: 8px }
+    .d-none { display: none !important }
+    .fade-out { opacity: 0; transform: scale(.95) }
+    .fade-in { opacity: 1 }
+</style>
+
 <body>
-<div class="wrapper">
-  <?= view('siswa/navbar'); ?>
-  <div class="content-wrapper p-4">
-    <div class="container-fluid mt-4">
-      
-      <!-- Card Wrapper -->
-      <div class="card shadow">
-        <!-- Title Bar -->
-       <div class="card-header bg-primary text-white d-flex align-items-center">
-          <i class="fas fa-calendar-check me-2"></i>
-          <h5 class="mb-0">&nbsp;Absensi Hari Ini</h5>
-       </div>
+    <div class="wrapper">
+        <?= view('siswa/navbar'); ?>
 
+        <div class="content-wrapper p-4">
+            <div class="container-fluid mt-4">
 
-        <!-- Card Body -->
-        <div class="card-body">
-          <div class="row gy-4 align-items-start">
-            
-            <!-- Preview Kamera & Tombol -->
-            <div class="col-12 col-md-3 text-center mb-3 mb-md-0">
-              <video id="video" autoplay playsinline style="width: 100%; max-height: 240px; border-radius: 8px;"></video>
-              <img id="snapshot" class="img-fluid rounded mt-2 d-none" alt="Hasil Gambar">
-              <input type="hidden" id="latitude_input">
-              <input type="hidden" id="longitude_input">
-              <input type="hidden" id="sudah_masuk" value="<?= $jam_masuk ? '1' : '0' ?>">
-              <input type="hidden" id="sudah_keluar" value="<?= $jam_keluar ? '1' : '0' ?>">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-calendar-check"></i> Absensi Hari Ini
+                    </div>
 
-
-              <!-- Tombol: Ambil Gambar -->
-              <!-- <button id="btnAmbil" class="btn btn-primary btn-block mt-2" onclick="ambilGambar()">Ambil Gambar</button> -->
-              <button id="btnAmbil" class="btn btn-primary btn-block mt-2" onclick="ambilGambar()" disabled>
-                <span class="spinner-border spinner-border-sm me-2" id="spinLoad"></span>
-                Memuat Lokasi...
-              </button>
-
-
-              <!-- Tombol: Ambil Ulang & Presensi Keluar (disembunyikan awalnya) -->
-              <div id="afterCaptureButtons" class="d-none mt-2">
-                <button class="btn btn-danger btn-block mb-2" onclick="ambilUlang()">Ambil Ulang</button>
-                <button id="btnPresensi" class="btn btn-info btn-block" onclick="presensi()">Absensi</button>
-              </div>
-            </div>
-
-            <!-- Info Absensi -->
-            <div class="col-12 col-md-4 mb-3 mb-md-0">
-                <div class="card text-white" style="background: linear-gradient(90deg, #2196f3, #9c27b0);">
                     <div class="card-body">
-                        <h2 class="mb-3"><?= $tanggal_hari_ini; ?></h2>
-                        <p><strong>Masuk:</strong> <span id="display_jam_masuk"><?= $jam_masuk ? $jam_masuk : '-'; ?></span></p>
-                        <p><strong>Keluar:</strong> <span id="display_jam_keluar"><?= $jam_keluar ? $jam_keluar : '-'; ?></span></p>
-                        <a href="<?= site_url('siswa/report') ?>" class="btn btn-outline-light mt-3">Lihat Riwayat <i class="fas fa-arrow-right"></i></a>
+                        <div class="row gy-4">
+
+                            <div class="col-lg-4 text-center">
+
+                                <input type="hidden" id="status_absensi" value="<?= $status_absensi ?? 'BELUM' ?>">
+                                <input type="hidden" id="latitude_input">
+                                <input type="hidden" id="longitude_input">
+
+                                <video id="video" autoplay playsinline></video>
+                                <img id="snapshot" class="d-none mt-2">
+
+                                <button id="btnAmbil" class="btn btn-primary w-100 mt-2" disabled onclick="ambilGambar()">
+                                    <span class="spinner-border spinner-border-sm"></span> Memuat Lokasi...
+                                </button>
+
+                                <div id="afterCaptureButtons" class="d-none mt-2">
+                                    <button class="btn btn-danger w-100 mb-2" onclick="ambilUlang()">Ambil Ulang</button>
+                                    <button id="btnPresensi" class="btn btn-info w-100" onclick="presensi()">
+                                        Absensi
+                                    </button>
+                                </div>
+
+                                <div id="izinSakitButtons" class="mt-3">
+                                    <button class="btn btn-warning w-100 mb-2" onclick="izinSakit('izin')">IZIN</button>
+                                    <button class="btn btn-danger w-100" onclick="izinSakit('sakit')">SAKIT</button>
+                                </div>
+
+                                <div id="formIzinSakit" class="d-none mt-3">
+                                    <textarea id="keteranganIzinSakit" class="form-control mb-2" placeholder="Keterangan"></textarea>
+                                    <input type="file" id="fotoIzinSakit" class="form-control mb-2">
+                                    <button class="btn btn-primary w-100" onclick="kirimIzinSakit()">Kirim</button>
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="card text-white" style="background:linear-gradient(90deg,#2196f3,#9c27b0)">
+                                    <div class="card-body">
+
+                                        <h4><?= $tanggal_hari_ini ?></h4>
+
+                                        <p>
+                                            <strong>Masuk:</strong>
+                                            <span id="display_jam_masuk">
+                                                <?php if (in_array($status_absensi, ['IZIN','SAKIT'])): ?>
+                                                    <?= $status_absensi ?>
+                                                <?php else: ?>
+                                                    <?= $jam_masuk ?? '-' ?>
+                                                <?php endif ?>
+                                            </span>
+                                        </p>
+
+                                        <p>
+                                            <strong>Keluar:</strong>
+                                            <span id="display_jam_keluar"><?= $jam_keluar ?? '-' ?></span>
+                                        </p>
+
+                                        <!-- ✅ TOMBOL RIWAYAT -->
+                                        <a href="<?= site_url('siswa/report') ?>" class="btn btn-outline-light w-100 mt-3">
+                                            Lihat Riwayat <i class="fas fa-arrow-right"></i>
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div id="map"></div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Peta -->
-            <div class="col-12 col-md-5">
-              <div id="map" style="height: 240px;"></div>
             </div>
-
-          </div>
         </div>
-      </div>
-      <!-- End Card -->
 
-    </div>
-  </div>
-</div>
+        <script>
+            const LOKASI_PUSAT = { lat: <?= $lokasi_absensi['lat'] ?>, lon: <?= $lokasi_absensi['lon'] ?> };
+            const RADIUS = <?= $lokasi_absensi['radius'] ?>;
+            let modeIzinSakit = null;
 
-<script>
-    // --- Variabel Global dan Konfigurasi ---
-    const LOKASI_PUSAT = {
-        lat: <?= $lokasi_absensi['lat'] ?>, 
-        lon: <?= $lokasi_absensi['lon'] ?>
-    };
-    const RADIUS_ABSENSI = <?= $lokasi_absensi['radius'] ?>; // dalam meter
+            // ===== INIT STATUS =====
+            $(document).ready(function() {
+                const status = $("#status_absensi").val();
+                const btn = $("#btnPresensi");
 
-    // Fungsi menghitung jarak dalam meter (Haversine formula)
-    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-        const R = 6371e3;
-        const toRad = angle => angle * Math.PI / 180;
-        const dLat = toRad(lat2 - lat1);
-        const dLon = toRad(lon2 - lon1);
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
-    }
+                switch (status) {
+                    case 'BELUM':
+                        window.statusPresensi = 'masuk';
+                        btn.text('Absensi Masuk');
+                        break;
 
-    // --- Inisialisasi Aplikasi Setelah DOM Siap ---
-    $(document).ready(function () {
-        const $video = $("#video");
-        const videoElement = $video[0];
-        const $btnPresensi = $("#btnPresensi");
-        let statusPresensi = "selesai";
+                    case 'MASUK':
+                        window.statusPresensi = 'keluar';
+                        btn.text('Absensi Keluar');
+                        $("#izinSakitButtons").hide();
+                        break;
 
-        // 1. Tentukan Status Presensi Hari Ini
-        const sudahMasuk = $("#sudah_masuk").val() === "1";
-        const sudahKeluar = $("#sudah_keluar").val() === "1";
+                    case 'SELESAI':
+                    case 'IZIN':
+                    case 'SAKIT':
+                        lockUI(status);
+                        break;
+                }
 
-        if (!sudahMasuk) {
-            statusPresensi = "masuk";
-            $btnPresensi.text("Absensi Masuk");
-        } else if (!sudahKeluar) {
-            statusPresensi = "keluar";
-            $btnPresensi.text("Absensi Keluar");
-        } else {
-            $btnPresensi.text("Sudah Absen Hari Ini");
-            $btnPresensi.prop("disabled", true);
-        }
+                // Kamera
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(s => video.srcObject = s);
 
-        // Simpan status ke window agar bisa diakses di fungsi lain
-        window.statusPresensi = statusPresensi;
+                // Lokasi
+                navigator.geolocation.getCurrentPosition(p => {
+                    $("#latitude_input").val(p.coords.latitude);
+                    $("#longitude_input").val(p.coords.longitude);
+                    $("#btnAmbil").prop('disabled', false).text('Ambil Gambar');
 
-        // 2. Akses Kamera
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }) // Preferensikan kamera depan
-                .then(function (stream) {
-                    videoElement.srcObject = stream;
-                })
-                .catch(function (err) {
-                    alert("Gagal mengakses kamera: " + err.message);
+                    const map = L.map('map').setView([p.coords.latitude, p.coords.longitude], 18);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                    L.circle([LOKASI_PUSAT.lat, LOKASI_PUSAT.lon], { radius: RADIUS }).addTo(map);
+                    L.marker([p.coords.latitude, p.coords.longitude]).addTo(map);
                 });
-        } else {
-            alert("Browser tidak mendukung akses kamera.");
-        }
-
-        // 3. Akses Geolocation dan Inisialisasi Peta
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function (position) {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                $("#latitude_input").val(lat);
-                $("#longitude_input").val(lon);
-
-                // Hitung jarak pengguna ke lokasi pusat
-                const userDistance = getDistanceFromLatLonInMeters(lat, lon, LOKASI_PUSAT.lat, LOKASI_PUSAT.lon);
-
-                // Validasi jarak
-                if (userDistance > RADIUS_ABSENSI) {
-                    $btnPresensi.prop("disabled", true).text("Di Luar Radius");
-                } 
-                // Catatan: Jika statusPresensi sudah 'selesai', tombol tetap disabled dari cek di atas.
-
-                // --- Inisialisasi Peta Leaflet (Hanya setelah lokasi didapat) ---
-                const map = L.map('map').setView([lat, lon], 18);
-
-                // HILANGKAN SPINNER & AKTIFKAN TOMBOL
-                $("#spinLoad").remove();
-                $("#btnAmbil").prop("disabled", false).text("Ambil Gambar");
-                
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
-
-                // Marker dan Circle Lokasi Pusat
-                L.circle([LOKASI_PUSAT.lat, LOKASI_PUSAT.lon], {
-                    radius: RADIUS_ABSENSI, 
-                    color: 'blue',
-                    fillColor: '#30a1ff',
-                    fillOpacity: 0.3
-                }).addTo(map);
-                
-                L.marker([LOKASI_PUSAT.lat, LOKASI_PUSAT.lon])
-                    .addTo(map)
-                    .bindPopup("Lokasi Absensi");
-
-                // Marker Lokasi Pengguna
-                L.marker([lat, lon]).addTo(map)
-                    .bindPopup("Lokasi Anda Saat Ini")
-                    .openPopup();
-                
-                // **Penting: Memastikan peta me-render ulang (Solusi masalah intermiten)**
-                setTimeout(function() {
-                    map.invalidateSize();
-                }, 100); 
-
-            }, function (error) {
-                // Fungsi error Geolocation
-                alert("Gagal mendapatkan lokasi: " + error.message + ". Presensi tidak bisa dilakukan.");
-                $btnPresensi.prop("disabled", true); // Nonaktifkan presensi jika lokasi gagal
-                $("#spinLoad").remove();
-                $("#btnAmbil").prop("disabled", true).text("Lokasi Tidak Ditemukan");
-
             });
-        } else {
-            alert("Geolocation tidak didukung oleh browser ini. Presensi tidak bisa dilakukan.");
-            $btnPresensi.prop("disabled", true);
-        }
-    });
 
-    // --- Fungsi Ambil Gambar (Capture) ---
-    function ambilGambar() {
-        const $video = $("#video");
-        const videoElement = $video[0];
-        const canvas = document.createElement("canvas");
-        const $snapshot = $("#snapshot");
-        const $btnAmbil = $("#btnAmbil");
-        const $afterCaptureButtons = $("#afterCaptureButtons");
+            // ===== LOCK UI =====
+            function lockUI(status) {
+                $("#btnAmbil,#btnPresensi").prop('disabled', true);
+                $("#video,#map,#izinSakitButtons,#afterCaptureButtons").addClass('d-none');
+                $("#display_jam_masuk").text(status);
+            }
 
-        // Set ukuran canvas sesuai video
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        const context = canvas.getContext("2d");
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            // ===== CAMERA =====
+            function ambilGambar() {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                $("#snapshot").attr('src', canvas.toDataURL()).removeClass('d-none');
+                $("#video,#btnAmbil").addClass('d-none');
+                $("#afterCaptureButtons").removeClass('d-none');
+            }
 
-        const dataUrl = canvas.toDataURL("image/png");
-        $snapshot.attr("src", dataUrl);
+            function ambilUlang() {
+                $("#snapshot").addClass('d-none');
+                $("#video,#btnAmbil").removeClass('d-none');
+                $("#afterCaptureButtons").addClass('d-none');
+            }
 
-        // Transisi dari video ke gambar dengan efek fade
-        $video.addClass("fade-out");
-        setTimeout(() => {
-            $video.addClass("d-none");
-            $snapshot.removeClass("d-none").addClass("fade-in");
-            $btnAmbil.addClass("d-none");
-            $afterCaptureButtons.removeClass("d-none");
-
-            // Atur ulang teks tombol sesuai status (jika tombol tidak disabled karena radius)
-            const $btnPresensi = $("#btnPresensi");
-            const status = window.statusPresensi;
-            if (!$btnPresensi.prop("disabled") || status === "selesai") {
-                if (status === "masuk") {
-                    $btnPresensi.text("Absensi Masuk");
-                } else if (status === "keluar") {
-                    $btnPresensi.text("Absensi Keluar");
+            let btnPresensiText = '';
+            function setLoadingPresensi(isLoading = true) {
+                const btn = $("#btnPresensi");
+                if (isLoading) {
+                    btnPresensiText = btn.html();
+                    btn.prop('disabled', true).html(`
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Memproses...
+                    `);
                 } else {
-                    $btnPresensi.text("Sudah Absen Hari Ini").prop("disabled", true);
+                    btn.prop('disabled', false).html(btnPresensiText);
                 }
             }
 
-        }, 500);
-    }
+            // ===== ABSENSI =====
+            function presensi() {
+                const status = window.statusPresensi;
 
+                // 🔄 AKTIFKAN SPINNER
+                setLoadingPresensi(true);
 
-    // --- Fungsi Ambil Ulang (Retake) ---
-    function ambilUlang() {
-        const $video = $("#video");
-        const $snapshot = $("#snapshot");
-        const $btnAmbil = $("#btnAmbil");
-        const $afterCaptureButtons = $("#afterCaptureButtons");
+                $.post('/siswa/absensi', {
+                    image: $("#snapshot").attr('src'),
+                    latitude: $("#latitude_input").val(),
+                    longitude: $("#longitude_input").val(),
+                    status: 'HADIR',
+                    status_presensi: status
+                })
+                .done(res => {
 
-        $snapshot.removeClass("fade-in").addClass("fade-out");
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: res.message
+                    });
 
-        setTimeout(() => {
-            $snapshot.addClass("d-none");
-            $video.removeClass("d-none fade-out").addClass("fade-in");
+                    if (status === 'masuk' && res.jam_masuk) {
+                        $("#display_jam_masuk").text(res.jam_masuk);
+                        window.statusPresensi = 'keluar';
+                        $("#btnPresensi").text('Absensi Keluar');
+                        $("#izinSakitButtons").hide();
+                    }
 
-            $btnAmbil.removeClass("d-none");
-            $afterCaptureButtons.addClass("d-none");
-        }, 500);
-    }
+                    else if (status === 'keluar' && res.jam_keluar) {
+                        $("#display_jam_keluar").text(res.jam_keluar);
+                        $("#btnPresensi")
+                            .prop('disabled', true)
+                            .removeClass('btn-info')
+                            .addClass('btn-secondary')
+                            .text('Sudah Absen');
+                    }
 
-    // --- Fungsi Presensi (Submit) ---
-    function presensi(){
-        const $snapshot = $("#snapshot");
-        const imageData = $snapshot.attr("src");
-        const $btnPresensi = $("#btnPresensi"); // Ambil elemen tombol
-        const status = window.statusPresensi; // 'masuk' atau 'keluar'
-
-        // 🚨 PENGAMANAN DOUBLE-CLICK INSTAN: Hentikan jika tombol sudah disabled
-        if ($btnPresensi.prop("disabled")) {
-            return; 
-        }
-
-        // 1. Validasi Gambar
-        if (!imageData || imageData.length < 100) {
-            alert("Silakan ambil gambar (selfie) terlebih dahulu.");
-            return;
-        }
-
-        // 2. DISABLE SEGERA & Tampilkan status loading
-        $btnPresensi.prop("disabled", true).text("Memproses..."); 
-
-        const latitude = $("#latitude_input").val();
-        const longitude = $("#longitude_input").val();
-        
-
-        $.ajax({
-            url: "/siswa/absensi", // Ganti dengan endpoint API Anda
-            method: "POST",
-            data: {
-                image: imageData,
-                latitude: latitude,
-                longitude: longitude,
-                status_presensi: status, // Kirim status ke backend
-            },
-            // beforeSend dihilangkan
-            success: function(response) {
-                alert("Data presensi " + status + " berhasil dikirim!");
-                
-                // 🚀 LOGIKA UPDATE TAMPILAN WAKTU & STATUS
-                if (status === 'masuk' && response.jam_masuk) {
-                    // 1. Update Waktu Masuk yang Ditampilkan
-                    $("#display_jam_masuk").text(response.jam_masuk); 
-                    
-                    // Update state untuk aksi berikutnya
-                    $("#sudah_masuk").val('1'); 
-                    window.statusPresensi = 'keluar'; 
-                    $btnPresensi.text("Absensi Keluar").prop("disabled", false); // Re-enable untuk absensi keluar
-
-                } else if (status === 'keluar' && response.jam_keluar) {
-                    // 2. Update Waktu Keluar yang Ditampilkan
-                    $("#display_jam_keluar").text(response.jam_keluar); 
-                    
-                    // Update state menjadi selesai
-                    $("#sudah_keluar").val('1'); 
-                    window.statusPresensi = 'selesai'; 
-                    $btnPresensi.text("Sudah Absen Hari Ini").prop("disabled", true); // Tetap disabled
-
-                } else {
-                    alert("Presensi berhasil, tapi data update tidak ditemukan. Silakan refresh.");
-                    // Jika ada masalah update status, kembalikan tombol ke keadaan semula agar bisa coba lagi
-                    const originalText = status === 'masuk' ? "Absensi Masuk" : "Absensi Keluar";
-                    $btnPresensi.prop("disabled", false).text(originalText); 
-                }
-
-                ambilUlang(); // Kembali ke tampilan video setelah sukses
-
-            },
-            error: function(xhr, status, error) {
-                alert("Gagal mengirim presensi: " + (xhr.responseJSON ? xhr.responseJSON.message : error));
-                console.error("AJAX Error:", xhr.responseText);
-                
-                // Kembalikan tombol ke keadaan sebelum kirim agar bisa coba lagi
-                const originalText = window.statusPresensi === 'masuk' ? "Absensi Masuk" : "Absensi Keluar";
-                $btnPresensi.prop("disabled", false).text(originalText); 
+                    ambilUlang();
+                })
+                .fail(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: err.responseJSON?.message ?? 'Terjadi kesalahan'
+                    });
+                })
+                .always(() => {
+                    // 🔚 MATIKAN SPINNER (kecuali sudah selesai)
+                    if (window.statusPresensi !== 'selesai') {
+                        setLoadingPresensi(false);
+                    }
+                });
             }
-        });
-    }
-</script>
 
+
+
+            // ===== IZIN / SAKIT =====
+            function izinSakit(mode) {
+                modeIzinSakit = mode;
+                $("#video,#map,#izinSakitButtons").addClass('d-none');
+                $("#formIzinSakit").removeClass('d-none');
+            }
+
+            function kirimIzinSakit() {
+                const fd = new FormData();
+                fd.append('status', modeIzinSakit);
+                fd.append('keterangan', $("#keteranganIzinSakit").val());
+                fd.append('foto', $("#fotoIzinSakit")[0].files[0]);
+
+                Swal.fire({
+                    title: 'Mengirim...',
+                    text: 'Mohon tunggu',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                $.ajax({
+                    url: '/siswa/izin-sakit',
+                    method: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+
+                    success: r => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: r.message,
+                            confirmButtonText: 'OK'
+                        });
+
+                        // 🔒 Kunci UI & update tampilan
+                        lockUI(modeIzinSakit.toUpperCase());
+                        $("#display_jam_masuk").text(modeIzinSakit.toUpperCase());
+                        $("#display_jam_keluar").text('-');
+                        $("#formIzinSakit").addClass('d-none');
+                    },
+
+                    error: e => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: e.responseJSON?.message ?? 'Terjadi kesalahan'
+                        });
+                    }
+                });
+            }
+
+
+        </script>
 </body>
-
 </html>

@@ -37,32 +37,53 @@ class Siswa extends BaseController
 
 	public function index()
 	{
-		$now 			= Time::now();
-		$model 			= new AbsensiModel();
-		$settingModel 	= new SettingModel();
-		$tanggal		= $now->toDateString('Y-m-d');
-		$userId 		= Services::login()->id;
-		$status 		= $model->cekStatusAbsensi($userId,$tanggal);
-		$lokasiJson 	= $settingModel->getSetting('lokasi_absensi');
-		// Gunakan default jika data tidak ada di database
-        $defaultLokasi = [
-            'lat' => -7.44710975382454,
-            'lng' => 112.52221433900381,
-            'radius' => 100,
-        ];
-		// Dekode JSON. Jika gagal atau kosong, gunakan default.
-        $lokasiAbsensi = $lokasiJson ? json_decode($lokasiJson, true) : $defaultLokasi;
-		$lokasiAbsensi['lon'] = $lokasiAbsensi['lng'];
-        unset($lokasiAbsensi['lng']);
-	
+		$now     = Time::now();
+		$tanggal = $now->toDateString();
+		$userId  = Services::login()->id;
+
+		$absensiModel = new AbsensiModel();
+		$settingModel = new SettingModel();
+
+		// 🔍 Cek status absensi hari ini
+		$result = $absensiModel->cekStatusAbsensi($userId, $tanggal);
+
+		// ✅ AMBIL DATA ABSENSI (INI KUNCINYA)
+		$dataAbsensi = $result['data'] ?? [];
+
+		// 📍 Default lokasi
+		$defaultLokasi = [
+			'lat'    => -7.44710975382454,
+			'lon'    => 112.52221433900381,
+			'radius' => 100,
+		];
+
+		$lokasiJson    = $settingModel->getSetting('lokasi_absensi');
+		$lokasiAbsensi = $lokasiJson
+			? array_merge($defaultLokasi, json_decode($lokasiJson, true))
+			: $defaultLokasi;
+
+		// Samakan key longitude
+		if (isset($lokasiAbsensi['lng'])) {
+			$lokasiAbsensi['lon'] = $lokasiAbsensi['lng'];
+			unset($lokasiAbsensi['lng']);
+		}
+
 		return view('siswa/dashboard', [
-			'page' => 'dashboard',
+			'page'             => 'dashboard',
 			'tanggal_hari_ini' => $tanggal,
-			'jam_masuk' => $status['data']['jam_masuk'] ?? null,
-			'jam_keluar' => $status['data']['jam_keluar'] ?? null,
-			'lokasi_absensi' => $lokasiAbsensi,
+
+			// ✅ JAM AMAN UNTUK HADIR / MASUK / SELESAI
+			'jam_masuk'        => $dataAbsensi['jam_masuk'] ?? null,
+			'jam_keluar'       => $dataAbsensi['jam_keluar'] ?? null,
+
+			// ✅ STATUS PASTI ADA
+			'status_absensi'   => $result['status'] ?? 'BELUM',
+
+			'lokasi_absensi'   => $lokasiAbsensi,
 		]);
 	}
+
+
 
 	public function logout()
 	{
@@ -182,6 +203,7 @@ class Siswa extends BaseController
 		$jam 		= $now->format('H:i:s');
         $latitude 	= $this->request->getPost('latitude');
         $longitude 	= $this->request->getPost('longitude');
+        $status 	= $this->request->getPost('status');
         $imageData = $this->request->getPost('image');
 
         // Validasi image
@@ -206,6 +228,7 @@ class Siswa extends BaseController
 				'user_id'     => $userId,
 				'nisn'        => $dataNisn->nisn,
 				'tanggal'     => $tanggal,
+				'status'      => $status,
 				'jam_masuk'   => $jam,
 				'lokasi_lat'  => $latitude,
 				'lokasi_lng'  => $longitude,
@@ -365,5 +388,89 @@ class Siswa extends BaseController
 			'end' => $end,
 		]);
 	}
+
+	public function absensiIzinSakit()
+	{
+		$request = $this->request;
+		$userId  = Services::login()->id;
+		$today  = date('Y-m-d');
+
+		$status      = strtolower($request->getPost('status')); // izin / sakit
+		$keterangan  = trim($request->getPost('keterangan'));
+		$foto        = $request->getFile('foto');
+
+		// 1️⃣ Validasi status
+		if (!in_array($status, ['izin', 'sakit'])) {
+			return $this->response->setStatusCode(400)->setJSON([
+				'message' => 'Status tidak valid'
+			]);
+		}
+
+		// 2️⃣ Validasi keterangan
+		if (!$keterangan) {
+			return $this->response->setStatusCode(400)->setJSON([
+				'message' => 'Keterangan wajib diisi'
+			]);
+		}
+
+		// 3️⃣ Validasi foto
+		if (!$foto || !$foto->isValid()) {
+			return $this->response->setStatusCode(400)->setJSON([
+				'message' => 'Foto bukti wajib diupload'
+			]);
+		}
+
+		if (!in_array($foto->getMimeType(), ['image/jpeg', 'image/png', 'image/jpg'])) {
+			return $this->response->setStatusCode(400)->setJSON([
+				'message' => 'Format foto harus JPG atau PNG'
+			]);
+		}
+
+		// 4️⃣ Cek apakah sudah absen hari ini
+		$absensiModel = new AbsensiModel();
+		$existing = $absensiModel
+			->where('user_id', $userId)
+			->where('tanggal', $today)
+			->first();
+
+		if ($existing) {
+			return $this->response->setStatusCode(409)->setJSON([
+				'message' => 'Anda sudah melakukan absensi hari ini'
+			]);
+		}
+
+		// 5️⃣ Upload foto
+		$uploadPath = WRITEPATH . 'uploads/absensi/';
+		if (!is_dir($uploadPath)) {
+			mkdir($uploadPath, 0775, true);
+		}
+
+		$fileName = $foto->getRandomName();
+		$foto->move($uploadPath, $fileName);
+
+		// 6️⃣ Ambil NISN
+		$userModel = new \App\Models\UserModel();
+		$user = $userModel->find($userId);
+
+		// 7️⃣ Simpan ke database
+		$absensiModel->insert([
+			'user_id'    => $userId,
+			'nisn'       => $user->nisn ?? null,
+			'tanggal'    => $today,
+			'status'     => $status,
+			'keterangan' => $keterangan,
+			'foto_izin_sakit'       => 'uploads/absensi/' . $fileName,
+			'jam_masuk'  => null,
+			'jam_keluar' => null,
+		]);
+
+		// 8️⃣ Response sukses
+		return $this->response->setJSON([
+			'status'  => 'success',
+			'message' => ucfirst($status) . ' berhasil dikirim'
+		]);
+	}
+
+
 
 }
