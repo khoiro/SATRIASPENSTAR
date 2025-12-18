@@ -40,52 +40,61 @@
                     <!-- STATISTICS -->
                     <div class="row g-3 mb-4" id="statsContainer">
 
+                        <!-- TOTAL HARI KERJA -->
                         <div class="col-md-4">
-                            <div class="p-3 rounded-4 shadow-sm bg-info text-white h-100">
+                            <div class="p-3 rounded-4 shadow-sm bg-secondary text-white">
                                 <p class="mb-1 small fw-semibold">Total Hari Kerja</p>
-                                <h3 class="mb-0 fw-bold" id="statTotalHariKerja">
-                                    <?= $total_hari_kerja ?> hari
-                                </h3>
+                                <h4 id="statHariKerja"><?= $total_hari_kerja ?> hari</h4>
                             </div>
                         </div>
 
+                        <!-- HADIR -->
                         <div class="col-md-4">
-                            <div class="p-3 rounded-4 shadow-sm bg-success text-white h-100">
-                                <p class="mb-1 small fw-semibold">Total Kehadiran</p>
-                                <h3 class="mb-0 fw-bold" id="statTotalHadir">
-                                    <?= $total_hadir ?> hari
-                                </h3>
+                            <div class="p-3 rounded-4 shadow-sm bg-success text-white">
+                                <p class="mb-1 small fw-semibold">Hadir</p>
+                                <h4 id="statHadir"><?= $hadir ?></h4>
+                                <small id="persenHadir">0%</small>
                             </div>
                         </div>
 
+                        <!-- IZIN -->
                         <div class="col-md-4">
-                            <div class="p-3 rounded-4 shadow-sm bg-warning text-dark h-100">
-                                <p class="mb-1 small fw-semibold">Total Keterlambatan</p>
-                                <h3 class="mb-0 fw-bold" id="statTotalTerlambat">
-                                    <?= $total_terlambat ?> kali
-                                </h3>
+                            <div class="p-3 rounded-4 shadow-sm bg-warning text-dark">
+                                <p class="mb-1 small fw-semibold">Izin</p>
+                                <h4 id="statIzin"><?= $izin ?></h4>
+                                <small id="persenIzin">0%</small>
                             </div>
                         </div>
 
+                        <!-- SAKIT -->
                         <div class="col-md-4">
-                            <div class="p-3 rounded-4 shadow-sm bg-danger text-white h-100">
-                                <p class="mb-1 small fw-semibold">Persentase Keterlambatan</p>
-                                <h3 class="mb-0 fw-bold" id="statPersentaseTerlambat">
-                                    <?= number_format(($total_terlambat / ($total_hari_kerja ?: 1)) * 100, 2) ?>%
-                                </h3>
+                            <div class="p-3 rounded-4 shadow-sm bg-info text-white">
+                                <p class="mb-1 small fw-semibold">Sakit</p>
+                                <h4 id="statSakit"><?= $sakit ?></h4>
+                                <small id="persenSakit">0%</small>
                             </div>
                         </div>
 
+                        <!-- ALPHA -->
                         <div class="col-md-4">
-                            <div class="p-3 rounded-4 shadow-sm bg-primary text-white h-100">
-                                <p class="mb-1 small fw-semibold">Persentase Kehadiran</p>
-                                <h3 class="mb-0 fw-bold" id="statPersentase">
-                                    <?= $persentase ?>%
-                                </h3>
+                            <div class="p-3 rounded-4 shadow-sm bg-danger text-white">
+                                <p class="mb-1 small fw-semibold">Tidak Hadir</p>
+                                <h4 id="statAlpha"><?= $alpha ?></h4>
+                                <small id="persenAlpha">0%</small>
+                            </div>
+                        </div>
+
+                        <!-- TERLAMBAT -->
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-4 shadow-sm bg-dark text-white">
+                                <p class="mb-1 small fw-semibold">Terlambat</p>
+                                <h4 id="statTerlambat"><?= $total_terlambat ?></h4>
+                                <small id="persenTerlambat">0%</small>
                             </div>
                         </div>
 
                     </div>
+
 
                     <!-- GRAFIK -->
                     <div class="card border-0 shadow-sm rounded-4 mt-4">
@@ -110,31 +119,23 @@
 
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="indicator bg-primary me-3"></div>
-                                            <span id="legendHadir" class="fw-semibold">
-                                                Hadir: <?= $total_hadir ?> hari
-                                            </span>
+                                            <span id="legendHadir">Hadir: -</span>
                                         </div>
 
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="indicator bg-danger me-3"></div>
-                                            <span id="legendTidakHadir" class="fw-semibold">
-                                                Tidak Hadir: <?= ($total_hari_kerja - $total_hadir) ?> hari
-                                            </span>
+                                            <span id="legendTidakHadir">Tidak Hadir: -</span>
                                         </div>
 
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="indicator bg-warning me-3"></div>
-                                            <span id="legendTerlambat" class="fw-semibold">
-                                                Terlambat: <?= $total_terlambat ?> kali
-                                            </span>
+                                            <span id="legendTerlambat">Terlambat: -</span>
                                         </div>
 
 
                                         <div class="d-flex align-items-center">
                                             <div class="indicator bg-secondary me-3"></div>
-                                            <span id="legendTotalHari" class="fw-semibold">
-                                                Total Hari: <?= $total_hari_kerja ?> hari
-                                            </span>
+                                            <span id="legendTotalHari">Total Hari: -</span>
                                         </div>
 
                                     </div>
@@ -160,88 +161,101 @@
     let kehadiranChart = null;
     const dataUrl = '<?= site_url('siswa/kehadiran/data-ajax') ?>';
 
-    function updateChart(hadir, tidakHadir, terlambat) {
-        // pastikan angka (parseInt) untuk menghindari string issues
-        hadir = Number(hadir) || 0;
-        tidakHadir = Number(tidakHadir) || 0;
-        terlambat = Number(terlambat) || 0;
-
-        const data = {
-            labels: ['Hadir', 'Tidak Hadir', 'Terlambat'],
+    function updateChart(data) {
+        const chartData = {
+            labels: ['Hadir', 'Izin', 'Sakit', 'Tidak Hadir'],
             datasets: [{
-                data: [hadir, tidakHadir, terlambat],
-                backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'],
-                borderWidth: 3,
-                borderColor: ['#fff','#fff','#fff']
+                data: [
+                    data.hadir,
+                    data.izin,
+                    data.sakit,
+                    data.alpha
+                ],
+                backgroundColor: [
+                    '#198754',
+                    '#ffc107',
+                    '#0dcaf0',
+                    '#dc3545'
+                ],
+                borderColor: '#fff',
+                borderWidth: 3
             }]
         };
 
         if (kehadiranChart) {
-            kehadiranChart.data = data;
+            kehadiranChart.data = chartData;
             kehadiranChart.update();
         } else {
             const ctx = document.getElementById('chartKehadiran').getContext('2d');
             kehadiranChart = new Chart(ctx, {
                 type: 'doughnut',
-                data: data,
+                data: chartData,
                 options: {
-                    plugins: { legend: { display: false }},
                     cutout: '70%',
-                    animation: { animateScale: true }
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
                 }
             });
         }
     }
 
+
     async function loadKehadiran(start, end) {
-        const button = document.getElementById('filterButton');
-        button.disabled = true;
-        // simpan teks asli sehingga bisa dikembalikan lebih aman
-        const originalText = button.textContent;
-        button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Memuat...`;
+        showLoading();
 
         try {
-            const res = await fetch(`${dataUrl}?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
-            if (!res.ok) throw new Error('Network response was not ok');
+            const res = await fetch(`${dataUrl}?start=${start}&end=${end}`);
+            const d = await res.json();
 
-            const data = await res.json();
+            const total = d.total_hari_kerja || 1;
 
-            // update statistik
-            document.getElementById('statTotalHariKerja').textContent = `${data.total_hari_kerja} hari`;
-            document.getElementById('statTotalHadir').textContent = `${data.total_hadir} hari`;
-            document.getElementById('statPersentase').textContent = `${data.persentase}%`;
+            document.getElementById('statHariKerja').innerText = `${total} hari`;
+            document.getElementById('statHadir').innerText = d.hadir;
+            document.getElementById('statIzin').innerText = d.izin;
+            document.getElementById('statSakit').innerText = d.sakit;
+            document.getElementById('statAlpha').innerText = d.alpha;
+            document.getElementById('statTerlambat').innerText = d.terlambat;
 
-            document.getElementById('legendHadir').textContent = `Hadir: ${data.total_hadir} hari`;
-            document.getElementById('legendTidakHadir').textContent = `Tidak Hadir: ${data.total_tidak_hadir} hari`;
-            document.getElementById('legendTotalHari').textContent = `Total Hari: ${data.total_hari_kerja} hari`;
+            // ===== UPDATE LEGEND =====
+            document.getElementById('legendHadir').innerText =
+                `Hadir: ${d.hadir} hari`;
 
-            document.getElementById('statTotalTerlambat').textContent = `${data.total_terlambat} kali`;
-            document.getElementById('legendTerlambat').textContent = `Terlambat: ${data.total_terlambat} kali`;
-            const persenTerlambat = data.total_hari_kerja > 0 ? ((data.total_terlambat / data.total_hari_kerja) * 100).toFixed(2) : 0;
-            document.getElementById('statPersentaseTerlambat').textContent = `${persenTerlambat}%`;
+            document.getElementById('legendTidakHadir').innerText =
+                `Tidak Hadir: ${d.alpha} hari`;
+
+            document.getElementById('legendTerlambat').innerText =
+                `Terlambat: ${d.terlambat} kali`;
+
+            document.getElementById('legendTotalHari').innerText =
+                `Total Hari: ${total} hari`;
 
 
-            // update chart
-            updateChart(data.total_hadir, data.total_tidak_hadir, data.total_terlambat);
+            document.getElementById('persenHadir').innerText = ((d.hadir / total) * 100).toFixed(2) + '%';
+            document.getElementById('persenIzin').innerText = ((d.izin / total) * 100).toFixed(2) + '%';
+            document.getElementById('persenSakit').innerText = ((d.sakit / total) * 100).toFixed(2) + '%';
+            document.getElementById('persenAlpha').innerText = ((d.alpha / total) * 100).toFixed(2) + '%';
+            document.getElementById('persenTerlambat').innerText = ((d.terlambat / total) * 100).toFixed(2) + '%';
+
+            updateChart(d);
 
         } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal memuat data',
+                text: 'Silakan coba lagi'
+            });
             console.error(err);
-            alert("Gagal memuat data. Cek console untuk detail.");
         } finally {
-            button.disabled = false;
-            button.textContent = originalText || "Terapkan Filter";
+            hideLoading();
         }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        // Gunakan nilai server-side sebagai nilai awal (bukan objek data yang tak terdefinisi)
-        updateChart(
-            <?= (int) $total_hadir ?>,
-            <?= (int) ($total_hari_kerja - $total_hadir) ?>,
-            <?= (isset($total_terlambat) ? (int)$total_terlambat : 0) ?>
-        );
 
-        // pastikan ambil elemen input secara eksplisit
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadKehadiran('<?= $start ?>', '<?= $end ?>');
+
         const inputStartEl = document.getElementById('inputStart');
         const inputEndEl = document.getElementById('inputEnd');
 
@@ -254,6 +268,25 @@
             loadKehadiran(start, end);
         });
     });
+
+
+    function showLoading() {
+        Swal.fire({
+            title: 'Memuat data...',
+            html: 'Mohon tunggu sebentar',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    }
+
+    function hideLoading() {
+        Swal.close();
+    }
+
+
 </script>
 
 

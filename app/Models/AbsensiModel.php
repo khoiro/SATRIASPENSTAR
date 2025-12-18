@@ -237,6 +237,32 @@ class AbsensiModel extends Model
         ]);
     }
 
+    public function getRekapStatus($userId, $start, $end)
+    {
+        return $this->select("
+                SUM(status = 'HADIR') AS hadir,
+                SUM(status = 'IZIN')  AS izin,
+                SUM(status = 'SAKIT') AS sakit
+            ")
+            ->where('user_id', $userId)
+            ->where('tanggal >=', $start)
+            ->where('tanggal <=', $end)
+            ->get()
+            ->getRowArray();
+    }
+
+    public function getTerlambat($userId, $start, $end)
+    {
+        return $this->where('user_id', $userId)
+            ->where('tanggal >=', $start)
+            ->where('tanggal <=', $end)
+            ->where('status', 'HADIR')
+            ->where('jam_masuk >', '06:45:00')
+            ->countAllResults();
+    }
+
+
+
 
 
 

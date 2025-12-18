@@ -264,14 +264,139 @@ class Siswa extends BaseController
 		}
     }
 
+	// public function kehadiran()
+	// {
+	// 	$userId = Services::login()->id;
+
+	// 	$start  = $this->request->getGet('start');
+	// 	$end    = $this->request->getGet('end');
+
+	// 	// default: bulan ini
+	// 	if (!$start || !$end) {
+	// 		$start = date('Y-m-01');
+	// 		$end   = date('Y-m-t');
+	// 	}
+
+	// 	$absensiModel = new AbsensiModel();
+	// 	$liburModel   = new LiburModel();
+
+	// 	// --- Hitung Total Hari Kerja ---
+	// 	$periode = new \DatePeriod(
+	// 		new \DateTime($start),
+	// 		new \DateInterval('P1D'),
+	// 		(new \DateTime($end))->modify('+1 day')
+	// 	);
+
+	// 	$hari_kerja = [];
+	// 	foreach ($periode as $tanggal) {
+	// 		$hari = $tanggal->format('Y-m-d');
+
+	// 		// Skip hanya hari Minggu (7)
+	// 		if ($tanggal->format('N') == 7) continue;
+
+	// 		// Skip Hari Libur
+	// 		$libur = $liburModel
+	// 			->where('tanggal_mulai <=', $hari)
+	// 			->where('tanggal_akhir >=', $hari)
+	// 			->first();
+	// 		if ($libur) continue;
+
+	// 		$hari_kerja[] = $hari;
+	// 	}
+
+	// 	$totalHariKerja = count($hari_kerja);
+	// 	$totalHadir = $absensiModel->getKehadiran($userId, $start, $end);
+	// 	$totalTerlambat = $absensiModel->getKeterlambatan($userId, $start, $end);
+
+
+	// 	$persentase = $totalHariKerja > 0 ? round(($totalHadir / $totalHariKerja) * 100, 2) : 0;
+
+	// 	return view('siswa/report_kehadiran', [
+	// 		'page' => 'kehadiran',
+	// 		'start' => $start,
+	// 		'end' => $end,
+	// 		'total_hari_kerja' => $totalHariKerja,
+	// 		'total_hadir' => $totalHadir,
+	// 		'persentase' => $persentase,
+	// 		'userId' => $userId,
+	// 		'total_terlambat' => $totalTerlambat,
+
+	// 	]);
+	// }
+
+	// Tambahkan function ini di Controller Siswa Anda
+
+	// public function getKehadiranDataAjax()
+	// {
+	// 	$userId = Services::login()->id;
+
+	// 	$start = $this->request->getGet('start');
+	// 	$end = $this->request->getGet('end');
+
+	// 	// Default: bulan ini (digunakan jika dipanggil tanpa parameter)
+	// 	if (!$start || !$end) {
+	// 		$start = date('Y-m-01');
+	// 		$end = date('Y-m-t');
+	// 	}
+
+	// 	$absensiModel = new AbsensiModel();
+	// 	$liburModel = new LiburModel();
+
+	// 	// --- Hitung Total Hari Kerja ---
+	// 	$periode = new \DatePeriod(
+	// 		new \DateTime($start),
+	// 		new \DateInterval('P1D'),
+	// 		(new \DateTime($end))->modify('+1 day')
+	// 	);
+
+	// 	$hari_kerja = [];
+	// 	foreach ($periode as $tanggal) {
+	// 		$hari = $tanggal->format('Y-m-d');
+
+	// 		// Skip hanya hari Minggu (7)
+	// 		if ($tanggal->format('N') == 7) continue;
+
+	// 		// Skip Hari Libur
+	// 		$libur = $liburModel
+	// 			->where('tanggal_mulai <=', $hari)
+	// 			->where('tanggal_akhir >=', $hari)
+	// 			->first();
+	// 		if ($libur) continue;
+
+	// 		$hari_kerja[] = $hari;
+	// 	}
+
+
+	// 	$totalHariKerja = count($hari_kerja);
+		
+	// 	// Asumsi getKehadiran($userId, $start, $end) sudah ada di AbsensiModel dan mengembalikan jumlah hari hadir
+	// 	$totalHadir = $absensiModel->getKehadiran($userId, $start, $end);
+
+	// 	$totalTidakHadir = $totalHariKerja - $totalHadir;
+	// 	$persentase = $totalHariKerja > 0 ? round(($totalHadir / $totalHariKerja) * 100, 2) : 0;
+	// 	$totalTerlambat = $absensiModel->getKeterlambatan($userId, $start, $end);
+
+
+	// 	// Mengembalikan data sebagai JSON
+	// 	return $this->response->setJSON([
+	// 		'total_hari_kerja' => $totalHariKerja,
+	// 		'total_hadir' => $totalHadir,
+	// 		'total_tidak_hadir' => $totalTidakHadir,
+	// 		'persentase' => $persentase,
+	// 		'total_terlambat' => $totalTerlambat,
+	// 		'start' => $start,
+	// 		'end' => $end,
+	// 	]);
+	// }
+
 	public function kehadiran()
 	{
 		$userId = Services::login()->id;
 
-		$start  = $this->request->getGet('start');
-		$end    = $this->request->getGet('end');
+		$start = $this->request->getGet('start');
+		$end   = $this->request->getGet('end');
 
-		// default: bulan ini
+		// Default: bulan ini
 		if (!$start || !$end) {
 			$start = date('Y-m-01');
 			$end   = date('Y-m-t');
@@ -280,114 +405,140 @@ class Siswa extends BaseController
 		$absensiModel = new AbsensiModel();
 		$liburModel   = new LiburModel();
 
-		// --- Hitung Total Hari Kerja ---
+		// ===============================
+		// HITUNG HARI KERJA
+		// ===============================
 		$periode = new \DatePeriod(
 			new \DateTime($start),
 			new \DateInterval('P1D'),
 			(new \DateTime($end))->modify('+1 day')
 		);
 
-		$hari_kerja = [];
-		foreach ($periode as $tanggal) {
-			$hari = $tanggal->format('Y-m-d');
+		$totalHariKerja = 0;
+		foreach ($periode as $tgl) {
+			if ($tgl->format('N') == 7) continue; // Minggu
 
-			// Skip hanya hari Minggu (7)
-			if ($tanggal->format('N') == 7) continue;
-
-			// Skip Hari Libur
 			$libur = $liburModel
-				->where('tanggal_mulai <=', $hari)
-				->where('tanggal_akhir >=', $hari)
+				->where('tanggal_mulai <=', $tgl->format('Y-m-d'))
+				->where('tanggal_akhir >=', $tgl->format('Y-m-d'))
 				->first();
-			if ($libur) continue;
 
-			$hari_kerja[] = $hari;
+			if (!$libur) {
+				$totalHariKerja++;
+			}
 		}
 
-		$totalHariKerja = count($hari_kerja);
-		$totalHadir = $absensiModel->getKehadiran($userId, $start, $end);
-		$totalTerlambat = $absensiModel->getKeterlambatan($userId, $start, $end);
+		// ===============================
+		// REKAP STATUS ABSENSI
+		// ===============================
+		$rekap = $absensiModel->getRekapStatus($userId, $start, $end);
 
+		$hadir = (int) ($rekap['hadir'] ?? 0);
+		$izin  = (int) ($rekap['izin'] ?? 0);
+		$sakit = (int) ($rekap['sakit'] ?? 0);
 
-		$persentase = $totalHariKerja > 0 ? round(($totalHadir / $totalHariKerja) * 100, 2) : 0;
+		// ===============================
+		// ALPHA
+		// ===============================
+		$alpha = max(0, $totalHariKerja - ($hadir + $izin + $sakit));
+
+		// ===============================
+		// TERLAMBAT
+		// ===============================
+		$terlambat = $absensiModel->getTerlambat($userId, $start, $end);
+
+		// ===============================
+		// PERSENTASE HADIR
+		// ===============================
+		$persentase = $totalHariKerja > 0
+			? round(($hadir / $totalHariKerja) * 100, 2)
+			: 0;
 
 		return view('siswa/report_kehadiran', [
-			'page' => 'kehadiran',
-			'start' => $start,
-			'end' => $end,
-			'total_hari_kerja' => $totalHariKerja,
-			'total_hadir' => $totalHadir,
-			'persentase' => $persentase,
-			'userId' => $userId,
-			'total_terlambat' => $totalTerlambat,
-
+			'page'               => 'kehadiran',
+			'start'              => $start,
+			'end'                => $end,
+			'total_hari_kerja'   => $totalHariKerja,
+			'hadir'              => $hadir,
+			'izin'               => $izin,
+			'sakit'              => $sakit,
+			'alpha'              => $alpha,
+			'persentase'         => $persentase,
+			'total_terlambat'    => $terlambat,
+			'userId'             => $userId
 		]);
 	}
 
-	// Tambahkan function ini di Controller Siswa Anda
 
 	public function getKehadiranDataAjax()
 	{
 		$userId = Services::login()->id;
 
 		$start = $this->request->getGet('start');
-		$end = $this->request->getGet('end');
+		$end   = $this->request->getGet('end');
 
-		// Default: bulan ini (digunakan jika dipanggil tanpa parameter)
 		if (!$start || !$end) {
 			$start = date('Y-m-01');
-			$end = date('Y-m-t');
+			$end   = date('Y-m-t');
 		}
 
 		$absensiModel = new AbsensiModel();
-		$liburModel = new LiburModel();
+		$liburModel   = new LiburModel();
 
-		// --- Hitung Total Hari Kerja ---
+		// ===============================
+		// HITUNG HARI KERJA
+		// ===============================
 		$periode = new \DatePeriod(
 			new \DateTime($start),
 			new \DateInterval('P1D'),
 			(new \DateTime($end))->modify('+1 day')
 		);
 
-		$hari_kerja = [];
-		foreach ($periode as $tanggal) {
-			$hari = $tanggal->format('Y-m-d');
+		$hariKerja = 0;
+		foreach ($periode as $tgl) {
+			if ($tgl->format('N') == 7) continue; // Minggu
 
-			// Skip hanya hari Minggu (7)
-			if ($tanggal->format('N') == 7) continue;
-
-			// Skip Hari Libur
 			$libur = $liburModel
-				->where('tanggal_mulai <=', $hari)
-				->where('tanggal_akhir >=', $hari)
+				->where('tanggal_mulai <=', $tgl->format('Y-m-d'))
+				->where('tanggal_akhir >=', $tgl->format('Y-m-d'))
 				->first();
-			if ($libur) continue;
 
-			$hari_kerja[] = $hari;
+			if (!$libur) {
+				$hariKerja++;
+			}
 		}
 
+		// ===============================
+		// HITUNG STATUS ABSENSI
+		// ===============================
+		$rekap = $absensiModel->getRekapStatus($userId, $start, $end);
 
-		$totalHariKerja = count($hari_kerja);
-		
-		// Asumsi getKehadiran($userId, $start, $end) sudah ada di AbsensiModel dan mengembalikan jumlah hari hadir
-		$totalHadir = $absensiModel->getKehadiran($userId, $start, $end);
+		$hadir = (int) ($rekap['hadir'] ?? 0);
+		$izin  = (int) ($rekap['izin'] ?? 0);
+		$sakit = (int) ($rekap['sakit'] ?? 0);
 
-		$totalTidakHadir = $totalHariKerja - $totalHadir;
-		$persentase = $totalHariKerja > 0 ? round(($totalHadir / $totalHariKerja) * 100, 2) : 0;
-		$totalTerlambat = $absensiModel->getKeterlambatan($userId, $start, $end);
+		// ===============================
+		// ALPHA = hari kerja - (hadir + izin + sakit)
+		// ===============================
+		$alpha = max(0, $hariKerja - ($hadir + $izin + $sakit));
 
+		// ===============================
+		// TERLAMBAT
+		// ===============================
+		$terlambat = $absensiModel->getTerlambat($userId, $start, $end);
 
-		// Mengembalikan data sebagai JSON
 		return $this->response->setJSON([
-			'total_hari_kerja' => $totalHariKerja,
-			'total_hadir' => $totalHadir,
-			'total_tidak_hadir' => $totalTidakHadir,
-			'persentase' => $persentase,
-			'total_terlambat' => $totalTerlambat,
-			'start' => $start,
-			'end' => $end,
+			'total_hari_kerja' => $hariKerja,
+			'hadir'            => $hadir,
+			'izin'             => $izin,
+			'sakit'            => $sakit,
+			'alpha'            => $alpha,
+			'terlambat'        => $terlambat,
+			'start'            => $start,
+			'end'              => $end
 		]);
 	}
+
 
 	public function absensiIzinSakit()
 	{

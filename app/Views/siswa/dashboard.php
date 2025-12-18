@@ -102,9 +102,11 @@
         </div>
 
         <script>
+            
             const LOKASI_PUSAT = { lat: <?= $lokasi_absensi['lat'] ?>, lon: <?= $lokasi_absensi['lon'] ?> };
             const RADIUS = <?= $lokasi_absensi['radius'] ?>;
             let modeIzinSakit = null;
+            let isDalamRadius = false; // ✅ FLAG RADIUS
 
             // ===== INIT STATUS =====
             $(document).ready(function() {
@@ -136,16 +138,57 @@
 
                 // Lokasi
                 navigator.geolocation.getCurrentPosition(p => {
-                    $("#latitude_input").val(p.coords.latitude);
-                    $("#longitude_input").val(p.coords.longitude);
-                    $("#btnAmbil").prop('disabled', false).text('Ambil Gambar');
+                    const lat = p.coords.latitude;
+                    const lon = p.coords.longitude;
 
-                    const map = L.map('map').setView([p.coords.latitude, p.coords.longitude], 18);
+                    $("#latitude_input").val(lat);
+                    $("#longitude_input").val(lon);
+
+                    // ✅ HITUNG JARAK
+                    const jarak = hitungJarak(
+                        lat, lon,
+                        LOKASI_PUSAT.lat,
+                        LOKASI_PUSAT.lon
+                    );
+
+                    isDalamRadius = jarak <= RADIUS;
+
+                    if (isDalamRadius) {
+                        $("#btnAmbil").prop('disabled', false).text('Ambil Gambar').removeClass('d-none'); // pastikan tampil saat HADIR;
+                    } else {
+                        $("#btnAmbil")
+                            .prop('disabled', true)
+                            .text('Di luar radius absensi');
+                    }
+
+                    const map = L.map('map').setView([lat, lon], 18);
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                    L.circle([LOKASI_PUSAT.lat, LOKASI_PUSAT.lon], { radius: RADIUS }).addTo(map);
-                    L.marker([p.coords.latitude, p.coords.longitude]).addTo(map);
+
+                    L.circle([LOKASI_PUSAT.lat, LOKASI_PUSAT.lon], {
+                        radius: RADIUS,
+                        color: 'green'
+                    }).addTo(map);
+
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup(isDalamRadius ? 'Dalam Radius' : 'Di Luar Radius')
+                        .openPopup();
                 });
             });
+
+            function hitungJarak(lat1, lon1, lat2, lon2) {
+                const R = 6371000; // meter
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) *
+                    Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
 
             // ===== LOCK UI =====
             function lockUI(status) {
@@ -171,6 +214,7 @@
                 $("#afterCaptureButtons").addClass('d-none');
             }
 
+
             let btnPresensiText = '';
             function setLoadingPresensi(isLoading = true) {
                 const btn = $("#btnPresensi");
@@ -188,6 +232,16 @@
             // ===== ABSENSI =====
             function presensi() {
                 const status = window.statusPresensi;
+
+                // 🚫 BLOK JIKA ABSENSI MASUK & DI LUAR RADIUS
+                if (status === 'masuk' && !isDalamRadius) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Di luar radius',
+                        text: 'Anda harus berada dalam radius absensi untuk melakukan absen masuk.'
+                    });
+                    return;
+                }
 
                 // 🔄 AKTIFKAN SPINNER
                 setLoadingPresensi(true);
@@ -243,11 +297,20 @@
 
 
             // ===== IZIN / SAKIT =====
-            function izinSakit(mode) {
+           function izinSakit(mode) {
                 modeIzinSakit = mode;
+
+                // 🔒 Sembunyikan kamera, map, tombol izin
                 $("#video,#map,#izinSakitButtons").addClass('d-none');
+
+                // ✅ JIKA DI LUAR RADIUS → HIDE TOMBOL AMBIL GAMBAR
+                if (!isDalamRadius) {
+                    $("#btnAmbil").addClass('d-none');
+                }
+
                 $("#formIzinSakit").removeClass('d-none');
             }
+
 
             function kirimIzinSakit() {
                 const fd = new FormData();
