@@ -85,30 +85,70 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
+    function toPercent(value, total) {
+        if (!total || total === 0) return 0;
+        return ((value / total) * 100).toFixed(1);
+    }
+
     const ctx = document.getElementById('grafikAbsensi');
 
     let chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Tepat Waktu', 'Terlambat', 'Alpha', 'Libur'],
+            labels: ['Hari Kerja', 'Hadir', 'Izin', 'Sakit', 'Alpha', 'Terlambat'],
             datasets: [{
                 data: [
-                    <?= $rekap['tepat_waktu'] ?>,
-                    <?= $rekap['terlambat'] ?>,
-                    <?= $rekap['alpha'] ?>,
-                    <?= $rekap['libur'] ?>
-                ],
-                backgroundColor: ['#28a745','#ffc107','#dc3545','#6c757d']
+                        <?= $rekap['hari_kerja'] ?>,
+                        <?= $rekap['hadir'] ?>,
+                        <?= $rekap['izin'] ?>,
+                        <?= $rekap['sakit'] ?>,
+                        <?= $rekap['alpha'] ?>,
+                        <?= $rekap['terlambat'] ?>
+                    ],
+
+                backgroundColor: [
+                                    '#007bff', // hari kerja
+                                    '#28a745',
+                                    '#ffc107',
+                                    '#17a2b8',
+                                    '#dc3545',
+                                    '#343a40'
+                                ],
+
             }]
+
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const hariKerja = context.chart.data.datasets[0].data[0];
+                            const value = context.raw;
+                            const persen = toPercent(value, hariKerja);
+                            return `${value} hari (${persen}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value;
+                        }
+                    }
+                }
+            }
         }
+
     });
 
-    $('#bulan, #tahun').change(function () {
+    $('#bulan, #tahun, #kelas').change(function () {
 
         $('#loadingChart').fadeIn(200);
 
@@ -117,15 +157,19 @@
             type: 'GET',
             data: {
                 bulan: $('#bulan').val(),
-                tahun: $('#tahun').val()
+                tahun: $('#tahun').val(),
+                kelas: $('#kelas').val() // 🔥 INI KUNCINYA
             },
             success: function (res) {
-                chart.data.datasets[0].data = [
-                    res.tepat_waktu,
-                    res.terlambat,
+               chart.data.datasets[0].data = [
+                    res.hari_kerja,
+                    res.hadir,
+                    res.izin,
+                    res.sakit,
                     res.alpha,
-                    res.libur
+                    res.terlambat
                 ];
+
                 chart.update();
             },
             complete: function () {

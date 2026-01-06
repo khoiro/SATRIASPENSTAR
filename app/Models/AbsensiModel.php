@@ -66,62 +66,132 @@ class AbsensiModel extends Model
                     ->countAllResults();
     }
 
-    public function getRekapAbsensiBulanan($bulan, $tahun)
+    public function getRekapAbsensiBulanan($bulan, $tahun, $kelas = null)
     {
         $db = \Config\Database::connect();
 
-        // 1️⃣ Total hari dalam bulan
+        $awalBulan  = "$tahun-$bulan-01";
+        $akhirBulan = date('Y-m-t', strtotime($awalBulan));
+
+        // =============================
+        // 1. TOTAL HARI DALAM BULAN
+        // =============================
         $totalHari = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
 
-        // 2️⃣ Hitung total hari libur (dari tabel liburs)
-        $libur = $db->query("
+        // =============================
+        // 2. HITUNG LIBUR DARI TABEL liburs
+        // =============================
+        $liburDb = $db->query("
+            SELECT
+                COALESCE(
+                    SUM(
+                        DATEDIFF(
+                            LEAST(tanggal_akhir, ?),
+                            GREATEST(tanggal_mulai, ?)
+                        ) + 1
+                    ), 0
+                ) AS total_libur
+            FROM liburs
+            WHERE tanggal_mulai <= ?
+            AND tanggal_akhir >= ?
+        ", [$akhirBulan, $awalBulan, $akhirBulan, $awalBulan])->getRow();
+
+        $liburTanggalMerah = (int) $liburDb->total_libur;
+
+        // =============================
+        // 3. HITUNG JUMLAH HARI MINGGU
+        // =============================
+        $jumlahMinggu = 0;
+        $tanggal = new \DateTime($awalBulan);
+
+        while ($tanggal->format('Y-m-d') <= $akhirBulan) {
+            if ($tanggal->format('w') == 0) { // 0 = Minggu
+                $jumlahMinggu++;
+            }
+            $tanggal->modify('+1 day');
+        }
+
+        // =============================
+        // 4. MINGGU YANG JATUH DI TANGGAL MERAH (ANTI DOBEL)
+        // =============================
+        $mingguLibur = $db->query("
             SELECT COUNT(*) AS total
             FROM (
-                SELECT tanggal_mulai + INTERVAL seq DAY AS tanggal
-                FROM liburs
-                JOIN (
-                    SELECT 0 seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
-                    UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
-                    UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14
-                    UNION ALL SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19
-                    UNION ALL SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24
-                    UNION ALL SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29
-                    UNION ALL SELECT 30
-                ) seq
-                WHERE tanggal_mulai + INTERVAL seq DAY <= tanggal_akhir
-            ) t
-            WHERE MONTH(tanggal) = ? AND YEAR(tanggal) = ?
-        ", [$bulan, $tahun])->getRow()->total;
+                SELECT DATE_ADD(?, INTERVAL seq DAY) AS tanggal
+                FROM (
+                    SELECT @row := @row + 1 AS seq
+                    FROM information_schema.columns, (SELECT @row := -1) r
+                    LIMIT ?
+                ) t
+            ) kalender
+            JOIN liburs l
+                ON kalender.tanggal BETWEEN l.tanggal_mulai AND l.tanggal_akhir
+            WHERE DAYOFWEEK(kalender.tanggal) = 1
+        ", [$awalBulan, $totalHari])->getRow();
 
-        $hariAktif = max(0, $totalHari - $libur);
+        $mingguTanggalMerah = (int) $mingguLibur->total;
 
-        // 3️⃣ Hitung tepat waktu & terlambat
-        $absen = $db->query("
+        // =============================
+        // 5. TOTAL LIBUR EFEKTIF
+        // =============================
+        $totalLibur = $liburTanggalMerah + $jumlahMinggu - $mingguTanggalMerah;
+
+        $hariKerja = max(0, $totalHari - $totalLibur);
+
+        // =============================
+        // 6. FILTER KELAS
+        // =============================
+        $whereKelas = '';
+        if ($kelas) {
+            $whereKelas = "AND siswa.rombel = " . $db->escape($kelas);
+        }
+
+        // =============================
+        // 7. REKAP ABSENSI
+        // =============================
+        $rekap = $db->query("
             SELECT
-                SUM(CASE WHEN jam_masuk <= '06:45:00' THEN 1 ELSE 0 END) AS tepat_waktu,
-                SUM(CASE WHEN jam_masuk >  '06:45:00' THEN 1 ELSE 0 END) AS terlambat
+                SUM(absensi.status = 'HADIR') AS hadir,
+                SUM(absensi.status = 'IZIN')  AS izin,
+                SUM(absensi.status = 'SAKIT') AS sakit,
+                SUM(
+                    absensi.status = 'HADIR'
+                    AND absensi.jam_masuk > '06:45:00'
+                ) AS terlambat
             FROM absensi
-            WHERE MONTH(tanggal) = ? AND YEAR(tanggal) = ?
-        ", [$bulan, $tahun])->getRow();
+            JOIN siswa ON siswa.nisn = absensi.nisn
+            WHERE absensi.tanggal BETWEEN ? AND ?
+            $whereKelas
+        ", [$awalBulan, $akhirBulan])->getRow();
 
-        // 4️⃣ Total siswa unik
-        $totalSiswa = $db->query("
-            SELECT COUNT(DISTINCT nisn) AS total
-            FROM absensi
-        ")->getRow()->total;
+        $hadir = (int) $rekap->hadir;
 
-        // 5️⃣ Hitung alpha
-        $totalKehadiran = $totalSiswa * $hariAktif;
-        $hadir = ($absen->tepat_waktu + $absen->terlambat);
-        $alpha = max(0, $totalKehadiran - $hadir);
+        // =============================
+        // 8. TEPAT WAKTU & ALPHA
+        // =============================
+        $tepatWaktu = max(0, $hadir - (int) $rekap->terlambat);
+        $alpha = max(0,$hariKerja - ($hadir + (int)$rekap->izin + (int)$rekap->sakit));
 
+
+        // =============================
+        // 9. RETURN
+        // =============================
         return [
-            'tepat_waktu' => (int) $absen->tepat_waktu,
-            'terlambat'   => (int) $absen->terlambat,
-            'alpha'       => (int) $alpha,
-            'libur'       => (int) $libur
+            'hari_kerja'  => $hariKerja,
+            'libur'       => $totalLibur,
+            'hadir'       => $hadir,
+            'izin'        => (int) $rekap->izin,
+            'sakit'       => (int) $rekap->sakit,
+            'terlambat'   => (int) $rekap->terlambat,
+            'tepat_waktu' => $tepatWaktu,
+            'alpha'       => $alpha
         ];
     }
+
+
+
+
+
 
     public function getRekapAbsensiBulananAjax($bulan, $tahun)
     {

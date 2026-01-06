@@ -43,7 +43,7 @@
                         <!-- TOTAL HARI KERJA -->
                         <div class="col-md-4">
                             <div class="p-3 rounded-4 shadow-sm bg-secondary text-white">
-                                <p class="mb-1 small fw-semibold">Total Hari Kerja</p>
+                                <p class="mb-1 small fw-semibold">Total Hari Masuk</p>
                                 <h4 id="statHariKerja"><?= $total_hari_kerja ?> hari</h4>
                             </div>
                         </div>

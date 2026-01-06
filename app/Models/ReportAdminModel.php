@@ -38,10 +38,16 @@ class ReportAdminModel extends Model
     {
         $builder = $this->db->table($this->table);
 
-        // JOIN siswa
+        $builder->select([
+            'absensi.*',
+            'absensi.status AS status_absensi', // 🔥 INI KUNCINYA
+            'siswa.nama',
+            'siswa.rombel'
+        ]);
+
         $builder->join(
-            $this->tableSiswa,
-            $this->tableSiswa . '.nisn = ' . $this->table . '.nisn',
+            'siswa',
+            'siswa.nisn = absensi.nisn',
             'left'
         );
 

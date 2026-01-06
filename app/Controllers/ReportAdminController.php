@@ -78,6 +78,7 @@ class ReportAdminController extends BaseController
                     'no'         => $no,
                     'nama'       => $row->nama,
                     'tanggal'    => Time::parse($row->tanggal)->toLocalizedString('d MMMM yyyy'),
+                    'status'     => $row->status,
                     'jam_masuk'  => $row->jam_masuk ?? '-',
                     'jam_keluar' => $row->jam_keluar ?? '-',
                     'koordinat_masuk' =>
@@ -86,6 +87,7 @@ class ReportAdminController extends BaseController
                             : 'N/A',
                     'foto_masuk'  => $row->foto,
                     'foto_keluar' => $row->foto_keluar,
+                    'foto_izin_sakit' => $row->foto_izin_sakit,
                 ];
             }
 
@@ -135,8 +137,9 @@ class ReportAdminController extends BaseController
 
         $bulan = $this->request->getGet('bulan') ?? date('m');
         $tahun = $this->request->getGet('tahun') ?? date('Y');
+        $kelas = $this->request->getGet('kelas');
 
-        $rekap = $this->AbsensiModel->getRekapAbsensiBulanan($bulan, $tahun);
+        $rekap = $this->AbsensiModel->getRekapAbsensiBulanan($bulan, $tahun,$kelas);
 
         return view('admin/report/reportstatusabsensi', [
             'rekap' => $rekap,
@@ -151,12 +154,14 @@ class ReportAdminController extends BaseController
     {
         $bulan = $this->request->getGet('bulan');
         $tahun = $this->request->getGet('tahun');
+        $kelas = $this->request->getGet('kelas'); // 🔥 ambil kelas
 
-        $model = new AbsensiModel();
-        $rekap = $model->getRekapAbsensiBulananAjax($bulan, $tahun);
+        $rekap = $this->AbsensiModel
+            ->getRekapAbsensiBulanan($bulan, $tahun, $kelas);
 
         return $this->response->setJSON($rekap);
     }
+
 
 
 
