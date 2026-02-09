@@ -78,6 +78,13 @@
               <p>Hitung Kehadiran</p>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="<?= site_url('siswa/bookingkamar') ?>" 
+            class="nav-link <?= ($page ?? '') === 'bookingkamar' ? 'active' : '' ?>">
+              <i class="nav-icon fas fa-bed"></i>
+              <p>Booking Kamar</p>
+          </a>
+        </li>
 
       </ul>
     </nav>

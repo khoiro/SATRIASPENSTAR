@@ -215,6 +215,7 @@ class Home extends BaseController
 
 			// Cek apakah NISN & Tanggal Lahir cocok di tabel siswa
 			$siswa = $siswaModel->checkNisnAndDob($nisn, $tgllahir);
+			
 
 			if ($siswa) {
 				// Cek apakah NISN sudah terdaftar di tabel user

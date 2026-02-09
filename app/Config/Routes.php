@@ -80,4 +80,12 @@ $routes->group('siswa', function($routes) {
     $routes->get('kehadiran', 'Siswa::kehadiran');
     $routes->get('kehadiran/data-ajax', 'Siswa::getKehadiranDataAjax');
     $routes->post('izin-sakit', 'Siswa::absensiIzinSakit');
+    // Halaman menampilkan booking kamar
+    $routes->get('bookingkamar', 'BookingKamar::index');
+    // proses booking (ADA PARAMETER)
+    $routes->get(
+        'bookingkamar/book/(:num)',
+        'BookingKamar::book/$1'
+    );
+
 });

@@ -46,7 +46,7 @@ class UserModel extends Model
     public function register($data, $thenLogin = true)
     {
         $data = array_intersect_key($data, array_flip(
-            ['name', 'email', 'password','nisn','status']
+            ['name', 'email', 'password','nisn','status','jenajang']
         ));
         $data['role'] = 'siswa';
         $data['status'] = '1';
@@ -55,6 +55,7 @@ class UserModel extends Model
         if ($this->save($data)) {
             if ($thenLogin) {
                 Services::session()->set('login', $this->insertID);
+                Services::session()->set('kelas', $data['kelas'] ?? '');
                 Services::session()->set('name', $data['name'] ?? '');
                 Services::session()->set('email', $data['email'] ?? '');
                 Services::session()->set('nisn', $data['nisn'] ?? '');

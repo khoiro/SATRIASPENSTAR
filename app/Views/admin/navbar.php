@@ -20,7 +20,7 @@
   <!-- Right navbar -->
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
-      <a class="nav-link" href="/logout">
+      <a class="nav-link" href="/admin/logout">
         <i class="fas fa-sign-out-alt"></i> Sign Out
       </a>
     </li>
@@ -163,6 +163,34 @@
                  class="nav-link <?= ($page ?? '') === 'reportstatusabsensi' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Status Absensi</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- ODL -->
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'menu-open' : '' ?>">
+           <a href="#"
+             class="nav-link <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'active' : '' ?>">
+            <i class="nav-icon fas fa-tree"></i>
+            <p>
+              ODL
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/admin/report"
+                 class="nav-link <?= ($page ?? '') === 'report_absensi' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Reset Kamar</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/admin/reportstatusabsensi"
+                 class="nav-link <?= ($page ?? '') === 'reportstatusabsensi' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Report Book Kamar</p>
               </a>
             </li>
           </ul>
