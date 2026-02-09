@@ -19,6 +19,7 @@ $routes->group('admin', function($routes) {
     $routes->get('datatablesiswa', 'Admin::datatablesiswa');
     $routes->get('datatableuser', 'Admin::datatableuser');
     $routes->get('datatablearticle', 'Admin::datatablearticle');
+    $routes->get('datatablekamar', 'Admin::datatablekamar');
     $routes->get('getnisn', 'Admin::getnisn');
     $routes->get('findsiswa/(:num)', 'Admin::findsiswa/$1');
     $routes->get('cekemail', 'Admin::cekemail');
@@ -62,6 +63,11 @@ $routes->group('admin', function($routes) {
     $routes->match(['get', 'post'], 'siswa/(:any)/(:num)', 'Admin::siswa/$1/$2');
     $routes->match(['get', 'post'], 'siswa/(:any)', 'Admin::siswa/$1');
     $routes->match(['get', 'post'], 'siswa', 'Admin::siswa');
+
+    // Rute untuk kamar - semua aksi ditangani oleh satu method
+    $routes->match(['get', 'post'], 'kamar/(:any)/(:num)', 'Admin::kamar/$1/$2');
+    $routes->match(['get', 'post'], 'kamar/(:any)', 'Admin::kamar/$1');
+    $routes->match(['get', 'post'], 'kamar', 'Admin::kamar');
     
 });
 

@@ -5,9 +5,11 @@ namespace App\Controllers;
 use App\Entities\Article;
 use App\Entities\User as EntitiesUser;
 use App\Entities\Siswa as EntitiesSiswa;
+use App\Entities\Kamar as EntitiesKamar;
 use App\Models\ArticleModel;
 use App\Models\SiswaModel;
 use App\Models\UserModel;
+use App\Models\KamarModel;
 use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
@@ -485,6 +487,108 @@ class Admin extends BaseController
             'item' => $dataLokasi
         ]);
     }
+
+    public function kamar($page = 'list', $id = null)
+	{
+		if ($this->login->role !== 'admin') {
+			throw new PageNotFoundException();
+		}
+		$model = new KamarModel();
+		if ($this->request->getMethod() === 'POST') {
+			if ($page === 'delete') {
+				 if ($model->processSoftDelete($id)) {
+                    $this->session->setFlashdata('success', 'Kamar berhasil dihapus!'); // Flashdata untuk delete
+                    return $this->response->redirect('/admin/kamar/');
+                } else {
+                    $this->session->setFlashdata('error', 'Gagal menghapus kamar.'); // Opsional: pesan error
+                    return $this->response->redirect('/admin/kamar/');
+                }
+			} else if ($id = $model->processWeb($id)) {
+			 	$message = ($page === 'add' ? 'menambahkan' : 'memperbarui');
+                $this->session->setFlashdata('success', 'Data kamar berhasil ' . $message . '!'); // Flashdata untuk add/edit
+                return $this->response->redirect('/admin/kamar/');
+            } else {
+                $this->session->setFlashdata('error', 'Gagal menyimpan kamar. Silakan coba lagi.'); // Opsional: pesan error
+                return $this->response->redirect('/admin/kamar/edit/' . $id); // Kembali ke form jika gagal
+            }
+		}
+		switch ($page) {
+			case 'list':
+				return view('admin/kamar/list',[
+					'page' => 'kamar',
+				]);
+			case 'add':
+				return view('admin/kamar/edit', [
+                    'item' => new EntitiesKamar(),
+					'subtitle' => 'Tambah Kamar',
+				]);
+			case 'edit':
+				if (!($item = $model->find($id))) {
+					throw new PageNotFoundException();
+				}
+				return view('admin/kamar/edit', [
+					'item' => $item,
+					'subtitle' => 'Edit Kamar',
+				]);
+		}
+		throw new PageNotFoundException();
+	}
+
+    public function datatablekamar()
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('kamar');
+        $builder->select('
+            kamar.id,
+            kamar.nomor_kamar,
+            kamar.jenjang,
+            kamar.kapasitas,
+            kamar.status,
+            COUNT(booking_kamar.id) AS terisi
+        ');
+        $builder->join('booking_kamar', 'booking_kamar.kamar_id = kamar.id', 'left');
+        $builder->groupBy('kamar.id');
+
+        $kamar = $builder->get()->getResultArray();
+
+        $data = [];
+        $no   = 1;
+
+        foreach ($kamar as $k) {
+            $status = ($k['terisi'] >= $k['kapasitas'])
+                ? '<span class="badge badge-danger">Penuh</span>'
+                : '<span class="badge badge-success">Tersedia</span>';
+           $statusKamar = ($k['status'] == 1)
+                ? '<i class="fas fa-eye text-success"></i> <span class="text-success">Aktif</span>'
+                : '<i class="fas fa-eye-slash text-danger"></i> <span class="text-danger">Non Aktif</span>';
+
+
+            $data[] = [
+                $no++,
+                esc($k['nomor_kamar']),
+                esc('Kelas '.$k['jenjang']),
+                $k['kapasitas'],
+                $k['terisi'],
+                $status,
+                $statusKamar,
+                '
+                <a href="/admin/kamar/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+                <button class="btn btn-danger btn-sm btn-delete-kamar" data-id="'.$k['id'].'">
+                    Hapus
+                </button>
+                ',
+                
+            ];
+        }
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
 
 
 
