@@ -6,10 +6,12 @@ use App\Entities\Article;
 use App\Entities\User as EntitiesUser;
 use App\Entities\Siswa as EntitiesSiswa;
 use App\Entities\Kamar as EntitiesKamar;
+use App\Entities\BookingKamar as EntitiesBookingKamar;
 use App\Models\ArticleModel;
 use App\Models\SiswaModel;
 use App\Models\UserModel;
 use App\Models\KamarModel;
+use App\Models\BookingKamarModel;
 use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
@@ -588,6 +590,121 @@ class Admin extends BaseController
             'data' => $data
         ]);
     }
+
+    public function resetkamar()
+    {
+        if ($this->login->role !== 'admin') {
+            throw new PageNotFoundException();
+        }
+
+        return view('admin/resetkamar/list', [
+            'page' => 'resetkamar',
+        ]);
+    }
+
+    public function resetkamarDelete($id = null)
+    {
+        if ($this->login->role !== 'admin') {
+            throw new PageNotFoundException();
+        }
+
+        if (!$id) {
+            return redirect()->back();
+        }
+
+        $model = new BookingKamarModel();
+
+        if ($model->delete($id)) {
+            session()->setFlashdata('success', 'Booking kamar berhasil di-reset');
+        } else {
+            session()->setFlashdata('error', 'Gagal mereset booking kamar');
+        }
+
+        return redirect()->to('/admin/resetkamar');
+    }
+
+
+    public function datatableresetkamar()
+    {
+        $db = \Config\Database::connect();
+
+        /*
+        * Ambil data booking + siswa + kamar
+        */
+        $builder = $db->table('booking_kamar bk');
+        $builder->select('
+            bk.id AS booking_id,
+            s.id AS siswa_id,
+            s.nama AS nama_siswa,
+            s.kelas,
+            s.rombel,
+            k.id AS kamar_id,
+            k.nomor_kamar
+        ');
+        $builder->join('siswa s', 's.id = bk.siswa_id', 'left');
+        $builder->join('kamar k', 'k.id = bk.kamar_id', 'left');
+
+        $booking = $builder->get()->getResultArray();
+
+        $data = [];
+        $no   = 1;
+
+        foreach ($booking as $row) {
+
+            /*
+            * Ambil penghuni lain dalam kamar yang sama
+            * selain siswa yang sedang ditampilkan
+            */
+            $penghuniBuilder = $db->table('booking_kamar bk2');
+            $penghuniBuilder = $db->table('booking_kamar bk2');
+            $penghuniBuilder->select('s2.nama, s2.rombel');
+            $penghuniBuilder->join('siswa s2', 's2.id = bk2.siswa_id', 'left');
+            $penghuniBuilder->where('bk2.kamar_id', $row['kamar_id']);
+
+            $penghuni = $penghuniBuilder->get()->getResultArray();
+
+            if ($penghuni) {
+                $listPenghuni = '<ul class="mb-0 pl-3">';
+                foreach ($penghuni as $p) {
+                    $listPenghuni .= '<li>'
+                        . esc($p['nama'])
+                        . ' <span class="text-muted">(' . esc($p['rombel']) . ')</span>'
+                        . '</li>';
+                }
+                $listPenghuni .= '</ul>';
+            } else {
+                $listPenghuni = '<span class="text-muted"><em>Kosong</em></span>';
+            }
+
+
+            /*
+            * Aksi reset
+            */
+            $aksi = '
+                <button 
+                    class="btn btn-danger btn-sm btn-reset-booking"
+                    data-id="' . $row['booking_id'] . '"
+                    data-nama="' . esc($row['nama_siswa']) . '"
+                >
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            ';
+
+            $data[] = [
+                $no++,
+                esc($row['nama_siswa']),
+                esc($row['rombel']),
+                esc($row['nomor_kamar']),
+                $listPenghuni,
+                $aksi
+            ];
+        }
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
 
 
 

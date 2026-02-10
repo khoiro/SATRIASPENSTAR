@@ -176,19 +176,19 @@
         </li>
 
         <!-- ODL -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar']) ? 'menu-open' : '' ?>">
            <a href="#"
-             class="nav-link <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'active' : '' ?>">
+             class="nav-link <?= in_array(($page ?? ''), ['resetkamar']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-tree"></i>
             <p>
               ODL
               <i class="right fas fa-angle-left"></i>
             </p>
           </a>
-          <ul class="nav nav-treeview">
+          <ul class="nav nav-treeview <?= in_array(($page ?? ''), ['resetkamar']) ? 'active' : '' ?>">
             <li class="nav-item">
-              <a href="/admin/report"
-                 class="nav-link <?= ($page ?? '') === 'report_absensi' ? 'active' : '' ?>">
+              <a href="/admin/resetkamar"
+                 class="nav-link <?= ($page ?? '') === 'resetkamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Reset Kamar</p>
               </a>

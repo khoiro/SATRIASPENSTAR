@@ -26,17 +26,17 @@
 
                             <div class="mb-2">
                                 Anda sudah booking kamar:
-                                <strong><?= esc($sudahBooking['nomor_kamar'] ?? $sudahBooking['kamar_id']) ?></strong>
+                                <strong><?= esc($sudahBooking->nomor_kamar ?? $sudahBooking->kamar_id) ?></strong>
                             </div>
 
-                            <?php if (!empty($sudahBooking['penghuni'])): ?>
+                            <?php if (!empty($sudahBooking->penghuni)): ?>
                                 <div>
                                     <strong>Penghuni kamar:</strong>
                                     <ul class="mb-0 mt-1">
-                                        <?php foreach ($sudahBooking['penghuni'] as $p): ?>
+                                        <?php foreach ($sudahBooking->penghuni as $p): ?>
                                             <li>
-                                                <?= esc($p['nama']) ?>
-                                                <span class="text-warning">(<?= esc($p['rombel']) ?>)</span>
+                                                <?= esc($p->nama) ?>
+                                                <span class="text-warning">(<?= esc($p->rombel) ?>)</span>
                                             </li>
                                         <?php endforeach ?>
                                     </ul>
@@ -56,9 +56,9 @@
                         <div class="border rounded p-3 mb-3">
 
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <h5 class="mb-0"><?= esc($k['nomor_kamar']) ?></h5>
+                                <h5 class="mb-0"><?= esc($k->nomor_kamar) ?></h5>
 
-                                <?php if ($k['terisi'] >= $k['kapasitas']): ?>
+                                <?php if ($k->terisi >= $k->kapasitas): ?>
                                     <span class="badge bg-danger">Penuh</span>
                                 <?php else: ?>
                                     <span class="badge bg-success">Tersedia</span>
@@ -66,19 +66,19 @@
                             </div>
 
                             <div class="text-muted mb-2">
-                                Kapasitas: <?= $k['kapasitas'] ?> |
-                                Terisi: <?= $k['terisi'] ?>
+                                Kapasitas: <?= $k->kapasitas ?> |
+                                Terisi: <?= $k->terisi ?>
                             </div>
 
                             <!-- DAFTAR SISWA DALAM KAMAR -->
-                            <?php if (!empty($k['penghuni'])): ?>
+                            <?php if (!empty($k->penghuni)): ?>
                                 <div class="mb-2">
                                     <small class="fw-bold">Penghuni:</small>
                                     <ul class="mb-0 ps-3">
-                                        <?php foreach ($k['penghuni'] as $p): ?>
+                                        <?php foreach ($k->penghuni as $p): ?>
                                             <li>
-                                                <?= esc($p['nama']) ?>
-                                                <span class="text-muted">(<?= esc($p['rombel']) ?>)</span>
+                                                <?= esc($p->nama) ?>
+                                                <span class="text-muted">(<?= esc($p->rombel) ?>)</span>
                                             </li>
                                         <?php endforeach ?>
                                     </ul>
@@ -90,7 +90,7 @@
                             <?php endif ?>
 
                             <!-- TOMBOL BOOKING -->
-                            <?php if ($k['terisi'] >= $k['kapasitas']): ?>
+                            <?php if ($k->terisi >= $k->kapasitas): ?>
                                 <span class="badge bg-secondary">Tidak tersedia</span>
 
                             <?php elseif ($sudahBooking): ?>
@@ -99,8 +99,8 @@
                             <?php else: ?>
                                 <a href="javascript:void(0)"
                                 class="btn btn-primary btn-sm btn-booking"
-                                data-url="<?= site_url('siswa/bookingkamar/book/'.$k['id']) ?>"
-                                data-kamar="<?= esc($k['nomor_kamar']) ?>">
+                                data-url="<?= site_url('siswa/bookingkamar/book/'.$k->id) ?>"
+                                data-kamar="<?= esc($k->nomor_kamar) ?>">
                                     Booking Kamar
                                 </a>
                             <?php endif ?>

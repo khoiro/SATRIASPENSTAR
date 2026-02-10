@@ -41,10 +41,10 @@ class BookingKamar extends BaseController
             ->first();
 
         if ($sudahBooking) {
-            $sudahBooking['penghuni'] = $this->bookingModel
+            $sudahBooking->penghuni = $this->bookingModel
                 ->select('siswa.nama, siswa.rombel')
                 ->join('siswa', 'siswa.id = booking_kamar.siswa_id')
-                ->where('booking_kamar.kamar_id', $sudahBooking['kamar_id'])
+                ->where('booking_kamar.kamar_id', $sudahBooking->kamar_id)
                 ->findAll();
         }
 
@@ -66,11 +66,11 @@ class BookingKamar extends BaseController
             $penghuni = $this->bookingModel
                 ->select('siswa.nama, siswa.rombel')
                 ->join('siswa', 'siswa.id = booking_kamar.siswa_id')
-                ->where('booking_kamar.kamar_id', $k['id'])
+                ->where('booking_kamar.kamar_id', $k->id)
                 ->findAll();
 
-            $k['penghuni'] = $penghuni;
-            $k['terisi']   = count($penghuni);
+            $k->penghuni = $penghuni;
+            $k->terisi   = count($penghuni);
         }
         unset($k); // good practice
 

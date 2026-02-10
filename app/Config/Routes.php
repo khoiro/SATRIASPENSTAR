@@ -20,6 +20,7 @@ $routes->group('admin', function($routes) {
     $routes->get('datatableuser', 'Admin::datatableuser');
     $routes->get('datatablearticle', 'Admin::datatablearticle');
     $routes->get('datatablekamar', 'Admin::datatablekamar');
+    $routes->get('datatableresetkamar', 'Admin::datatableresetkamar');
     $routes->get('getnisn', 'Admin::getnisn');
     $routes->get('findsiswa/(:num)', 'Admin::findsiswa/$1');
     $routes->get('cekemail', 'Admin::cekemail');
@@ -30,6 +31,13 @@ $routes->group('admin', function($routes) {
     $routes->post('report/getSiswaByKelas', 'ReportAdminController::getSiswaByKelas');
     $routes->get('reportstatusabsensi', 'ReportAdminController::statusAbsensi');
     $routes->get('reportajaxstatusabsensi', 'ReportAdminController::ajaxRekap');
+    // =========================
+    // RESET KAMAR (FIX)
+    // =========================
+    $routes->get('resetkamar', 'Admin::resetkamar');
+    $routes->post('resetkamar/delete/(:num)', 'Admin::resetkamarDelete/$1');
+    $routes->get('datatableresetkamar', 'Admin::datatableresetkamar');
+
 
 
     // Rute untuk Pengaturan Lokasi Absensi (GET & POST)
@@ -68,6 +76,8 @@ $routes->group('admin', function($routes) {
     $routes->match(['get', 'post'], 'kamar/(:any)/(:num)', 'Admin::kamar/$1/$2');
     $routes->match(['get', 'post'], 'kamar/(:any)', 'Admin::kamar/$1');
     $routes->match(['get', 'post'], 'kamar', 'Admin::kamar');
+
+    
     
 });
 
