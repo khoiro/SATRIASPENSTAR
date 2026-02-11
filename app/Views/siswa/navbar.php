@@ -85,6 +85,13 @@
               <p>Booking Kamar</p>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="<?= site_url('siswa/bookingbus') ?>" 
+            class="nav-link <?= ($page ?? '') === 'bookingbus' ? 'active' : '' ?>">
+              <i class="nav-icon fas fa-bus"></i>
+              <p>Booking Bus</p>
+          </a>
+        </li>
 
       </ul>
     </nav>

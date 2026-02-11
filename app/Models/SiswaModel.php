@@ -113,4 +113,25 @@ class SiswaModel extends Model
                     ->first();
     }
 
+    public function getSiswaBelumBooking($jenjang = null, $kelas = null)
+    {
+        $builder = $this->db->table('siswa s');
+        $builder->select('s.nama AS nama_siswa, s.rombel');
+        $builder->where('s.status', 1);
+
+        if ($kelas) {
+            $builder->where('s.rombel', $kelas);
+        } elseif ($jenjang) {
+            $builder->where('s.kelas', $jenjang);
+        }
+
+        $builder->whereNotIn('s.id', function ($sub) {
+            $sub->select('bk.siswa_id')
+                ->from('booking_kamar bk');
+        });
+
+        return $builder->get()->getResultArray();
+    }
+
+
 }

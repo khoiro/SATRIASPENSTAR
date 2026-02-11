@@ -11,16 +11,21 @@ class KamarModel extends Model
     protected $allowedFields = ['kegiatan_id','jenjang','nomor_kamar','kapasitas','status'];
     protected $returnType = \App\Entities\Kamar::class;
 
-    public function getKamarWithStatus($jenjang)
+    public function getKamarWithStatus($jenjang = null)
     {
-        return $this->db->table('kamar k')
+        $builder = $this->db->table('kamar k')
             ->select('k.id, k.nomor_kamar, k.kapasitas, COUNT(b.id) AS terisi')
             ->join('booking_kamar b', 'b.kamar_id = k.id', 'left')
-            ->where('k.jenjang', $jenjang)
-            ->groupBy('k.id')
-            ->get()
-            ->getResultArray();
+            ->groupBy('k.id');
+
+        // Jika jenjang diisi → filter
+        if (!empty($jenjang)) {
+            $builder->where('k.jenjang', $jenjang);
+        }
+
+        return $builder->get()->getResultArray();
     }
+
 
     public function processSoftDelete($id)
     {

@@ -176,16 +176,16 @@
         </li>
 
         <!-- ODL -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar']) ? 'menu-open' : '' ?>">
            <a href="#"
-             class="nav-link <?= in_array(($page ?? ''), ['resetkamar']) ? 'active' : '' ?>">
+             class="nav-link <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-tree"></i>
             <p>
               ODL
               <i class="right fas fa-angle-left"></i>
             </p>
           </a>
-          <ul class="nav nav-treeview <?= in_array(($page ?? ''), ['resetkamar']) ? 'active' : '' ?>">
+          <ul class="nav nav-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar']) ? 'active' : '' ?>">
             <li class="nav-item">
               <a href="/admin/resetkamar"
                  class="nav-link <?= ($page ?? '') === 'resetkamar' ? 'active' : '' ?>">
@@ -194,8 +194,8 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/reportstatusabsensi"
-                 class="nav-link <?= ($page ?? '') === 'reportstatusabsensi' ? 'active' : '' ?>">
+              <a href="/admin/reportbookkamar"
+                 class="nav-link <?= ($page ?? '') === 'reportbookkamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Book Kamar</p>
               </a>

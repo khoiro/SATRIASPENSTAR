@@ -25,9 +25,24 @@ class BookingKamar extends BaseController
      */
     public function index()
     {
-        // ambil siswa login
-        $siswaId = Services::login()->id;
-        $siswa   = $this->siswaModel->find($siswaId);
+        $userId = Services::login()->id;
+
+        // ===============================
+        // AMBIL DATA SISWA DARI USER LOGIN
+        // ===============================
+        $siswa = $this->db->table('user u')
+            ->select('s.id AS siswa_id, s.kelas')
+            ->join('siswa s', 's.nisn = u.nisn')
+            ->where('u.id', $userId)
+            ->get()
+            ->getRow();
+
+        if (!$siswa) {
+            return redirect()->back()
+                ->with('error', 'Data siswa tidak ditemukan.');
+        }
+
+        $siswaId = $siswa->siswa_id;
         $jenjang = $siswa->kelas;
 
         // ===============================
@@ -48,7 +63,6 @@ class BookingKamar extends BaseController
                 ->findAll();
         }
 
-
         // ===============================
         // AMBIL DATA KAMAR SESUAI JENJANG
         // ===============================
@@ -62,7 +76,6 @@ class BookingKamar extends BaseController
         // ===============================
         foreach ($kamar as &$k) {
 
-            // ambil penghuni kamar
             $penghuni = $this->bookingModel
                 ->select('siswa.nama, siswa.rombel')
                 ->join('siswa', 'siswa.id = booking_kamar.siswa_id')
@@ -72,7 +85,7 @@ class BookingKamar extends BaseController
             $k->penghuni = $penghuni;
             $k->terisi   = count($penghuni);
         }
-        unset($k); // good practice
+        unset($k);
 
         return view('booking_kamar/index', [
             'kamar'        => $kamar,
@@ -81,33 +94,70 @@ class BookingKamar extends BaseController
     }
 
 
+
     /**
      * Proses booking kamar
      */
     public function book($kamarId)
     {
-        $siswaId = Services::login()->id;
+        $userId = Services::login()->id;
 
-        // Cek siswa sudah booking
-        if ($this->bookingModel->where('siswa_id', $siswaId)->countAllResults() > 0) {
-            return redirect()->back()->with('error', 'Anda sudah memilih kamar.');
+        // 1️⃣ Ambil NISN dari tabel user berdasarkan user_id login
+        $user = $this->db->table('user')
+            ->select('nisn')
+            ->where('id', $userId)
+            ->get()
+            ->getRowArray();
+
+        if (!$user || empty($user['nisn'])) {
+            return redirect()->back()
+                ->with('error', 'NISN user tidak ditemukan.');
         }
 
-        // Cek kapasitas kamar
+        // 2️⃣ Ambil siswa_id dari tabel siswa berdasarkan NISN
+        $siswa = $this->db->table('siswa')
+            ->select('id')
+            ->where('nisn', $user['nisn'])
+            ->get()
+            ->getRowArray();
+
+        if (!$siswa) {
+            return redirect()->back()
+                ->with('error', 'Data siswa tidak ditemukan.');
+        }
+
+        $siswaId = $siswa['id'];
+
+        // 3️⃣ Cek siswa sudah booking
+        if (
+            $this->bookingModel
+                ->where('siswa_id', $siswaId)
+                ->countAllResults() > 0
+        ) {
+            return redirect()->back()
+                ->with('error', 'Anda sudah memilih kamar.');
+        }
+
+        // 4️⃣ Cek kapasitas kamar (max 3)
         $jumlah = $this->bookingModel
             ->where('kamar_id', $kamarId)
             ->countAllResults();
 
         if ($jumlah >= 3) {
-            return redirect()->back()->with('error', 'Kamar sudah penuh.');
+            return redirect()->back()
+                ->with('error', 'Kamar sudah penuh.');
         }
 
-        // Simpan booking
+        // 5️⃣ Simpan booking
         $this->bookingModel->insert([
             'kamar_id' => $kamarId,
             'siswa_id' => $siswaId
         ]);
 
-        return redirect()->to('/siswa/bookingkamar')->with('success', 'Kamar berhasil dibooking.');
+        return redirect()->to('/siswa/bookingkamar')
+            ->with('success', 'Kamar berhasil dibooking.');
     }
+
+
+
 }

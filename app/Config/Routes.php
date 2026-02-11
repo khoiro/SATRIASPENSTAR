@@ -27,6 +27,9 @@ $routes->group('admin', function($routes) {
     $routes->post('importsiswa', 'Admin::importsiswa');
     $routes->post('holiday/datatable', 'HolidayController::datatable');
     $routes->get('report', 'ReportAdminController::index');
+    $routes->get('reportbookkamar', 'ReportAdminController::reportbookkamar');
+    $routes->get('report/printbookkamar', 'ReportAdminController::printbookkamar');
+    $routes->get('report/printbookkamar2', 'ReportAdminController::printbookkamar2');
     $routes->post('report/get_absensi', 'ReportAdminController::get_absensi');
     $routes->post('report/getSiswaByKelas', 'ReportAdminController::getSiswaByKelas');
     $routes->get('reportstatusabsensi', 'ReportAdminController::statusAbsensi');
@@ -103,5 +106,8 @@ $routes->group('siswa', function($routes) {
         'bookingkamar/book/(:num)',
         'BookingKamar::book/$1'
     );
+    // Halaman menampilkan booking bus
+    $routes->get('bookingbus', 'BookingBus::index');
+   
 
 });

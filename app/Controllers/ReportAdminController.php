@@ -162,6 +162,164 @@ class ReportAdminController extends BaseController
         return $this->response->setJSON($rekap);
     }
 
+    public function reportbookkamar()
+    {
+        $jenjangList = ['7','8','9'];
+
+        $kelasList = [
+            'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
+            'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
+            'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
+        ];
+
+        $jenjang = $this->request->getGet('jenjang');
+        $kelas   = $this->request->getGet('kelas');
+
+        $kamarModel   = new \App\Models\KamarModel();
+        $bookingModel = new \App\Models\BookingKamarModel();
+        $siswaModel   = new \App\Models\SiswaModel();
+
+        // === DATA KAMAR ===
+        $dataKamar = [];
+
+        $kamars = $kamarModel->getKamarWithStatus($jenjang);
+
+        foreach ($kamars as $k) {
+            $penghuni = $bookingModel->getPenghuniByKamar($k['id']);
+
+            $dataKamar[] = [
+                'nama_kamar' => 'Kamar ' . $k['nomor_kamar'],
+                'kapasitas'  => $k['kapasitas'],
+                'penghuni'   => $penghuni
+            ];
+        }
+      
+
+        // === SISWA BELUM BOOKING ===
+        $siswaBelumBooking = $siswaModel->getSiswaBelumBooking($jenjang, $kelas);
+
+        return view('admin/report/reportbookkamar', [
+            'page' => 'reportbookkamar',
+            'jenjangList' => $jenjangList,
+            'kelasList' => $kelasList,
+            'kelas' => $kelas,
+            'dataKamar' => $dataKamar,
+            'siswaBelumBooking' => $siswaBelumBooking
+        ]);
+    }
+
+    public function printbookkamar()
+    {
+        $jenjang = $this->request->getGet('jenjang');
+        $kelas   = $this->request->getGet('kelas');
+
+        $kamarModel   = new \App\Models\KamarModel();
+        $bookingModel = new \App\Models\BookingKamarModel();
+
+        $dataKamar = [];
+
+        $kamars = $kamarModel->getKamarWithStatus($jenjang);
+
+        foreach ($kamars as $k) {
+
+            // skip kamar kosong
+            if ($k['terisi'] == 0) {
+                continue;
+            }
+
+            // ===============================
+            // JIKA KELAS DIPILIH → CEK SAJA
+            // ===============================
+            if ($kelas) {
+                $adaKelas = $bookingModel
+                    ->getPenghuniByKamarPrint($k['id'], $kelas);
+
+                // kalau kamar ini tidak ada siswa kelas tsb → skip
+                if (!$adaKelas) {
+                    continue;
+                }
+            }
+
+            // ===============================
+            // AMBIL SEMUA PENGHUNI (TANPA FILTER KELAS)
+            // ===============================
+            $penghuni = $bookingModel->getPenghuniByKamarPrint(
+                $k['id'],
+                null
+            );
+
+            $dataKamar[] = [
+                'nama_kamar' => 'Kamar ' . $k['nomor_kamar'],
+                'kapasitas'  => $k['kapasitas'],
+                'penghuni'   => $penghuni
+            ];
+        }
+
+        return view('admin/report/printbookkamar', [
+            'jenjang'   => $jenjang,
+            'kelas'     => $kelas,
+            'dataKamar' => $dataKamar
+        ]);
+    }
+
+    public function printbookkamar2()
+    {
+        $jenjang = $this->request->getGet('jenjang');
+        $kelas   = $this->request->getGet('kelas');
+
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('booking_kamar bk')
+            ->select('
+                s.nama AS nama_siswa,
+                s.rombel,
+                k.nomor_kamar,
+                k.id AS kamar_id
+            ')
+            ->join('siswa s', 's.id = bk.siswa_id')
+            ->join('kamar k', 'k.id = bk.kamar_id')
+            ->where('k.status', 1);
+
+        if ($jenjang) {
+            $builder->where('k.jenjang', $jenjang);
+        }
+
+        if ($kelas) {
+            $builder->where('s.rombel', $kelas);
+        }
+
+        $rows = $builder
+            ->orderBy('k.nomor_kamar')
+            ->orderBy('s.nama')
+            ->get()
+            ->getResultArray();
+
+        // ambil penghuni per kamar (cache biar hemat query)
+        $penghuniKamar = [];
+
+        foreach ($rows as $r) {
+            if (!isset($penghuniKamar[$r['kamar_id']])) {
+                $penghuniKamar[$r['kamar_id']] = $db->table('booking_kamar bk')
+                    ->select('s.nama, s.rombel')
+                    ->join('siswa s', 's.id = bk.siswa_id')
+                    ->where('bk.kamar_id', $r['kamar_id'])
+                    ->get()
+                    ->getResultArray();
+            }
+        }
+
+        return view('admin/report/printbookkamar2', [
+            'rows' => $rows,
+            'penghuniKamar' => $penghuniKamar,
+            'jenjang' => $jenjang,
+            'kelas' => $kelas
+        ]);
+    }
+
+
+
+
+
 
 
 
