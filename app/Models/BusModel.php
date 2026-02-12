@@ -47,4 +47,34 @@ class BusModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function processWeb($data, $id = null)
+    {
+        if ($id === null) {
+            if ($this->insert($data)) {
+                return $this->getInsertID();
+            }
+            return false;
+        }
+
+        if ($this->find($id)) {
+            return $this->update($id, $data);
+        }
+
+        return false;
+    }
+
+    public function processSoftDelete($id)
+    {
+        if (!$this->find($id)) {
+            return false;
+        }
+
+        return $this->update($id, [
+            'status' => 0
+        ]);
+    }
+
+
+
 }

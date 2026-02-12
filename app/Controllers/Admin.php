@@ -11,6 +11,7 @@ use App\Models\ArticleModel;
 use App\Models\SiswaModel;
 use App\Models\UserModel;
 use App\Models\KamarModel;
+use App\Models\BusModel;
 use App\Models\BookingKamarModel;
 use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -697,6 +698,121 @@ class Admin extends BaseController
                 esc($row['nomor_kamar']),
                 $listPenghuni,
                 $aksi
+            ];
+        }
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
+    public function bus($page = 'list', $id = null)
+	{
+		if ($this->login->role !== 'admin') {
+			throw new PageNotFoundException();
+		}
+		$model = new BusModel();
+		if ($this->request->getMethod() === 'POST') {
+
+            $model = new BusModel();
+            $data  = $this->request->getPost();
+
+            // ================= DELETE =================
+            if ($page === 'delete') {
+
+                if ($model->processSoftDelete($id)) {
+                    session()->setFlashdata('success', 'Bus berhasil dihapus!');
+                } else {
+                    session()->setFlashdata('error', 'Gagal menghapus bus.');
+                }
+
+                return redirect()->to('/admin/bus');
+            }
+
+            // ================= ADD / EDIT =================
+            $result = $model->processWeb($data, $id);
+
+            if ($result) {
+
+                $message = ($page === 'add') 
+                    ? 'ditambahkan' 
+                    : 'diperbarui';
+
+                session()->setFlashdata('success', "Data bus berhasil {$message}!");
+                return redirect()->to('/admin/bus');
+
+            } else {
+
+                session()->setFlashdata('error', 'Gagal menyimpan bus. Silakan coba lagi.');
+                return redirect()->to('/admin/bus/' . ($page === 'add' ? 'add' : 'edit/' . $id));
+            }
+        }
+
+		switch ($page) {
+			case 'list':
+				return view('admin/bus/list',[
+					'page' => 'bus',
+				]);
+			case 'add':
+				return view('admin/bus/edit', [
+                    'item' => new EntitiesKamar(),
+					'subtitle' => 'Tambah Bus',
+				]);
+			case 'edit':
+				if (!($item = $model->asObject()->find($id))) {
+					throw new PageNotFoundException();
+				}
+				return view('admin/bus/edit', [
+					'item' => $item,
+					'subtitle' => 'Edit Bus',
+				]);
+		}
+		throw new PageNotFoundException();
+	}
+
+    public function datatablebus()
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('bus');
+        $builder->select('
+            bus.id,
+            bus.nama_bus,
+            bus.jenjang,
+            bus.kapasitas,
+            bus.status,
+            COUNT(booking_bus.id) AS terisi
+        ');
+        $builder->join('booking_bus', 'booking_bus.bus_id = bus.id', 'left');
+        $builder->groupBy('bus.id');
+
+        $kamar = $builder->get()->getResultArray();
+
+        $data = [];
+        $no   = 1;
+
+        foreach ($kamar as $k) {
+           $statusKamar = ($k['status'] == 1)
+                ? '<i class="fas fa-eye text-success"></i> <span class="text-success">Aktif</span>'
+                : '<i class="fas fa-eye-slash text-danger"></i> <span class="text-danger">Non Aktif</span>';
+
+
+            $data[] = [
+                $no++,
+                esc($k['nama_bus']),
+                esc($k['jenjang']),
+                $k['kapasitas'],
+                $k['terisi'],
+                $statusKamar,
+                '
+                <a href="/admin/bus/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+                <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
+                    Hapus
+                </button>
+                ',
+                
             ];
         }
 

@@ -20,6 +20,7 @@ $routes->group('admin', function($routes) {
     $routes->get('datatableuser', 'Admin::datatableuser');
     $routes->get('datatablearticle', 'Admin::datatablearticle');
     $routes->get('datatablekamar', 'Admin::datatablekamar');
+    $routes->get('datatablebus', 'Admin::datatablebus');
     $routes->get('datatableresetkamar', 'Admin::datatableresetkamar');
     $routes->get('getnisn', 'Admin::getnisn');
     $routes->get('findsiswa/(:num)', 'Admin::findsiswa/$1');
@@ -80,6 +81,10 @@ $routes->group('admin', function($routes) {
     $routes->match(['get', 'post'], 'kamar/(:any)', 'Admin::kamar/$1');
     $routes->match(['get', 'post'], 'kamar', 'Admin::kamar');
 
+    // Route untuk bus
+    $routes->match(['get', 'post'], 'bus', 'Admin::bus');
+    $routes->match(['get', 'post'], 'bus/(:any)', 'Admin::bus/$1');
+
     
     
 });
@@ -108,6 +113,7 @@ $routes->group('siswa', function($routes) {
     );
     // Halaman menampilkan booking bus
     $routes->get('bookingbus', 'BookingBus::index');
-   
+    $routes->post('booking/simpan', 'BookingBus::simpan');
+
 
 });

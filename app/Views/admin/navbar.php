@@ -85,9 +85,9 @@
         </li>
 
         <!-- MASTER DATA -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['manage','siswa','kamar']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['manage','siswa','kamar','bus']) ? 'menu-open' : '' ?>">
           <a href="#"
-             class="nav-link <?= in_array(($page ?? ''), ['manage','siswa','kamar']) ? 'active' : '' ?>">
+             class="nav-link <?= in_array(($page ?? ''), ['manage','siswa','kamar','bus']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-database"></i>
             <p>
               Master Data
@@ -114,6 +114,13 @@
                  class="nav-link <?= ($page ?? '') === 'kamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Kamar</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/admin/bus"
+                 class="nav-link <?= ($page ?? '') === 'bus' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Bus</p>
               </a>
             </li>
           </ul>
