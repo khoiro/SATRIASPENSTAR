@@ -12,6 +12,7 @@ use App\Models\SiswaModel;
 use App\Models\UserModel;
 use App\Models\KamarModel;
 use App\Models\BusModel;
+use App\Models\BusKelasModel;
 use App\Models\BookingKamarModel;
 use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -806,6 +807,142 @@ class Admin extends BaseController
                 $statusKamar,
                 '
                 <a href="/admin/bus/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+                <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
+                    Hapus
+                </button>
+                ',
+                
+            ];
+        }
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
+    public function buskelas($page = 'list', $id = null)
+	{
+		if ($this->login->role !== 'admin') {
+			throw new PageNotFoundException();
+		}
+		$model = new BusKelasModel();
+		if ($this->request->getMethod() === 'POST') {
+
+            $data  = $this->request->getPost();
+
+            // ================= DELETE =================
+            if ($page === 'delete') {
+
+                if ($model->processHardDelete($id)) {
+                    session()->setFlashdata('success', 'Bus kelas berhasil dihapus!');
+                } else {
+                    session()->setFlashdata('error', 'Gagal menghapus bus kelas.');
+                }
+
+                return redirect()->to('/admin/buskelas');
+            }
+
+            // ================= ADD / EDIT =================
+            $result = $model->processWeb($data, $id);
+
+            // 🔴 HANDLE DUPLICATE
+            if ($result === 'duplicate') {
+                session()->setFlashdata('error', 'Rombel sudah terdaftar pada bus ini!');
+                return redirect()->back()->withInput();
+            }
+
+            // ✅ SUCCESS
+            if ($result) {
+
+                $message = ($page === 'add') 
+                    ? 'ditambahkan' 
+                    : 'diperbarui';
+
+                session()->setFlashdata('success', "Data bus kelas berhasil {$message}!");
+                return redirect()->to('/admin/buskelas');
+            }
+
+            // ❌ GAGAL UMUM
+            session()->setFlashdata('error', 'Gagal menyimpan bus kelas. Silakan coba lagi.');
+            return redirect()->back()->withInput();
+        }
+
+
+        $busModel = new BusModel();
+        $busList  = $busModel->where('status', 1)->findAll(); 
+        // hanya bus aktif (kalau pakai status)
+
+
+		switch ($page) {
+			case 'list':
+				return view('admin/buskelas/list',[
+					'page' => 'buskelas',
+				]);
+			case 'add':
+                $rombelList = [
+                    'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
+                    'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
+                    'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
+                ];
+				return view('admin/buskelas/edit', [
+                    'item' => (object) [
+                                    'id' => null,
+                                    'bus_id' => null,
+                                    'rombel' => null
+                                ],
+                    'busList'   => $busList,
+                    'datarombel' => $rombelList ,
+					'subtitle' => 'Tambah Bus Kelas',
+				]);
+			case 'edit':
+				if (!($item = $model->asObject()->find($id))) {
+					throw new PageNotFoundException();
+				}
+                 // Data kelas
+                $rombelList = [
+                    'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
+                    'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
+                    'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
+                ];
+                
+				return view('admin/buskelas/edit', [
+					'item' => $item,
+                    'busList'   => $busList,
+					'datarombel' => $rombelList ,
+					'subtitle' => 'Edit Bus Kelas',
+				]);
+		}
+		throw new PageNotFoundException();
+	}
+
+    public function datatablebuskelas()
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('bus_kelas');
+        $builder->select('
+            bus_kelas.id,
+            bus_kelas.bus_id,
+            bus_kelas.rombel,
+            bus.nama_bus,
+        ');
+        $builder->join('bus', 'bus.id = bus_kelas.bus_id', 'left');
+
+        $kamar = $builder->get()->getResultArray();
+
+        $data = [];
+        $no   = 1;
+
+        foreach ($kamar as $k) {
+
+            $data[] = [
+                $no++,
+                esc($k['nama_bus']),
+                esc($k['rombel']),
+                '
+                <a href="/admin/buskelas/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
                     Edit
                 </a>
                 <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">

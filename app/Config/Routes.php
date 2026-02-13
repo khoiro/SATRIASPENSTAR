@@ -21,6 +21,7 @@ $routes->group('admin', function($routes) {
     $routes->get('datatablearticle', 'Admin::datatablearticle');
     $routes->get('datatablekamar', 'Admin::datatablekamar');
     $routes->get('datatablebus', 'Admin::datatablebus');
+    $routes->get('datatablebuskelas', 'Admin::datatablebuskelas');
     $routes->get('datatableresetkamar', 'Admin::datatableresetkamar');
     $routes->get('getnisn', 'Admin::getnisn');
     $routes->get('findsiswa/(:num)', 'Admin::findsiswa/$1');
@@ -84,6 +85,10 @@ $routes->group('admin', function($routes) {
     // Route untuk bus
     $routes->match(['get', 'post'], 'bus', 'Admin::bus');
     $routes->match(['get', 'post'], 'bus/(:any)', 'Admin::bus/$1');
+
+    // Route untuk buskelas
+    $routes->match(['get', 'post'], 'buskelas', 'Admin::buskelas');
+    $routes->match(['get', 'post'], 'buskelas/(:any)', 'Admin::buskelas/$1');
 
     
     
