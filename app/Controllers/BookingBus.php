@@ -83,6 +83,7 @@ class BookingBus extends BaseController
             // Ambil semua kursi bus
             $seats = $this->seatModel
                 ->where('bus_id', $b['id'])
+                ->where('status', '1')
                 ->orderBy('nomor_kursi', 'ASC')
                 ->findAll();
 

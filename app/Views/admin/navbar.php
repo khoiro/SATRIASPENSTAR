@@ -85,9 +85,9 @@
         </li>
 
         <!-- MASTER DATA -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['manage','siswa','kamar','bus','buskelas']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['manage','siswa','kamar','bus','buskelas','buskursi']) ? 'menu-open' : '' ?>">
           <a href="#"
-             class="nav-link <?= in_array(($page ?? ''), ['manage','siswa','kamar','bus','buskelas']) ? 'active' : '' ?>">
+             class="nav-link <?= in_array(($page ?? ''), ['manage','siswa','kamar','bus','buskelas','buskursi']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-database"></i>
             <p>
               Master Data
@@ -127,7 +127,14 @@
               <a href="/admin/buskelas"
                  class="nav-link <?= ($page ?? '') === 'buskelas' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
-                <p>Setting Bus Kelas</p>
+                <p>Bus Kelas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/admin/buskursi"
+                 class="nav-link <?= ($page ?? '') === 'buskursi' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Bus Kursi</p>
               </a>
             </li>
           </ul>

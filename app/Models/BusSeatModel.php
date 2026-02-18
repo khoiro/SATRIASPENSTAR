@@ -19,6 +19,7 @@ class BusSeatModel extends Model
         'baris',
         'kolom',
         'posisi',
+        'status',
         'created_at'
     ];
 
@@ -34,4 +35,40 @@ class BusSeatModel extends Model
                     ->orderBy('kolom', 'ASC')
                     ->findAll();
     }
+
+    public function processWeb($data, $id = null)
+    {
+        $payload = [
+            'bus_id'      => $data['bus_id'],
+            'nomor_kursi' => $data['nomor_kursi'],
+            'baris'       => $data['baris'],
+            'kolom'       => $data['kolom'],
+            'posisi'      => $data['posisi'],
+            'status'      => $data['status'],
+        ];
+
+        if ($id === null) {
+            return $this->insert($payload);
+        }
+
+        if ($this->find($id)) {
+            return $this->update($id, $payload);
+        }
+
+        return false;
+    }
+
+    public function processSoftDelete($id)
+    {
+        if ($this->find($id)) {
+            return $this->update($id, [
+                'status' => 0
+            ]);
+        }
+
+        return false;
+    }
+
+
+
 }

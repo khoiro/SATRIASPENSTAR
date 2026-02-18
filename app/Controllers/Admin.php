@@ -13,6 +13,7 @@ use App\Models\UserModel;
 use App\Models\KamarModel;
 use App\Models\BusModel;
 use App\Models\BusKelasModel;
+use App\Models\BusSeatModel;
 use App\Models\BookingKamarModel;
 use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -943,6 +944,155 @@ class Admin extends BaseController
                 esc($k['rombel']),
                 '
                 <a href="/admin/buskelas/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                    Edit
+                </a>
+                <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
+                    Hapus
+                </button>
+                ',
+                
+            ];
+        }
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
+    public function buskursi($page = 'list', $id = null)
+	{
+		if ($this->login->role !== 'admin') {
+			throw new PageNotFoundException();
+		}
+		$model = new BusSeatModel();
+		if ($this->request->getMethod() === 'POST') {
+
+            $data  = $this->request->getPost();
+
+            // ================= DELETE =================
+            if ($page === 'delete') {
+
+                if ($model->processSoftDelete($id)) {
+                    session()->setFlashdata('success', 'Bus kursi berhasil dihapus!');
+                } else {
+                    session()->setFlashdata('error', 'Gagal menghapus bus kursi.');
+                }
+
+                return redirect()->to('/admin/buskursi');
+            }
+
+
+            // ================= ADD / EDIT =================
+            $result = $model->processWeb($data, $id);
+
+            // 🔴 HANDLE DUPLICATE
+            if ($result === 'duplicate') {
+                session()->setFlashdata('error', 'nomor kursi,baris,kolom dan posisi sudah terdaftar pada bus ini!');
+                return redirect()->back()->withInput();
+            }
+
+            // ✅ SUCCESS
+            if ($result) {
+
+                $message = ($page === 'add') 
+                    ? 'ditambahkan' 
+                    : 'diperbarui';
+
+                session()->setFlashdata('success', "Data bus kursi berhasil {$message}!");
+                return redirect()->to('/admin/buskursi');
+            }
+
+            // ❌ GAGAL UMUM
+            session()->setFlashdata('error', 'Gagal menyimpan bus kursi. Silakan coba lagi.');
+            return redirect()->back()->withInput();
+        }
+
+
+        $busModel = new BusModel();
+        $busList  = $busModel->where('status', 1)->findAll(); 
+        // hanya bus aktif (kalau pakai status)
+
+
+		switch ($page) {
+			case 'list':
+				return view('admin/buskursi/list',[
+					'page' => 'buskursi',
+				]);
+			case 'add':
+                $posisiList = [
+                    'L1','L2','R1','R2','BACK',
+                ];
+				return view('admin/buskursi/edit', [
+                    'item' => (object) [
+                                    'id' => null,
+                                    'bus_id' => null,
+                                    'rombel' => null,
+                                    'nomor_kursi' => null,
+                                    'baris' => null,
+                                    'kolom' => null,
+                                    'posisi' => null,
+                                    'status' => null,
+                                ],
+                    'busList'   => $busList,
+                    'dataposisi' => $posisiList ,
+					'subtitle' => 'Tambah Bus Kursi',
+				]);
+			case 'edit':
+				if (!($item = $model->asObject()->find($id))) {
+					throw new PageNotFoundException();
+				}
+                 // Data kelas
+                $posisiList = [
+                    'L1','L2','R1','R2','BACK',
+                ];
+                
+				return view('admin/buskursi/edit', [
+					'item' => $item,
+                    'busList'   => $busList,
+					'dataposisi' => $posisiList ,
+					'subtitle' => 'Edit Bus Kelas',
+				]);
+		}
+		throw new PageNotFoundException();
+	}
+
+    public function datatablebuskursi()
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('bus_seat');
+        $builder->select('
+            bus_seat.id,
+            bus_seat.bus_id,
+            bus.nama_bus,
+            bus_seat.nomor_kursi,
+            bus_seat.baris,
+            bus_seat.kolom,
+            bus_seat.posisi,
+            bus_seat.status,
+        ');
+        $builder->join('bus', 'bus.id = bus_seat.bus_id', 'left');
+
+        $kamar = $builder->get()->getResultArray();
+
+        $data = [];
+        $no   = 1;
+
+        foreach ($kamar as $k) {
+            $statusSeat = ($k['status'] == 1)
+                ? '<i class="fas fa-eye text-success"></i> <span class="text-success">Aktif</span>'
+                : '<i class="fas fa-eye-slash text-danger"></i> <span class="text-danger">Non Aktif</span>';
+
+            $data[] = [
+                $no++,
+                esc($k['nama_bus']),
+                esc($k['nomor_kursi']),
+                esc($k['baris']),
+                esc($k['kolom']),
+                esc($k['posisi']),
+                $statusSeat,
+                '
+                <a href="/admin/buskursi/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
                     Edit
                 </a>
                 <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
