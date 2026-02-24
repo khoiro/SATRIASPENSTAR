@@ -84,10 +84,19 @@ class BookingBus extends BaseController
             $seats = $this->seatModel
                 ->where('bus_id', $b['id'])
                 ->where('status', '1')
-                ->orderBy('nomor_kursi', 'ASC')
+                // ->orderBy('nomor_kursi', 'ASC')
+                ->orderBy('baris', 'ASC')
+                ->orderBy('kolom', 'ASC')
                 ->findAll();
+            
+            $lockedSeats = ['3', '4', '21', '22', '53'];
+            $lockedCount = 0;
 
             foreach ($seats as &$seat) {
+
+                if (in_array($seat['nomor_kursi'], $lockedSeats)) {
+                    $lockedCount++;
+                }
 
                 $booked = $this->bookingModel
                     ->select('booking_bus.*, siswa.nama, siswa.kelas, siswa.rombel')
@@ -106,6 +115,7 @@ class BookingBus extends BaseController
                 }
             }
 
+            $b['terisi_final'] = $b['terisi'] + $lockedCount;
             $b['seats'] = $seats;
         }
         unset($b);

@@ -155,7 +155,7 @@
                     <h5 class="mb-3">
                         🚌 <?= esc($b['nama_bus']) ?>
                         <span class="badge bg-success float-end">
-                            <?= $b['terisi'] ?>/<?= $b['kapasitas'] ?>
+                            <?= $b['terisi_final'] ?>/<?= $b['kapasitas'] ?>
                         </span>
                     </h5>
 
