@@ -201,6 +201,7 @@ class ReportAdminController extends BaseController
         return view('admin/report/reportbookkamar', [
             'page' => 'reportbookkamar',
             'jenjangList' => $jenjangList,
+            'jenjang' => $jenjang,
             'kelasList' => $kelasList,
             'kelas' => $kelas,
             'dataKamar' => $dataKamar,

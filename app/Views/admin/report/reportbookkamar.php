@@ -76,7 +76,7 @@
                     <select class="form-control" id="jenjang" name="jenjang">
                         <option value="">-- Semua Jenjang --</option>
                         <?php foreach ($jenjangList as $j): ?>
-                            <option value="<?= $j ?>" <?= ($j == ($_GET['jenjang'] ?? '')) ? 'selected' : '' ?>>
+                            <option value="<?= $j ?>" <?= ($j == ($jenjang ?? '')) ? 'selected' : '' ?>>
                                 <?= $j ?>
                             </option>
                         <?php endforeach; ?>
@@ -267,9 +267,32 @@
         updatePrintLink();
         updatePrintLink2();
     });
+    
+    function loadKelas(jenjang, selectedKelas = ''){
+        let opt = '<option value="">-- Semua Kelas --</option>';
+
+        kelasList.forEach(k => {
+            if(k.match(/\d+/)[0] === jenjang){
+                const selected = (k === selectedKelas) ? 'selected' : '';
+                opt += `<option value="${k}" ${selected}>${k}</option>`;
+            }
+        });
+
+        $('#kelas').html(opt).prop('disabled', false);
+    }
 
     // set awal saat page load
-    $(document).ready(function(){
+   $(document).ready(function(){
+
+        const selectedJenjang = "<?= $jenjang ?? '' ?>";
+        const selectedKelas   = "<?= $kelas ?? '' ?>";
+
+        if(selectedJenjang !== ''){
+            loadKelas(selectedJenjang, selectedKelas);
+        } else {
+            $('#kelas').prop('disabled', true);
+        }
+
         updatePrintLink();
         updatePrintLink2();
     });
