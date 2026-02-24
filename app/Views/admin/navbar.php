@@ -197,16 +197,16 @@
         </li>
 
         <!-- ODL -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat']) ? 'menu-open' : '' ?>">
            <a href="#"
-             class="nav-link <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar']) ? 'active' : '' ?>">
+             class="nav-link <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-tree"></i>
             <p>
               ODL
               <i class="right fas fa-angle-left"></i>
             </p>
           </a>
-          <ul class="nav nav-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar']) ? 'active' : '' ?>">
+          <ul class="nav nav-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat']) ? 'active' : '' ?>">
             <li class="nav-item">
               <a href="/admin/resetkamar"
                  class="nav-link <?= ($page ?? '') === 'resetkamar' ? 'active' : '' ?>">
@@ -219,6 +219,13 @@
                  class="nav-link <?= ($page ?? '') === 'reportbookkamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Book Kamar</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/admin/resetseat"
+                 class="nav-link <?= ($page ?? '') === 'resetseat' ? 'active' : '' ?>">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Reset Seat Bus</p>
               </a>
             </li>
           </ul>

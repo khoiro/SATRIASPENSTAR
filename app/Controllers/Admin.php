@@ -15,6 +15,7 @@ use App\Models\BusModel;
 use App\Models\BusKelasModel;
 use App\Models\BusSeatModel;
 use App\Models\BookingKamarModel;
+use App\Models\BookingBusModel;
 use App\Models\SettingModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use Config\Services;
@@ -1106,6 +1107,109 @@ class Admin extends BaseController
         return $this->response->setJSON([
             'data' => $data
         ]);
+    }
+
+    public function resetseat()
+    {
+        if ($this->login->role !== 'admin') {
+            throw new PageNotFoundException();
+        }
+
+        return view('admin/resetseat/list', [
+            'page' => 'resetseat',
+        ]);
+    }
+
+    public function datatableresetseat()
+    {
+        $db = \Config\Database::connect();
+
+        /*
+        * Ambil data booking + siswa + kamar
+        */
+        $builder = $db->table('booking_bus bk');
+        $builder->select('
+            bk.id AS booking_id,
+            bk.siswa_id AS siswa_id,
+            bk.bus_id AS bus_id,
+            s.nama AS nama_siswa,
+            s.kelas,
+            s.rombel,
+            k.nama_bus,
+            t.nomor_kursi,
+            t.baris,
+            t.kolom,
+            t.posisi
+        ');
+        $builder->join('siswa s', 's.id = bk.siswa_id', 'left');
+        $builder->join('bus k', 'k.id = bk.bus_id', 'left');
+        $builder->join('bus_seat t', 't.id = bk.seat_id', 'left');
+
+        $booking = $builder->get()->getResultArray();
+
+        $data = [];
+        $no   = 1;
+
+        foreach ($booking as $row) {
+
+            // Format seat lebih user friendly
+            if (!empty($row['nomor_kursi'])) {
+                $seat = 'Kursi <strong>' . esc($row['nomor_kursi']) . '</strong>'
+                    . ' &bull; Baris ' . esc($row['baris'])
+                    . ', Kolom ' . esc($row['kolom'])
+                    . ' &bull; Posisi: ' . esc(ucfirst($row['posisi']));
+            } else {
+                $seat = '<span class="text-muted">Belum memilih kursi</span>';
+            }
+
+            /*
+            * Aksi reset
+            */
+            $aksi = '
+                <button 
+                    class="btn btn-danger btn-sm btn-reset-booking"
+                    data-id="' . $row['booking_id'] . '"
+                    data-nama="' . esc($row['nama_siswa']) . '"
+                >
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            ';
+
+            $data[] = [
+                $no++,
+                esc($row['nama_siswa']),
+                esc($row['rombel']),
+                esc($row['nama_bus']),
+                $seat,
+                $aksi
+            ];
+        }
+       
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
+    public function resetseatDelete($id = null)
+    {
+        if ($this->login->role !== 'admin') {
+            throw new PageNotFoundException();
+        }
+
+        if (!$id) {
+            return redirect()->back();
+        }
+
+        $model = new BookingBusModel();
+
+        if ($model->delete($id)) {
+            session()->setFlashdata('success', 'Booking seat bus berhasil di-reset');
+        } else {
+            session()->setFlashdata('error', 'Gagal mereset booking seat bus');
+        }
+
+        return redirect()->to('/admin/resetseat');
     }
 
 

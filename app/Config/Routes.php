@@ -44,6 +44,13 @@ $routes->group('admin', function($routes) {
     $routes->post('resetkamar/delete/(:num)', 'Admin::resetkamarDelete/$1');
     $routes->get('datatableresetkamar', 'Admin::datatableresetkamar');
 
+    // =========================
+    // RESET SEAT (FIX)
+    // =========================
+    $routes->get('resetseat', 'Admin::resetseat');
+    $routes->post('resetseat/delete/(:num)', 'Admin::resetseatDelete/$1');
+    $routes->get('datatableresetseat', 'Admin::datatableresetseat');
+
 
 
     // Rute untuk Pengaturan Lokasi Absensi (GET & POST)
