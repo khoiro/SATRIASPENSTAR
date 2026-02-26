@@ -1212,6 +1212,94 @@ class Admin extends BaseController
         return redirect()->to('/admin/resetseat');
     }
 
+    public function updatebayar()
+    {
+        return view('admin/siswa/listbayar');
+    }
+
+    public function konfirmasiBayar($id)
+    {
+        if (!$this->request->is('post')) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Method tidak diizinkan'
+            ]);
+        }
+
+        $model = new \App\Models\SiswaModel();
+        $siswa = $model->find($id);
+
+        if (!$siswa) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+
+        if ($siswa->status_bayar == 1) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Sudah lunas'
+            ]);
+        }
+
+        $model->update($id, [
+            'status_bayar' => 1,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Pembayaran berhasil dikonfirmasi'
+        ]);
+    }
+
+    public function datatableUpdateBayar()
+    {
+        $model = new \App\Models\SiswaModel();
+
+        $siswa = $model
+            ->select('id, nisn, nama, kelas, rombel, status_bayar')
+            ->where('deleted_at', null)
+            ->where('status', '1')
+            ->findAll();
+
+        $data = [];
+        $no = 1;
+
+        foreach ($siswa as $row) {
+
+            $status = $row->status_bayar == 1
+                ? '<span class="badge bg-success">Lunas</span>'
+                : '<span class="badge bg-danger">Belum Bayar</span>';
+
+            if ($row->status_bayar == 0) {
+               $aksi = '<button class="btn btn-success btn-sm btn-konfirmasi"
+                            data-id="'.$row->id.'"
+                            data-nama="'.$row->nama.'"
+                            data-kelas="'.$row->rombel.'">
+                            Konfirmasi
+                        </button>';
+            } else {
+                $aksi = '-';
+            }
+
+            $data[] = [
+                'no'            => $no++,
+                'nisn'          => $row->nisn,
+                'nama'          => $row->nama,
+                'kelas'         => $row->kelas . ' - ' . $row->rombel,
+                'status_bayar'  => $status,
+                'aksi'          => $aksi,
+                'id'            => $row->id
+            ];
+        }
+
+        return $this->response->setJSON([
+            'data' => $data
+        ]);
+    }
+
 
 
 

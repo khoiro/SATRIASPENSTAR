@@ -25,26 +25,22 @@
     justify-content: space-between;
 }
 
-
 .bus-row {
     display: flex;
-    justify-content: center;  /* center semua isi */
+    justify-content: center;
     align-items: center;
     margin-bottom: 10px;
-    gap: 20px; /* jarak kiri dan kanan */
+    gap: 20px;
 }
-
 
 .seat-side {
     display: flex;
     gap: 8px;
 }
 
-
 .aisle {
-    width: 30px; /* lorong */
+    width: 30px;
 }
-
 
 .back-row {
     justify-content: center;
@@ -85,6 +81,14 @@
     background: #bfdbfe;
     border: 1px solid #2563eb;
     color: #1e3a8a;
+}
+
+/* 🔒 LOCKED */
+.seat-locked {
+    background: #e5e7eb;
+    border: 1px solid #9ca3af;
+    color: #374151;
+    cursor: not-allowed;
 }
 
 .seat-pair {
@@ -128,173 +132,178 @@
 <?php endif; ?>
 
 <div class="card shadow">
-    <div class="card-header bg-primary text-white">
-        <i class="fas fa-bus"></i> Booking Kursi Bus
+<div class="card-header bg-primary text-white">
+    <i class="fas fa-bus"></i> Booking Kursi Bus
+</div>
+
+<div class="card-body">
+
+<?php if (!empty($sudahBooking)): ?>
+    <div class="alert alert-info">
+        Anda sudah memilih:
+        <strong>
+            <?= esc($sudahBooking['nama_bus']) ?> -
+            Kursi <?= esc($sudahBooking['nomor_kursi']) ?>
+        </strong>
     </div>
+<?php endif; ?>
 
-    <div class="card-body">
+<div class="row">
 
-        <?php if (!empty($sudahBooking)): ?>
-            <div class="alert alert-info">
-                Anda sudah memilih:
-                <strong>
-                    <?= esc($sudahBooking['nama_bus']) ?> -
-                    Kursi <?= esc($sudahBooking['nomor_kursi']) ?>
-                </strong>
+<?php if (!empty($busList)): ?>
+<?php foreach ($busList as $b): ?>
+
+<div class="col-md-6 mb-4">
+<div class="bus-card p-3">
+
+<h5 class="mb-3">
+    🚌 <?= esc($b['nama_bus']) ?>
+    <span class="badge bg-success float-end">
+        <?= $b['terisi_final'] ?>/<?= $b['kapasitas'] ?>
+    </span>
+</h5>
+
+<div class="driver-area">
+    👨‍✈️ SUPIR
+</div>
+
+<div class="bus-body">
+
+<?php
+$grouped = [];
+foreach ($b['seats'] as $seat) {
+    $grouped[$seat['baris']][] = $seat;
+}
+ksort($grouped);
+?>
+
+<?php foreach ($grouped as $baris => $seats): ?>
+
+    <?php if ($baris <= 11): ?>
+        <div class="bus-row-normal">
+            <div class="seat-pair">
+                <?php foreach ($seats as $s): if (in_array($s['posisi'], ['L1','L2'])): ?>
+                    <?php $isLocked = !empty($s['is_blocked']); ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $s,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => $isLocked
+                    ]) ?>
+                <?php endif; endforeach; ?>
             </div>
-        <?php endif; ?>
-
-        <div class="row">
-
-        <?php if (!empty($busList)): ?>
-        <?php foreach ($busList as $b): ?>
-
-            <div class="col-md-6 mb-4">
-                <div class="bus-card p-3">
-
-                    <h5 class="mb-3">
-                        🚌 <?= esc($b['nama_bus']) ?>
-                        <span class="badge bg-success float-end">
-                            <?= $b['terisi_final'] ?>/<?= $b['kapasitas'] ?>
-                        </span>
-                    </h5>
-
-                    <div class="driver-area">
-                        👨‍✈️ SUPIR
-                    </div>
-
-                    <div class="bus-body">  
-                        <?php
-                        // DAFTAR KURSI YANG DIBLOKIR (MERAH & TIDAK BISA DIKLIK)
-                        $lockedSeats = ['3', '4', '21', '22', '53'];
-
-                        $grouped = [];
-                        foreach ($b['seats'] as $seat) {
-                            $grouped[$seat['baris']][] = $seat;
-                        }
-                        ksort($grouped);
-                        ?>
-
-                        <?php foreach ($grouped as $baris => $seats): ?>
-
-                            <?php if ($baris <= 11): // Baris 1-11: Normal 2-2 ?>
-                                <div class="bus-row-normal">
-                                    <div class="seat-pair">
-                                        <?php foreach ($seats as $s): if (in_array($s['posisi'], ['L1','L2'])): ?>
-                                            <?php $isLocked = in_array($s['nomor_kursi'], $lockedSeats); ?>
-                                            <?= view('booking_bus/_seat', ['seat' => $s, 'sudahBooking' => $sudahBooking, 'isLocked' => $isLocked]) ?>
-                                        <?php endif; endforeach; ?>
-                                    </div>
-                                    <div class="seat-pair">
-                                        <?php foreach ($seats as $s): if (in_array($s['posisi'], ['R1','R2'])): ?>
-                                            <?php $isLocked = in_array($s['nomor_kursi'], $lockedSeats); ?>
-                                            <?= view('booking_bus/_seat', ['seat' => $s, 'sudahBooking' => $sudahBooking, 'isLocked' => $isLocked]) ?>
-                                        <?php endif; endforeach; ?>
-                                    </div>
-                                </div>
-
-                            <?php elseif ($baris == 12): ?>
-                                <div class="bus-row-normal" style="justify-content: flex-end;">
-                                    <div class="seat-pair">
-                                        <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [45,46])): ?>
-                                            <?php $isLocked = in_array($seat['nomor_kursi'], $lockedSeats); ?>
-                                            <?= view('booking_bus/_seat', ['seat' => $seat, 'sudahBooking' => $sudahBooking, 'isLocked' => $isLocked]) ?>
-                                        <?php endif; endforeach; ?>
-                                    </div>
-                                </div>
-
-                            <?php elseif ($baris == 13): ?>
-                                <div class="bus-row-normal">
-                                    <div class="seat-pair">
-                                        <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [47,48])): ?>
-                                            <?php $isLocked = in_array($seat['nomor_kursi'], $lockedSeats); ?>
-                                            <?= view('booking_bus/_seat', ['seat' => $seat, 'sudahBooking' => $sudahBooking, 'isLocked' => $isLocked]) ?>
-                                        <?php endif; endforeach; ?>
-                                    </div>
-                                    <div class="seat-pair">
-                                        <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [49,50])): ?>
-                                            <?php $isLocked = in_array($seat['nomor_kursi'], $lockedSeats); ?>
-                                            <?= view('booking_bus/_seat', ['seat' => $seat, 'sudahBooking' => $sudahBooking, 'isLocked' => $isLocked]) ?>
-                                        <?php endif; endforeach; ?>
-                                    </div>
-                                </div>
-
-                            <?php elseif ($baris == 14): ?>
-                                <div class="bus-row-back">
-                                    <?php foreach ($seats as $seat): ?>
-                                        <?php $isLocked = in_array($seat['nomor_kursi'], $lockedSeats); ?>
-                                        <?= view('booking_bus/_seat', ['seat' => $seat, 'sudahBooking' => $sudahBooking, 'isLocked' => $isLocked]) ?>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php endif; ?>
-
-                        <?php endforeach; ?>
-                    </div>
-
-
-
-                </div>
+            <div class="seat-pair">
+                <?php foreach ($seats as $s): if (in_array($s['posisi'], ['R1','R2'])): ?>
+                    <?php $isLocked = !empty($s['is_blocked']); ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $s,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => $isLocked
+                    ]) ?>
+                <?php endif; endforeach; ?>
             </div>
-
-        <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12">
-                <div class="alert alert-warning">
-                    Tidak ada bus tersedia untuk kelas Anda.
-                </div>
-            </div>
-        <?php endif; ?>
-
         </div>
 
-    </div>
-</div>
+    <?php elseif ($baris == 12): ?>
+        <div class="bus-row-normal" style="justify-content: flex-end;">
+            <div class="seat-pair">
+                <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [45,46])): ?>
+                    <?php $isLocked = !empty($seat['is_blocked']); ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $seat,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => $isLocked
+                    ]) ?>
+                <?php endif; endforeach; ?>
+            </div>
+        </div>
+
+    <?php elseif ($baris == 13): ?>
+        <div class="bus-row-normal">
+            <div class="seat-pair">
+                <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [47,48])): ?>
+                    <?php $isLocked = !empty($seat['is_blocked']); ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $seat,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => $isLocked
+                    ]) ?>
+                <?php endif; endforeach; ?>
+            </div>
+            <div class="seat-pair">
+                <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [49,50])): ?>
+                    <?php $isLocked = !empty($seat['is_blocked']); ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $seat,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => $isLocked
+                    ]) ?>
+                <?php endif; endforeach; ?>
+            </div>
+        </div>
+
+    <?php elseif ($baris == 14): ?>
+        <div class="bus-row-back">
+            <?php foreach ($seats as $seat): ?>
+                <?php $isLocked = !empty($seat['is_blocked']); ?>
+                <?= view('booking_bus/_seat', [
+                    'seat' => $seat,
+                    'sudahBooking' => $sudahBooking,
+                    'isLocked' => $isLocked
+                ]) ?>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+<?php endforeach; ?>
 
 </div>
 </div>
 </div>
+
+<?php endforeach; ?>
+<?php endif; ?>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
 <script>
-    function pilihKursi(nomorKursi,busId, seatId) {
-        Swal.fire({
-            title: 'Konfirmasi Booking',
-            text: "Apakah Anda yakin ingin memilih Kursi Nomor " + nomorKursi + "?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, Booking!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Kirim data menggunakan Fetch API (AJAX)
-                fetch('<?= base_url('siswa/booking/simpan') ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        '<?= csrf_header() ?>': '<?= csrf_hash() ?>' // CSRF Protection
-                    },
-                    body: JSON.stringify({
-                        bus_id: busId,
-                        seat_id: seatId,
-                    })
+function pilihKursi(nomorKursi,busId, seatId) {
+    Swal.fire({
+        title: 'Konfirmasi Booking',
+        text: "Apakah Anda yakin ingin memilih Kursi Nomor " + nomorKursi + "?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Booking!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('<?= base_url('siswa/booking/simpan') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+                },
+                body: JSON.stringify({
+                    bus_id: busId,
+                    seat_id: seatId,
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire('Berhasil!', data.message, 'success')
-                        .then(() => location.reload()); // Reload untuk update warna kursi
-                    } else {
-                        Swal.fire('Gagal!', data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire('Error!', 'Terjadi kesalahan sistem.', 'error');
-                });
-            }
-        })
-    }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Berhasil!', data.message, 'success')
+                    .then(() => location.reload());
+                } else {
+                    Swal.fire('Gagal!', data.message, 'error');
+                }
+            });
+        }
+    })
+}
 </script>
 
 </body>

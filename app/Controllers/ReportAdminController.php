@@ -317,6 +317,201 @@ class ReportAdminController extends BaseController
         ]);
     }
 
+    public function reportbookseat()
+    {
+        $jenjangList = ['7','8','9'];
+
+        $kelasList = [
+            'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
+            'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
+            'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
+        ];
+
+        $jenjang = $this->request->getGet('jenjang');
+        $kelas   = $this->request->getGet('kelas');
+
+        $busModel     = new \App\Models\BusModel();
+        $seatModel    = new \App\Models\BusSeatModel();
+        $bookingModel = new \App\Models\BookingBusModel();
+        $siswaModel   = new \App\Models\SiswaModel();
+
+        $busList = [];
+
+        if ($jenjang && $kelas) {
+
+            // =========================
+            // AMBIL BUS SESUAI KELAS
+            // =========================
+            $busData = $busModel
+                    ->select('bus.*')
+                    ->join('bus_kelas', 'bus_kelas.bus_id = bus.id')
+                    ->where('bus.jenjang', $jenjang)
+                    ->where('bus_kelas.rombel', $kelas)
+                    ->where('bus.status', 1)
+                    ->findAll();
+
+            foreach ($busData as $bus) {
+                
+                    // HARDCODE BLOKIR BERDASARKAN NOMOR KURSI
+                    // ======================
+                    $lockedSeats = ['3', '4', '21', '22', '53']; 
+                    // ini adalah NOMOR KURSI (field nomor_kursi)
+
+                    if ($bus['id'] == 1) {
+                         $lockedSeats = ['1','3', '4', '21', '22', '53']; 
+                    }
+
+                    $seats = $seatModel
+                        ->where('bus_id', $bus['id'])
+                        ->orderBy('baris','ASC')
+                        ->orderBy('kolom','ASC')
+                        ->findAll();
+
+                    $bookings = $bookingModel
+                        ->select('booking_bus.*, siswa.nama, siswa.kelas, siswa.rombel')
+                        ->join('siswa', 'siswa.id = booking_bus.siswa_id')
+                        ->where('booking_bus.bus_id', $bus['id'])
+                        ->findAll();
+
+                    $bookingMap = [];
+                    foreach ($bookings as $b) {
+                        $bookingMap[$b['seat_id']] = $b;
+                    }
+
+                    foreach ($seats as &$seat) {
+
+                        $seat['is_booked']  = false;
+                        $seat['is_blocked'] = false;
+                        $seat['booked_by']  = null;
+
+                        // 🔒 CEK BLOKIR BERDASARKAN NOMOR KURSI
+                        if (in_array($seat['nomor_kursi'], $lockedSeats)) {
+                            $seat['is_blocked'] = true;
+                        }
+
+                        // 🔴 CEK BOOKING
+                        if (isset($bookingMap[$seat['id']])) {
+                            $seat['is_booked'] = true;
+                            $seat['booked_by'] = $bookingMap[$seat['id']]['nama'];
+                        }
+                    }
+
+                    $bus['seats'] = $seats;
+                    $busList[] = $bus;
+            }
+        }
+
+        // =========================
+        // SISWA BELUM BOOKING
+        // =========================
+        $siswaBelumBooking = [];
+
+        if ($jenjang && $kelas) {
+            $siswaBelumBooking = $siswaModel
+                ->select('siswa.*')
+                ->join('booking_bus','booking_bus.siswa_id = siswa.id','left')
+                ->where('siswa.kelas', $jenjang)
+                ->where('siswa.rombel', $kelas)
+                ->where('booking_bus.id IS NULL')
+                ->findAll();
+        }
+
+        // =========================
+        // AMBIL SEMUA BUS UNTUK DROPDOWN CETAK
+        // =========================
+        $allBus = $busModel
+            ->where('status', 1)
+            ->findAll();
+
+        return view('admin/report/reportbookseat',[
+            'page' => 'reportbookseat',
+            'jenjangList' => $jenjangList,
+            'kelasList'   => $kelasList,
+            'jenjang'     => $jenjang,
+            'kelas'       => $kelas,
+            'busList'     => $busList,
+            'allBus'      => $allBus,
+            'siswaBelumBooking' => $siswaBelumBooking
+        ]);
+    }
+
+    public function printbus()
+    {
+         $busId = $this->request->getGet('bus_id');
+         
+        /* ===============================
+        DEFAULT LOCKED SEAT (SEMUA BUS)
+        =============================== */
+        $lockedSeats = [
+            '3'  => 'Pendamping 1',
+            '4'  => 'Pendamping 2',
+            '21' => 'Pendamping 3',
+            '22' => 'Cadangan',
+            '53' => 'Cadangan'
+        ];
+
+        /* ===============================
+        KHUSUS BUS ID = 1
+        =============================== */
+        if ($busId == 1) {
+            $lockedSeats = [
+                '1'  => 'Pendamping 1',
+                '3'  => 'Pendamping 2',
+                '4'  => 'Pendamping 3',
+                '21' => 'Pendamping 4',
+                '22' => 'Cadangan',
+                '53' => 'Cadangan'
+            ];
+        }
+
+        $busModel     = new \App\Models\BusModel();
+        $seatModel    = new \App\Models\BusSeatModel();
+        $bookingModel = new \App\Models\BookingBusModel();
+
+        $bus = $busModel->find($busId);
+
+        $seats = $seatModel
+            ->where('bus_id', $busId)
+            ->orderBy('baris','ASC')
+            ->orderBy('kolom','ASC')
+            ->findAll();
+
+        $bookings = $bookingModel
+            ->select('booking_bus.*, siswa.nama')
+            ->join('siswa','siswa.id = booking_bus.siswa_id')
+            ->where('booking_bus.bus_id',$busId)
+            ->findAll();
+
+        $bookingMap = [];
+        foreach ($bookings as $b) {
+            $bookingMap[$b['seat_id']] = $b['nama'];
+        }
+
+        foreach ($seats as &$seat) {
+
+            $seat['nama'] = null;
+            $seat['is_blocked'] = false;
+            $seat['blocked_reason'] = null;
+
+            // 🔒 CEK BLOCKED BERDASARKAN NOMOR KURSI
+            if (array_key_exists($seat['nomor_kursi'], $lockedSeats)) {
+                $seat['is_blocked'] = true;
+                $seat['blocked_reason'] = $lockedSeats[$seat['nomor_kursi']];
+            }
+
+            // 🔴 CEK BOOKING (booking tetap bisa tampil)
+            if (isset($bookingMap[$seat['id']])) {
+                $seat['nama'] = $bookingMap[$seat['id']];
+            }
+        }
+
+        return view('admin/report/printbus',[
+            'bus'   => $bus,
+            'seats' => $seats
+        ]);
+    }
+
+
 
 
 

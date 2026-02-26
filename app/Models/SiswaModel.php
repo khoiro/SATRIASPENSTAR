@@ -44,7 +44,7 @@ class SiswaModel extends Model
 
     protected $table         = 'siswa';
     protected $allowedFields = [
-        'nisn', 'nis', 'nama', 'tgl_lahir','alamat','telp_siswa','telp_ortu','kelas','rombel','status','user_id'
+        'nisn', 'nis', 'nama', 'tgl_lahir','alamat','telp_siswa','telp_ortu','kelas','rombel','status','user_id','status_bayar'
     ];
     protected $primaryKey = 'id';
     protected $returnType = 'App\Entities\Siswa';

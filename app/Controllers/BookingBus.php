@@ -89,15 +89,31 @@ class BookingBus extends BaseController
                 ->orderBy('kolom', 'ASC')
                 ->findAll();
             
-            $lockedSeats = ['3', '4', '21', '22', '53'];
+            // HARDCODE BLOKIR BERDASARKAN NOMOR KURSI
+            // ======================
+            $lockedSeats = ['3', '4', '21', '22', '53']; 
+            // ini adalah NOMOR KURSI (field nomor_kursi)
+
+            if ($b['id'] == 1) {
+                    $lockedSeats = ['1','3', '4', '21', '22', '53']; 
+            }
+
             $lockedCount = 0;
 
             foreach ($seats as &$seat) {
 
+                // default
+                $seat['is_blocked'] = false;
+                $seat['is_booked']  = false;
+                $seat['booked_by']  = null;
+
+                // 🔒 LOCKED
                 if (in_array($seat['nomor_kursi'], $lockedSeats)) {
+                    $seat['is_blocked'] = true;
                     $lockedCount++;
                 }
 
+                // 🔴 BOOKED
                 $booked = $this->bookingModel
                     ->select('booking_bus.*, siswa.nama, siswa.kelas, siswa.rombel')
                     ->join('siswa', 'siswa.id = booking_bus.siswa_id')
@@ -109,9 +125,6 @@ class BookingBus extends BaseController
                     $seat['booked_by'] = $booked['nama'];
                     $seat['booked_kelas'] = $booked['kelas'];
                     $seat['booked_rombel'] = $booked['rombel'];
-                } else {
-                    $seat['is_booked'] = false;
-                    $seat['booked_by'] = null;
                 }
             }
 
