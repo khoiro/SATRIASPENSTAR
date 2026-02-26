@@ -17,6 +17,7 @@ $routes->group('admin', function($routes) {
     $routes->get('logout', 'Admin::logout');
     $routes->get('profile', 'Admin::profile');
     $routes->get('datatablesiswa', 'Admin::datatablesiswa');
+    $routes->get('datatableupdatebayar', 'Admin::datatableupdatebayar');
     $routes->get('datatableuser', 'Admin::datatableuser');
     $routes->get('datatablearticle', 'Admin::datatablearticle');
     $routes->get('datatablekamar', 'Admin::datatablekamar');
@@ -37,6 +38,8 @@ $routes->group('admin', function($routes) {
     $routes->post('report/getSiswaByKelas', 'ReportAdminController::getSiswaByKelas');
     $routes->get('reportstatusabsensi', 'ReportAdminController::statusAbsensi');
     $routes->get('reportajaxstatusabsensi', 'ReportAdminController::ajaxRekap');
+    $routes->get('reportbookseat', 'ReportAdminController::reportbookseat');
+    $routes->get('report/printbus', 'ReportAdminController::printbus');
     // =========================
     // RESET KAMAR (FIX)
     // =========================
@@ -50,6 +53,10 @@ $routes->group('admin', function($routes) {
     $routes->get('resetseat', 'Admin::resetseat');
     $routes->post('resetseat/delete/(:num)', 'Admin::resetseatDelete/$1');
     $routes->get('datatableresetseat', 'Admin::datatableresetseat');
+
+    // $routes->get('updatebayar', 'Admin::updatebayar');
+    $routes->get('updatebayar', 'Admin::updatebayar');
+    $routes->post('updatebayar/konfirmasi/(:num)', 'Admin::konfirmasiBayar/$1');
 
 
 
@@ -107,7 +114,8 @@ $routes->group('admin', function($routes) {
 });
 
 $routes->group('siswa', function($routes) {
-    $routes->get('/', 'Siswa::index');
+    $routes->get('/', 'BookingKamar::index');
+    // $routes->get('/', 'Siswa::index');
     $routes->get('profile', 'Siswa::profile');
     $routes->get('logout', 'Siswa::logout');
     $routes->post('profile', 'Siswa::profile');
