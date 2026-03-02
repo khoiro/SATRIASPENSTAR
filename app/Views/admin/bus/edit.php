@@ -18,7 +18,7 @@
 
                             <div class="d-flex mb-3">
                                 <h1 class="h4 mb-0 mr-auto"><?= esc($subtitle) ?></h1>
-                                <a href="/admin/bus" class="btn btn-outline-secondary ml-2">
+                                <a href="<?= base_url('admin/bus') ?>" class="btn btn-outline-secondary ml-2">
                                     Kembali
                                 </a>
                             </div>
@@ -94,7 +94,9 @@
 </div>
 
 <?php if ($item->id): ?>
-<form method="POST" action="/admin/bus/delete/<?= $item->id ?>" id="deleteForm">
+<form method="POST"
+      action="<?= site_url('admin/bus/delete/'.$item->id) ?>"
+      id="deleteForm">
 </form>
 <?php endif ?>
 

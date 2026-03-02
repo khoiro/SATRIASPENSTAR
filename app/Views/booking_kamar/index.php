@@ -35,7 +35,7 @@
                                     <ul class="mb-0 mt-1">
                                         <?php foreach ($sudahBooking->penghuni as $p): ?>
                                             <li>
-                                                <?= esc($p->nama) ?>
+                                                <?= esc($p->nama) ?> - <?= esc($p->jenis) ?>
                                                 <span class="text-warning">(<?= esc($p->rombel) ?>)</span>
                                             </li>
                                         <?php endforeach ?>
@@ -77,7 +77,7 @@
                                     <ul class="mb-0 ps-3">
                                         <?php foreach ($k->penghuni as $p): ?>
                                             <li>
-                                                <?= esc($p->nama) ?>
+                                                <?= esc($p->nama) ?> - <?= esc($p->jenis) ?>
                                                 <span class="text-muted">(<?= esc($p->rombel) ?>)</span>
                                             </li>
                                         <?php endforeach ?>
@@ -117,7 +117,8 @@
 
 <script>
 $(document).ready(function () {
-    // ALERT SUCCESS (jika ada)
+
+    // ✅ ALERT SUCCESS
     <?php if (session()->getFlashdata('success')): ?>
         Swal.fire({
             icon: 'success',
@@ -129,14 +130,31 @@ $(document).ready(function () {
         });
     <?php endif; ?>
 
-    // KONFIRMASI BOOKING (SELALU AKTIF)
+    // ✅ ALERT ERROR (TERMASUK BELUM LUNAS)
+    <?php if (session()->getFlashdata('error')): ?>
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '<?= session()->getFlashdata('error') ?>',
+            confirmButtonText: 'OK'
+        });
+    <?php endif; ?>
+
+    // KONFIRMASI BOOKING
     $(document).on('click', '.btn-booking', function () {
+
         const url   = $(this).data('url');
         const kamar = $(this).data('kamar');
 
         Swal.fire({
             title: 'Konfirmasi Booking',
-            text: 'Yakin ingin booking kamar ' + kamar + '?',
+            html: `
+                <div style="text-align:left">
+                    <p><b>Kamar:</b> ${kamar}</p>
+                    <hr>
+                    <p>Yakin ingin booking kamar ini?</p>
+                </div>
+            `,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Ya, Booking',
@@ -147,6 +165,7 @@ $(document).ready(function () {
                 window.location.href = url;
             }
         });
+
     });
 
 });

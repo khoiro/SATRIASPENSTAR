@@ -74,7 +74,7 @@ $(function () {
                 text: '<i class="fas fa-plus"></i> Tambah Setting Bus Kelas',
                 className: 'btn btn-primary btn-sm',
                 action: function () {
-                    window.location.href = '/admin/buskelas/add';
+                    window.location.href = '<?= site_url('admin/buskelas/add') ?>';
                 }
             }
         ]
@@ -96,7 +96,10 @@ $(function () {
         }).then((res) => {
             if (res.isConfirmed) {
                 $('#globalDeleteForm')
-                    .attr('action', '/admin/buskelas/delete/' + id)
+                    .attr(
+                            'action',
+                            '<?= site_url('admin/buskelas/delete') ?>/' + id
+                        )
                     .submit();
             }
         });

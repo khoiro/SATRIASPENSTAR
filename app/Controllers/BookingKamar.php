@@ -57,7 +57,7 @@ class BookingKamar extends BaseController
 
         if ($sudahBooking) {
             $sudahBooking->penghuni = $this->bookingModel
-                ->select('siswa.nama, siswa.rombel')
+                ->select('siswa.nama, siswa.rombel,siswa.jenis')
                 ->join('siswa', 'siswa.id = booking_kamar.siswa_id')
                 ->where('booking_kamar.kamar_id', $sudahBooking->kamar_id)
                 ->findAll();
@@ -77,7 +77,7 @@ class BookingKamar extends BaseController
         foreach ($kamar as &$k) {
 
             $penghuni = $this->bookingModel
-                ->select('siswa.nama, siswa.rombel')
+                ->select('siswa.nama, siswa.rombel,siswa.jenis')
                 ->join('siswa', 'siswa.id = booking_kamar.siswa_id')
                 ->where('booking_kamar.kamar_id', $k->id)
                 ->findAll();
@@ -102,7 +102,7 @@ class BookingKamar extends BaseController
     {
         $userId = Services::login()->id;
 
-        // 1️⃣ Ambil NISN dari tabel user berdasarkan user_id login
+        // 1️⃣ Ambil NISN dari tabel user
         $user = $this->db->table('user')
             ->select('nisn')
             ->where('id', $userId)
@@ -114,9 +114,9 @@ class BookingKamar extends BaseController
                 ->with('error', 'NISN user tidak ditemukan.');
         }
 
-        // 2️⃣ Ambil siswa_id dari tabel siswa berdasarkan NISN
+        // 2️⃣ Ambil siswa berdasarkan NISN (TAMBAH FIELD JENIS)
         $siswa = $this->db->table('siswa')
-            ->select('id')
+            ->select('id, status_bayar, jenis')
             ->where('nisn', $user['nisn'])
             ->get()
             ->getRowArray();
@@ -126,29 +126,67 @@ class BookingKamar extends BaseController
                 ->with('error', 'Data siswa tidak ditemukan.');
         }
 
-        $siswaId = $siswa['id'];
+        // 🔥 3️⃣ Cek status bayar
+        if ($siswa['status_bayar'] != 1) {
+            return redirect()->back()
+                ->with('error', 'Anda belum lunas. Silakan lakukan pembayaran terlebih dahulu.');
+        }
 
-        // 3️⃣ Cek siswa sudah booking
-        if (
-            $this->bookingModel
+        $siswaId    = $siswa['id'];
+        $jenisSiswa = $siswa['jenis']; // L atau P
+
+        // 4️⃣ Cek sudah booking
+        if ($this->bookingModel
                 ->where('siswa_id', $siswaId)
-                ->countAllResults() > 0
-        ) {
+                ->countAllResults() > 0) {
+
             return redirect()->back()
                 ->with('error', 'Anda sudah memilih kamar.');
         }
 
-        // 4️⃣ Cek kapasitas kamar (max 3)
-        $jumlah = $this->bookingModel
+        // 🔥 5️⃣ Ambil data kamar (TERMASUK KAPASITAS)
+        $kamar = $this->db->table('kamar')
+            ->select('kapasitas')
+            ->where('id', $kamarId)
+            ->get()
+            ->getRowArray();
+
+        if (!$kamar) {
+            return redirect()->back()
+                ->with('error', 'Data kamar tidak ditemukan.');
+        }
+
+        // 🔥 6️⃣ Hitung jumlah penghuni kamar
+        $jumlahTerisi = $this->bookingModel
             ->where('kamar_id', $kamarId)
             ->countAllResults();
 
-        if ($jumlah >= 3) {
+        if ($jumlahTerisi >= $kamar['kapasitas']) {
             return redirect()->back()
-                ->with('error', 'Kamar sudah penuh.');
+                ->with('error', 'Kamar sudah penuh sesuai kapasitas.');
         }
 
-        // 5️⃣ Simpan booking
+        // =====================================================
+        // 🔥 7️⃣ CEK JENIS KELAMIN PENGHUNI KAMAR
+        // =====================================================
+        $penghuni = $this->bookingModel
+            ->select('siswa.jenis')
+            ->join('siswa', 'siswa.id = booking_kamar.siswa_id')
+            ->where('booking_kamar.kamar_id', $kamarId)
+            ->findAll();
+
+        if (!empty($penghuni)) {
+
+            // Ambil jenis penghuni pertama
+            $jenisKamar = $penghuni[0]->jenis;
+
+            if ($jenisKamar !== $jenisSiswa) {
+                return redirect()->back()
+                    ->with('error', 'Kamar ini sudah diisi oleh siswa dengan jenis kelamin berbeda.');
+            }
+        }
+
+        // 8️⃣ Simpan booking
         $this->bookingModel->insert([
             'kamar_id' => $kamarId,
             'siswa_id' => $siswaId

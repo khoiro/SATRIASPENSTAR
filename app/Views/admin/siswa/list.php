@@ -199,7 +199,10 @@
               if (result.isConfirmed) {
                   // Jika dikonfirmasi, set action URL form dan submit
                   const form = $('#globalDeleteForm');
-                  form.attr('action', '/admin/siswa/delete/' + siswaId); // Sesuaikan URL
+                  form.attr(
+                      'action',
+                      '<?= site_url('admin/siswa/delete') ?>/' + siswaId
+                  ); // Sesuaikan URL
                   // Jika Anda mengirim ID melalui body POST, uncomment baris ini:
                   $('#deleteSiswaId').val(siswaId);
                   form.submit();
@@ -213,7 +216,7 @@
          const siswaId = $(this).data('id'); // Ambil ID siswa dari atribut data-id
          
          $.ajax({
-            url: '/admin/findsiswa/' + siswaId, // Contoh: /api/info/denise-spangler-id
+            url: '<?= site_url('admin/findsiswa') ?>/' + siswaId, // Contoh: /api/info/denise-spangler-id
             method: 'GET',
             dataType: 'json',
             beforeSend: function() {

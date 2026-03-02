@@ -29,7 +29,7 @@
                 <form enctype="multipart/form-data" method="post">
                   <div class="d-flex mb-3">
                     <h1 class="h3 mb-0 mr-auto"><?= $subtitle?></h1>
-                    <a href="/admin/manage/" class="btn btn-outline-secondary ml-2">Kembali</a>
+                    <a href="<?= base_url('admin/manage') ?>" class="btn btn-outline-secondary ml-2">Kembali</a>
                   </div>
                   <label class="d-block mb-3">
                     <span>Nama Lengkap</span>
@@ -78,7 +78,7 @@
     </div>
   </div>
 
-  <form method="POST" action="/admin/manage/delete/<?= $item->id ?>">
+  <form method="POST" action="<?= base_url('admin/manage/delete') ?><?= $item->id ?>">
     <input type="submit" hidden id="delete-form" onclick="return confirm('Apakah Anda ingin menghapus pengguna ini secara permanen?')">
   </form>
 
@@ -112,7 +112,7 @@
       console.log(nisn);
       if (nisn) {
         $.ajax({
-          url: '/admin/getnisn',
+          url: '<?= base_url('admin/getnisn') ?>',
           method: 'GET',
           data: { nisn: nisn },
           dataType: 'json',
@@ -175,7 +175,7 @@
 
       if (email.length > 5) {
         $.ajax({
-          url: '/admin/cekemail',
+          url: '<?= base_url('admin/cekemail') ?>',
           method: 'GET',
           data: { email: email },
           dataType: 'json',

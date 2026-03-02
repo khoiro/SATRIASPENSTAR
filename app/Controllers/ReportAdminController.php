@@ -354,11 +354,11 @@ class ReportAdminController extends BaseController
                 
                     // HARDCODE BLOKIR BERDASARKAN NOMOR KURSI
                     // ======================
-                    $lockedSeats = ['3', '4', '21', '22', '53']; 
+                    $lockedSeats = ['3', '4', '21', '22']; 
                     // ini adalah NOMOR KURSI (field nomor_kursi)
 
                     if ($bus['id'] == 1) {
-                         $lockedSeats = ['1','3', '4', '21', '22', '53']; 
+                         $lockedSeats = ['1','2', '3', '4', '21', '22','48']; 
                     }
 
                     $seats = $seatModel
@@ -447,7 +447,6 @@ class ReportAdminController extends BaseController
             '4'  => 'Pendamping 2',
             '21' => 'Pendamping 3',
             '22' => 'Cadangan',
-            '53' => 'Cadangan'
         ];
 
         /* ===============================
@@ -455,12 +454,12 @@ class ReportAdminController extends BaseController
         =============================== */
         if ($busId == 1) {
             $lockedSeats = [
-                '1'  => 'Pendamping 1',
-                '3'  => 'Pendamping 2',
-                '4'  => 'Pendamping 3',
-                '21' => 'Pendamping 4',
-                '22' => 'Cadangan',
-                '53' => 'Cadangan'
+                '1'  => 'Kepala Sekolah',
+                '2'  => 'Komite 1',
+                '3'  => 'Komite 2',
+                '4' => 'Pendamping 1',
+                '21' => 'Pendamping 2',
+                '22' => 'Pendamping 3'
             ];
         }
 

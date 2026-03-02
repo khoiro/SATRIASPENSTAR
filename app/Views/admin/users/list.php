@@ -140,7 +140,7 @@
                 if (result.isConfirmed) {
                     // Jika dikonfirmasi, set action URL form dan submit
                     const form = $('#globalDeleteForm');
-                    form.attr('action', '/admin/manage/delete/' + siswaId); // Sesuaikan URL
+                    form.attr('action', '<?= site_url('admin/manage/delete') ?>/' + siswaId); // Sesuaikan URL
                     // Jika Anda mengirim ID melalui body POST, uncomment baris ini:
                     $('#deleteUserId').val(siswaId);
                     form.submit();

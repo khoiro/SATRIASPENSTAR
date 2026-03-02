@@ -13,7 +13,7 @@
             <form enctype="multipart/form-data" method="post">
               <div class="d-flex mb-3">
                 <h1 class="h3 mb-0 mr-auto"><?=$subtitle;?></h1>
-                <a href="/admin/siswa/" class="btn btn-outline-secondary ml-2">Back</a>
+                <a href="<?= base_url('admin/siswa') ?>" class="btn btn-outline-secondary ml-2">Back</a>
               </div>
               <label class="d-block mb-3">
                 <span>NISN</span>
@@ -74,7 +74,7 @@
     </div>
   </div>
 
-  <form method="POST" action="/admin/siswa/delete/<?= $item->id ?>">
+  <form method="POST" action="<?= site_url('admin/siswa/delete/' . $item->id) ?>">
     <input type="submit" hidden id="delete-form" onclick="return confirm('Do you want to delete this user permanently?')">
   </form>
 

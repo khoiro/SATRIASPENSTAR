@@ -10,17 +10,17 @@
       </a>
     </li>
     <li class="nav-item d-none d-sm-inline-block">
-      <a href="/admin" class="nav-link">Dashboard</a>
+      <a href="<?= base_url('admin') ?>" class="nav-link">Dashboard</a>
     </li>
     <li class="nav-item d-none d-sm-inline-block">
-      <a href="/admin/profile" class="nav-link">Edit Profile</a>
+      <a href="<?= base_url('admin/profile') ?>" class="nav-link">Edit Profile</a>
     </li>
   </ul>
 
   <!-- Right navbar -->
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
-      <a class="nav-link" href="/admin/logout">
+      <a class="nav-link" href="<?= base_url('admin/logout') ?>">
         <i class="fas fa-sign-out-alt"></i> Sign Out
       </a>
     </li>
@@ -62,7 +62,7 @@
              style="width:45px;height:45px;object-fit:cover;">
       </div>
       <div class="info">
-        <a href="/admin/profile" class="d-block">
+        <a href="<?= base_url('admin/profile') ?>" class="d-block">
           <?= esc(\Config\Services::login()->name ?? 'Administrator') ?>
         </a>
       </div>
@@ -77,7 +77,7 @@
 
         <!-- Dashboard -->
         <li class="nav-item">
-          <a href="/admin"
+          <a href="<?= base_url('admin') ?>"
              class="nav-link <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
             <i class="nav-icon fas fa-home"></i>
             <p>Dashboard</p>
@@ -96,42 +96,42 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/admin/manage"
+              <a href="<?= base_url('admin/manage') ?>"
                  class="nav-link <?= ($page ?? '') === 'manage' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Users</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/siswa"
+              <a href="<?= base_url('admin/siswa') ?>"
                  class="nav-link <?= ($page ?? '') === 'siswa' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Siswa</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/kamar"
+              <a href="<?= base_url('admin/kamar') ?>"
                  class="nav-link <?= ($page ?? '') === 'kamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Kamar</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/bus"
+              <a href="<?= base_url('admin/bus') ?>"
                  class="nav-link <?= ($page ?? '') === 'bus' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Bus</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/buskelas"
+              <a href="<?= base_url('admin/buskelas') ?>"
                  class="nav-link <?= ($page ?? '') === 'buskelas' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Bus Kelas</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/buskursi"
+              <a href="<?= base_url('admin/buskursi') ?>"
                  class="nav-link <?= ($page ?? '') === 'buskursi' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Bus Kursi</p>
@@ -141,7 +141,7 @@
         </li>
 
         <!-- PENGATURAN -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['location','holiday']) ? 'menu-open' : '' ?>">
+        <!-- <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['location','holiday']) ? 'menu-open' : '' ?>">
           <a href="#"
              class="nav-link <?= in_array(($page ?? ''), ['location','holiday']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-cogs"></i>
@@ -152,24 +152,24 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/admin/location"
+              <a href="<?= base_url('admin/location') ?>"
                  class="nav-link <?= ($page ?? '') === 'location' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Koordinat Lokasi</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/holiday"
+              <a href="<?= base_url('admin/holiday') ?>"
                  class="nav-link <?= ($page ?? '') === 'holiday' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Jadwal Libur</p>
               </a>
             </li>
           </ul>
-        </li>
+        </li> -->
 
         <!-- LAPORAN -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'menu-open' : '' ?>">
+        <!-- <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'menu-open' : '' ?>">
            <a href="#"
              class="nav-link <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-chart-bar"></i>
@@ -180,21 +180,21 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/admin/report"
+              <a href="<?= base_url('admin/report') ?>"
                  class="nav-link <?= ($page ?? '') === 'report_absensi' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Absensi</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/reportstatusabsensi"
+              <a href="<?= base_url('admin/reportstatusabsensi') ?>"
                  class="nav-link <?= ($page ?? '') === 'reportstatusabsensi' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Status Absensi</p>
               </a>
             </li>
           </ul>
-        </li>
+        </li> -->
 
         <!-- ODL -->
         <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat','reportbookseat','updatebayar']) ? 'menu-open' : '' ?>">
@@ -208,35 +208,35 @@
           </a>
           <ul class="nav nav-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat','reportbookseat','updatebayar']) ? 'active' : '' ?>">
             <li class="nav-item">
-              <a href="/admin/resetkamar"
+              <a href="<?= base_url('admin/resetkamar') ?>"
                  class="nav-link <?= ($page ?? '') === 'resetkamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Reset Kamar</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/reportbookkamar"
+              <a href="<?= base_url('admin/reportbookkamar') ?>"
                  class="nav-link <?= ($page ?? '') === 'reportbookkamar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Book Kamar</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/resetseat"
+              <a href="<?= base_url('admin/resetseat') ?>"
                  class="nav-link <?= ($page ?? '') === 'resetseat' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Reset Seat Bus</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/reportbookseat"
+              <a href="<?= base_url('admin/reportbookseat') ?>"
                  class="nav-link <?= ($page ?? '') === 'reportbookseat' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Report Book Seat</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/admin/updatebayar"
+              <a href="<?= base_url('admin/updatebayar') ?>"
                  class="nav-link <?= ($page ?? '') === 'updatebayar' ? 'active' : '' ?>">
                 <i class="far fa-circle nav-icon"></i>
                 <p>Update Bayar</p>

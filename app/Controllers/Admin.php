@@ -32,16 +32,20 @@ class Admin extends BaseController
         $this->checkAccess(['admin']);
     }
 
-	public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
-	{
-		parent::initController($request, $response, $logger);
+	public function initController(
+        \CodeIgniter\HTTP\RequestInterface $request,
+        \CodeIgniter\HTTP\ResponseInterface $response,
+        \Psr\Log\LoggerInterface $logger
+    ) {
+        parent::initController($request, $response, $logger);
 
-		if (!($this->login = Services::login())) {
-			$this->logout();
-			$this->response->redirect('/login/')->send();
-			exit;
-		}
-	}
+        if (!($this->login = Services::login())) {
+            $this->logout();
+
+            redirect()->to('login')->send();
+            exit;
+        }
+    }
 
 	public function index()
 	{
@@ -104,22 +108,22 @@ class Admin extends BaseController
 		$model = new UserModel();
 		if ($this->request->getMethod() === 'POST') {
 			if ($page === 'delete') {
-				// return $this->response->redirect('/admin/manage/');
+				// return redirect()->to('admin/manage');
 				 if ($model->processSoftDelete($id)) {
                     $this->session->setFlashdata('success', 'User berhasil dihapus!'); // Flashdata untuk delete
-                    return $this->response->redirect('/admin/manage/');
+                    return redirect()->to('admin/manage');
                 } else {
                     $this->session->setFlashdata('error', 'Gagal menghapus user.'); // Opsional: pesan error
-                    return $this->response->redirect('/admin/manage/');
+                    return redirect()->to('admin/manage');
                 }
 			} else if ($id = $model->processWeb($id)) {
-				// return $this->response->redirect('/admin/manage/');
+				// return redirect()->to('admin/manage');
 			 	$message = ($page === 'add' ? 'menambahkan' : 'memperbarui');
                 $this->session->setFlashdata('success', 'Data user berhasil ' . $message . '!'); // Flashdata untuk add/edit
-                return $this->response->redirect('/admin/manage/');
+                return redirect()->to('admin/manage');
             } else {
                 $this->session->setFlashdata('error', 'Gagal menyimpan user. Silakan coba lagi.'); // Opsional: pesan error
-                return $this->response->redirect('/admin/manage/edit/' . $id); // Kembali ke form jika gagal
+                return redirect()->to('admin/manage/edit/' . $id); // Kembali ke form jika gagal
             }
 		}
 		switch ($page) {
@@ -185,26 +189,39 @@ class Admin extends BaseController
             $model->withUser($this->login->id);
         }
 
-        if ($this->request->getMethod() === 'POST') {
-            $data   = $model->find($id);
-            $nisn   = $model2->where('nisn', $data->nisn)->first();
+        if ($this->request->getMethod() === 'POST') {   
 
-            if ($page === 'delete') {
-                if ($model->processSoftDelete($id) && $model2->softDeleteByNisn($nisn->nisn)) {
-                    $this->session->setFlashdata('success', 'Data siswa berhasil dihapus!'); // Flashdata untuk delete
-                    return $this->response->redirect('/admin/siswa/');
-                } else {
-                    $this->session->setFlashdata('error', 'Gagal menghapus data siswa.'); // Opsional: pesan error
-                    return $this->response->redirect('/admin/siswa/');
+                if ($page === 'delete' && $id !== null) {
+
+                    $data = $model->find($id);
+
+                    if (!$data) {
+                        $this->session->setFlashdata('error', 'Data tidak ditemukan');
+                        return redirect()->to('admin/siswa');
+                    }
+
+                    $user = $model2->where('nisn', $data->nisn)->first();
+
+                    if ($model->processSoftDelete($id) &&
+                        (!$user || $model2->softDeleteByNisn($user->nisn))) {
+
+                        $this->session->setFlashdata('success', 'Data siswa berhasil dihapus!');
+                        return redirect()->to('admin/siswa');
+                    }
+
+                    $this->session->setFlashdata('error', 'Gagal menghapus data siswa.');
+                    return redirect()->to('admin/siswa');
                 }
-            } else if ($id = $model->processWeb($id)) {
-                $message = ($page === 'add' ? 'menambahkan' : 'memperbarui');
-                $this->session->setFlashdata('success', 'Data siswa berhasil ' . $message . '!'); // Flashdata untuk add/edit
-                return $this->response->redirect('/admin/siswa/');
-            } else {
-                $this->session->setFlashdata('error', 'Gagal menyimpan data siswa. Silakan coba lagi.'); // Opsional: pesan error
-                return $this->response->redirect('/admin/siswa/edit/' . $id); // Kembali ke form jika gagal
-            }
+
+                // ADD / EDIT
+                if ($model->processWeb($id)) {
+                    $message = ($page === 'add' ? 'menambahkan' : 'memperbarui');
+                    $this->session->setFlashdata('success', 'Data siswa berhasil ' . $message . '!');
+                    return redirect()->to('admin/siswa');
+                }
+
+                $this->session->setFlashdata('error', 'Gagal menyimpan data siswa.');
+                return redirect()->back();
         }
 
         switch ($page) {
@@ -250,10 +267,11 @@ class Admin extends BaseController
                     <i class="fa fa-trash"></i> Hapus
                 </button>';
 
-            $editButton = '
-                <a href="/admin/siswa/edit/' . esc($item->id ?? 0) . '" class="btn btn-warning btn-sm">
-                    <i class="fa fa-edit"></i> Edit
-                </a>';
+         $editButton = '
+                        <a href="' . site_url('admin/siswa/edit/' . ($item->id ?? 0)) . '" 
+                        class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i> Edit
+                        </a>';
 
             $viewButton = '
                 <button type="button" class="btn btn-success btn-sm btn-view-siswa" data-id="' . esc($item->id ?? 0) . '" title="Lihat Detail Siswa">
@@ -290,7 +308,7 @@ class Admin extends BaseController
                     <i class="fa fa-trash"></i> Hapus
                 </button>';
             $editButton = '
-                <a href="/admin/manage/edit/' . esc($item->id ?? 0) . '" class="btn btn-warning btn-sm mr-1">
+                <a href="' . site_url('admin/manage/edit/' . ($item->id ?? 0)) . '" class="btn btn-warning btn-sm mr-1">
                     <i class="fa fa-edit"></i> Edit
                 </a>';
 
@@ -504,15 +522,15 @@ class Admin extends BaseController
 			if ($page === 'delete') {
 				 if ($model->processSoftDelete($id)) {
                     $this->session->setFlashdata('success', 'Kamar berhasil dihapus!'); // Flashdata untuk delete
-                    return $this->response->redirect('/admin/kamar/');
+                    return redirect()->to('admin/kamar');;
                 } else {
                     $this->session->setFlashdata('error', 'Gagal menghapus kamar.'); // Opsional: pesan error
-                    return $this->response->redirect('/admin/kamar/');
+                    return redirect()->to('admin/kamar');;
                 }
 			} else if ($id = $model->processWeb($id)) {
 			 	$message = ($page === 'add' ? 'menambahkan' : 'memperbarui');
                 $this->session->setFlashdata('success', 'Data kamar berhasil ' . $message . '!'); // Flashdata untuk add/edit
-                return $this->response->redirect('/admin/kamar/');
+                return redirect()->to('admin/kamar');;
             } else {
                 $this->session->setFlashdata('error', 'Gagal menyimpan kamar. Silakan coba lagi.'); // Opsional: pesan error
                 return $this->response->redirect('/admin/kamar/edit/' . $id); // Kembali ke form jika gagal
@@ -579,7 +597,7 @@ class Admin extends BaseController
                 $status,
                 $statusKamar,
                 '
-                <a href="/admin/kamar/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                <a href="'.site_url('admin/kamar/edit/'.$k['id']).'" class="btn btn-warning btn-sm">
                     Edit
                 </a>
                 <button class="btn btn-danger btn-sm btn-delete-kamar" data-id="'.$k['id'].'">
@@ -624,7 +642,7 @@ class Admin extends BaseController
             session()->setFlashdata('error', 'Gagal mereset booking kamar');
         }
 
-        return redirect()->to('/admin/resetkamar');
+        return redirect()->to('admin/resetkamar');
     }
 
 
@@ -729,7 +747,7 @@ class Admin extends BaseController
                     session()->setFlashdata('error', 'Gagal menghapus bus.');
                 }
 
-                return redirect()->to('/admin/bus');
+                return redirect()->to('admin/bus');
             }
 
             // ================= ADD / EDIT =================
@@ -742,12 +760,12 @@ class Admin extends BaseController
                     : 'diperbarui';
 
                 session()->setFlashdata('success', "Data bus berhasil {$message}!");
-                return redirect()->to('/admin/bus');
+                return redirect()->to('admin/bus');
 
             } else {
 
                 session()->setFlashdata('error', 'Gagal menyimpan bus. Silakan coba lagi.');
-                return redirect()->to('/admin/bus/' . ($page === 'add' ? 'add' : 'edit/' . $id));
+                return redirect()->to('admin/bus/' . ($page === 'add' ? 'add' : 'edit/' . $id));
             }
         }
 
@@ -808,7 +826,7 @@ class Admin extends BaseController
                 $k['terisi'],
                 $statusKamar,
                 '
-                <a href="/admin/bus/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                <a href="'.site_url('admin/bus/edit/'.$k['id']).'" class="btn btn-warning btn-sm">
                     Edit
                 </a>
                 <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
@@ -825,14 +843,16 @@ class Admin extends BaseController
     }
 
     public function buskelas($page = 'list', $id = null)
-	{
-		if ($this->login->role !== 'admin') {
-			throw new PageNotFoundException();
-		}
-		$model = new BusKelasModel();
-		if ($this->request->getMethod() === 'POST') {
+    {
+        if ($this->login->role !== 'admin') {
+            throw new PageNotFoundException();
+        }
 
-            $data  = $this->request->getPost();
+        $model = new BusKelasModel();
+
+        if ($this->request->getMethod() === 'POST') {
+
+            $data = $this->request->getPost();
 
             // ================= DELETE =================
             if ($page === 'delete') {
@@ -843,7 +863,7 @@ class Admin extends BaseController
                     session()->setFlashdata('error', 'Gagal menghapus bus kelas.');
                 }
 
-                return redirect()->to('/admin/buskelas');
+                return redirect()->to('admin/buskelas');
             }
 
             // ================= ADD / EDIT =================
@@ -863,7 +883,8 @@ class Admin extends BaseController
                     : 'diperbarui';
 
                 session()->setFlashdata('success', "Data bus kelas berhasil {$message}!");
-                return redirect()->to('/admin/buskelas');
+
+                return redirect()->to('admin/buskelas');
             }
 
             // ❌ GAGAL UMUM
@@ -871,53 +892,57 @@ class Admin extends BaseController
             return redirect()->back()->withInput();
         }
 
-
         $busModel = new BusModel();
-        $busList  = $busModel->where('status', 1)->findAll(); 
-        // hanya bus aktif (kalau pakai status)
+        $busList  = $busModel->where('status', 1)->findAll();
 
+        switch ($page) {
 
-		switch ($page) {
-			case 'list':
-				return view('admin/buskelas/list',[
-					'page' => 'buskelas',
-				]);
-			case 'add':
+            case 'list':
+                return view('admin/buskelas/list', [
+                    'page' => 'buskelas',
+                ]);
+
+            case 'add':
+
                 $rombelList = [
                     'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
                     'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
                     'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
                 ];
-				return view('admin/buskelas/edit', [
-                    'item' => (object) [
-                                    'id' => null,
-                                    'bus_id' => null,
-                                    'rombel' => null
-                                ],
-                    'busList'   => $busList,
-                    'datarombel' => $rombelList ,
-					'subtitle' => 'Tambah Bus Kelas',
-				]);
-			case 'edit':
-				if (!($item = $model->asObject()->find($id))) {
-					throw new PageNotFoundException();
-				}
-                 // Data kelas
+
+                return view('admin/buskelas/edit', [
+                    'item' => (object)[
+                        'id'      => null,
+                        'bus_id'  => null,
+                        'rombel'  => null
+                    ],
+                    'busList'    => $busList,
+                    'datarombel' => $rombelList,
+                    'subtitle'   => 'Tambah Bus Kelas',
+                ]);
+
+            case 'edit':
+
+                if (!($item = $model->asObject()->find($id))) {
+                    throw new PageNotFoundException();
+                }
+
                 $rombelList = [
                     'KELAS 7A','KELAS 7B','KELAS 7C','KELAS 7D','KELAS 7E','KELAS 7F','KELAS 7G','KELAS 7H',
                     'KELAS 8A','KELAS 8B','KELAS 8C','KELAS 8D','KELAS 8E','KELAS 8F','KELAS 8G','KELAS 8H',
                     'KELAS 9A','KELAS 9B','KELAS 9C','KELAS 9D','KELAS 9E','KELAS 9F','KELAS 9G','KELAS 9H',
                 ];
-                
-				return view('admin/buskelas/edit', [
-					'item' => $item,
-                    'busList'   => $busList,
-					'datarombel' => $rombelList ,
-					'subtitle' => 'Edit Bus Kelas',
-				]);
-		}
-		throw new PageNotFoundException();
-	}
+
+                return view('admin/buskelas/edit', [
+                    'item'       => $item,
+                    'busList'    => $busList,
+                    'datarombel' => $rombelList,
+                    'subtitle'   => 'Edit Bus Kelas',
+                ]);
+        }
+
+        throw new PageNotFoundException();
+    }
 
     public function datatablebuskelas()
     {
@@ -944,7 +969,7 @@ class Admin extends BaseController
                 esc($k['nama_bus']),
                 esc($k['rombel']),
                 '
-                <a href="/admin/buskelas/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                <a href="'.site_url('admin/buskelas/edit/'.$k['id']).'" class="btn btn-warning btn-sm">
                     Edit
                 </a>
                 <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
@@ -979,7 +1004,7 @@ class Admin extends BaseController
                     session()->setFlashdata('error', 'Gagal menghapus bus kursi.');
                 }
 
-                return redirect()->to('/admin/buskursi');
+                return redirect()->to('admin/buskursi');
             }
 
 
@@ -1000,7 +1025,7 @@ class Admin extends BaseController
                     : 'diperbarui';
 
                 session()->setFlashdata('success', "Data bus kursi berhasil {$message}!");
-                return redirect()->to('/admin/buskursi');
+                return redirect()->to('admin/buskursi');
             }
 
             // ❌ GAGAL UMUM
@@ -1093,7 +1118,7 @@ class Admin extends BaseController
                 esc($k['posisi']),
                 $statusSeat,
                 '
-                <a href="/admin/buskursi/edit/'.$k['id'].'" class="btn btn-warning btn-sm">
+                <a href="'.site_url('admin/buskursi/edit/'.$k['id']).'" class="btn btn-warning btn-sm">
                     Edit
                 </a>
                 <button class="btn btn-danger btn-sm btn-delete-bus" data-id="'.$k['id'].'">
@@ -1214,7 +1239,9 @@ class Admin extends BaseController
 
     public function updatebayar()
     {
-        return view('admin/siswa/listbayar');
+        return view('admin/siswa/listbayar',[
+            'page' => 'updatebayar',
+        ]);
     }
 
     public function konfirmasiBayar($id)

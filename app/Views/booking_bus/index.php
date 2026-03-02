@@ -20,7 +20,8 @@
 }
 
 .bus-row-normal {
-    width: 420px;
+    width: 100%;
+    max-width: 420px;
     display: flex;
     justify-content: space-between;
 }
@@ -110,6 +111,35 @@
     border-radius: 6px;
     margin-bottom: 15px;
 }
+
+
+@media (max-width: 576px) {
+
+    .bus-row-normal {
+        max-width: 100%;
+    }
+
+    .seat {
+        width: 36px;
+        height: 34px;
+        font-size: 11px;
+    }
+
+    .seat-pair {
+        gap: 4px;
+    }
+
+    .bus-body {
+        gap: 8px;
+    }
+
+    .driver-area {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+}
+
 </style>
 
 <body>
@@ -137,7 +167,10 @@
 </div>
 
 <div class="card-body">
-
+<div class="mb-3 text-center">
+    <span class="badge" style="background:#c77dff">Zona Perempuan (1-24)</span>
+    <span class="badge" style="background:#4dabf7">Zona Laki-laki (25-50)</span>
+</div>
 <?php if (!empty($sudahBooking)): ?>
     <div class="alert alert-info">
         Anda sudah memilih:
@@ -179,78 +212,56 @@ ksort($grouped);
 
 <?php foreach ($grouped as $baris => $seats): ?>
 
-    <?php if ($baris <= 11): ?>
-        <div class="bus-row-normal">
-            <div class="seat-pair">
-                <?php foreach ($seats as $s): if (in_array($s['posisi'], ['L1','L2'])): ?>
-                    <?php $isLocked = !empty($s['is_blocked']); ?>
-                    <?= view('booking_bus/_seat', [
-                        'seat' => $s,
-                        'sudahBooking' => $sudahBooking,
-                        'isLocked' => $isLocked
-                    ]) ?>
-                <?php endif; endforeach; ?>
-            </div>
-            <div class="seat-pair">
-                <?php foreach ($seats as $s): if (in_array($s['posisi'], ['R1','R2'])): ?>
-                    <?php $isLocked = !empty($s['is_blocked']); ?>
-                    <?= view('booking_bus/_seat', [
-                        'seat' => $s,
-                        'sudahBooking' => $sudahBooking,
-                        'isLocked' => $isLocked
-                    ]) ?>
-                <?php endif; endforeach; ?>
-            </div>
-        </div>
+    <?php
+    $left = [];
+    $right = [];
+    $back = [];
 
-    <?php elseif ($baris == 12): ?>
-        <div class="bus-row-normal" style="justify-content: flex-end;">
-            <div class="seat-pair">
-                <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [45,46])): ?>
-                    <?php $isLocked = !empty($seat['is_blocked']); ?>
-                    <?= view('booking_bus/_seat', [
-                        'seat' => $seat,
-                        'sudahBooking' => $sudahBooking,
-                        'isLocked' => $isLocked
-                    ]) ?>
-                <?php endif; endforeach; ?>
-            </div>
-        </div>
+    foreach ($seats as $s) {
+        if (in_array($s['posisi'], ['L1','L2'])) {
+            $left[] = $s;
+        } elseif (in_array($s['posisi'], ['R1','R2'])) {
+            $right[] = $s;
+        } else {
+            $back[] = $s;
+        }
+    }
+    ?>
 
-    <?php elseif ($baris == 13): ?>
-        <div class="bus-row-normal">
-            <div class="seat-pair">
-                <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [47,48])): ?>
-                    <?php $isLocked = !empty($seat['is_blocked']); ?>
-                    <?= view('booking_bus/_seat', [
-                        'seat' => $seat,
-                        'sudahBooking' => $sudahBooking,
-                        'isLocked' => $isLocked
-                    ]) ?>
-                <?php endif; endforeach; ?>
-            </div>
-            <div class="seat-pair">
-                <?php foreach ($seats as $seat): if (in_array($seat['nomor_kursi'], [49,50])): ?>
-                    <?php $isLocked = !empty($seat['is_blocked']); ?>
-                    <?= view('booking_bus/_seat', [
-                        'seat' => $seat,
-                        'sudahBooking' => $sudahBooking,
-                        'isLocked' => $isLocked
-                    ]) ?>
-                <?php endif; endforeach; ?>
-            </div>
-        </div>
-
-    <?php elseif ($baris == 14): ?>
+    <?php if (!empty($back)): ?>
+        <!-- BARIS BELAKANG -->
         <div class="bus-row-back">
-            <?php foreach ($seats as $seat): ?>
-                <?php $isLocked = !empty($seat['is_blocked']); ?>
+            <?php foreach ($back as $seat): ?>
                 <?= view('booking_bus/_seat', [
                     'seat' => $seat,
                     'sudahBooking' => $sudahBooking,
-                    'isLocked' => $isLocked
+                    'isLocked' => !empty($seat['is_blocked'])
                 ]) ?>
             <?php endforeach; ?>
+        </div>
+
+    <?php else: ?>
+        <!-- BARIS NORMAL -->
+        <div class="bus-row-normal">
+            <div class="seat-pair">
+                <?php foreach ($left as $seat): ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $seat,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => !empty($seat['is_blocked'])
+                    ]) ?>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="seat-pair">
+                <?php foreach ($right as $seat): ?>
+                    <?= view('booking_bus/_seat', [
+                        'seat' => $seat,
+                        'sudahBooking' => $sudahBooking,
+                        'isLocked' => !empty($seat['is_blocked'])
+                    ]) ?>
+                <?php endforeach; ?>
+            </div>
         </div>
     <?php endif; ?>
 
@@ -270,39 +281,108 @@ ksort($grouped);
 </div>
 
 <script>
-function pilihKursi(nomorKursi,busId, seatId) {
+function lihatBlokir(reason, nomor) {
     Swal.fire({
-        title: 'Konfirmasi Booking',
-        text: "Apakah Anda yakin ingin memilih Kursi Nomor " + nomorKursi + "?",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Booking!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch('<?= base_url('siswa/booking/simpan') ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
-                },
-                body: JSON.stringify({
-                    bus_id: busId,
-                    seat_id: seatId,
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire('Berhasil!', data.message, 'success')
-                    .then(() => location.reload());
-                } else {
-                    Swal.fire('Gagal!', data.message, 'error');
-                }
-            });
-        }
+        icon: 'warning',
+        title: 'Kursi Diblokir',
+        html: `
+            <div style="text-align:left">
+                <b>Kursi ${nomor}</b><br><br>
+                Keterangan:<br>
+                <b>${reason}</b>
+            </div>
+        `,
+        confirmButtonText: 'OK'
+    });
+}
+function lihatBooking(nama, kelas, rombel, nomor) {
+    Swal.fire({
+        icon: 'info',
+        title: 'Kursi Sudah Dibooking',
+        html: `
+            <div style="text-align:left">
+                <b>Kursi ${nomor}</b><br><br>
+                Dibooking oleh:<br>
+                <b>${nama}</b><br>
+                Kelas ${kelas} - ${rombel}
+            </div>
+        `,
+        confirmButtonText: 'OK'
+    });
+}
+function pilihKursi(nomorKursi, busId, seatId) {
+
+    let jenisSiswa = "<?= $siswa->jenis ?>"; // L atau P
+    let nomor = parseInt(nomorKursi);
+
+    let zonaPerempuan = nomor >= 1 && nomor <= 24;
+    let zonaLaki = nomor >= 25 && nomor <= 50;
+
+    let perluPassword = false;
+    let pesanZona = "";
+
+    // 🔥 CEK ZONA
+    if (zonaPerempuan && jenisSiswa === 'L') {
+        perluPassword = true;
+        pesanZona = "Kursi ini khusus siswa perempuan.";
+    }
+
+    if (zonaLaki && jenisSiswa === 'P') {
+        perluPassword = true;
+        pesanZona = "Kursi ini khusus siswa laki-laki.";
+    }
+
+    if (perluPassword) {
+
+        Swal.fire({
+            title: 'Zona Kursi Khusus',
+            html: `
+                <div style="text-align:left">
+                    ${pesanZona}<br><br>
+                    Masukkan password admin untuk melanjutkan:
+                    <input type="password" id="adminPass" class="swal2-input" placeholder="Password Admin">
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Lanjutkan',
+            cancelButtonText: 'Batal',
+            preConfirm: () => {
+                return document.getElementById('adminPass').value;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                kirimBooking(busId, seatId, result.value);
+            }
+        });
+
+    } else {
+        kirimBooking(busId, seatId, null);
+    }
+}
+function kirimBooking(busId, seatId, adminPass = null) {
+
+    fetch('<?= base_url('siswa/booking/simpan') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+        },
+        body: JSON.stringify({
+            bus_id: busId,
+            seat_id: seatId,
+            admin_pass: adminPass
+        })
     })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Berhasil!', data.message, 'success')
+                .then(() => location.reload());
+        } else {
+            Swal.fire('Gagal!', data.message, 'error');
+        }
+    });
 }
 </script>
 

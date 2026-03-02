@@ -93,7 +93,7 @@ $(function () {
         }).then((res) => {
             if (res.isConfirmed) {
                 $('#globalDeleteForm')
-                    .attr('action', '/admin/resetkamar/delete/' + id)
+                    .attr('action', '<?= site_url('admin/resetkamar/delete') ?>/' + id)
                     .submit();
             }
         });

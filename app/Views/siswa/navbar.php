@@ -47,14 +47,14 @@
     <!-- Sidebar Menu -->
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a href="/" target="_blank" class="nav-link">
             <i class="nav-icon fas fa-globe"></i>
             <p>
               Website
             </p>
           </a>
-        </li>
+        </li> -->
         <!-- <li class="nav-item">
           <a href="/siswa/" class="nav-link <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
             <i class="nav-icon fas fa-home"></i>

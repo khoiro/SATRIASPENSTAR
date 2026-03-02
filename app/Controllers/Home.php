@@ -44,7 +44,7 @@ class Home extends BaseController
 			$user = $userModel->atEmail($post['email']);
 			
 			if (!$user || !password_verify($post['password'], $user->password)) {
-				return $this->handleFailedLogin(lang('Login Salah !!! Cek Email dan Password Anda'));
+				return $this->handleFailedLogin(lang('Login Salah !!! Cek Username dan Password Anda'));
 			}
 
 			// Tambahkan pengecekan status

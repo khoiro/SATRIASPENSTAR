@@ -14,7 +14,7 @@
             <form enctype="multipart/form-data" method="post">
               <div class="d-flex mb-3">
                 <h1 class="h3 mb-0 mr-auto">Edit Profile</h1>
-                <a href="/admin/" class="btn btn-outline-secondary ml-2">Back</a>
+                <a href="<?= base_url('admin') ?>" class="btn btn-outline-secondary ml-2">Back</a>
               </div>
               <label class="d-block mb-3">
                 <span>Full Name</span>

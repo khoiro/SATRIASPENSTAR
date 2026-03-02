@@ -82,7 +82,7 @@ $(function () {
                 text: '<i class="fas fa-plus"></i> Tambah Kamar',
                 className: 'btn btn-primary btn-sm',
                 action: function () {
-                    window.location.href = '/admin/kamar/add';
+                    window.location.href = '<?= base_url('admin/kamar/add') ?>';
                 }
             }
         ]
@@ -104,7 +104,7 @@ $(function () {
         }).then((res) => {
             if (res.isConfirmed) {
                 $('#globalDeleteForm')
-                    .attr('action', '/admin/kamar/delete/' + id)
+                    .attr('action', '<?= site_url('admin/kamar/delete') ?>/' + id)
                     .submit();
             }
         });

@@ -82,7 +82,7 @@ $(function () {
                 text: '<i class="fas fa-plus"></i> Tambah Setting Bus Kursi',
                 className: 'btn btn-primary btn-sm',
                 action: function () {
-                    window.location.href = '/admin/buskursi/add';
+                    window.location.href = '<?= site_url('admin/buskursi/add') ?>';
                 }
             }
         ]
@@ -104,7 +104,7 @@ $(function () {
         }).then((res) => {
             if (res.isConfirmed) {
                 $('#globalDeleteForm')
-                    .attr('action', '/admin/buskursi/delete/' + id)
+                   .attr('action', '<?= site_url('admin/buskursi/delete') ?>/' + id)
                     .submit();
             }
         });

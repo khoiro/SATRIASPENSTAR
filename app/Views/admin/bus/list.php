@@ -80,7 +80,7 @@ $(function () {
                 text: '<i class="fas fa-plus"></i> Tambah Bus',
                 className: 'btn btn-primary btn-sm',
                 action: function () {
-                    window.location.href = '/admin/bus/add';
+                    window.location.href = '<?= site_url('admin/bus/add') ?>';
                 }
             }
         ]
@@ -102,7 +102,7 @@ $(function () {
         }).then((res) => {
             if (res.isConfirmed) {
                 $('#globalDeleteForm')
-                    .attr('action', '/admin/bus/delete/' + id)
+                    .attr('action', '<?= site_url('admin/bus/delete') ?>/' + id)
                     .submit();
             }
         });

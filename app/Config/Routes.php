@@ -5,7 +5,10 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
+// $routes->get('/', 'Home::index');
+$routes->get('/', function() {
+    return redirect()->to('/login');
+});
 $routes->add('/user/', 'User::index');
 $routes->add('/user/(:any)', 'User::$1');
 $routes->post('check-nisn-dob', 'Home::checkNisnDob'); 

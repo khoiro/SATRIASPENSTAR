@@ -31,7 +31,7 @@ class BookingBus extends BaseController
     | INDEX
     |--------------------------------------------------------------------------
     */
-   public function index()
+    public function index()
     {
         $userId = Services::login()->id;
 
@@ -39,7 +39,7 @@ class BookingBus extends BaseController
         // AMBIL DATA SISWA DARI USER LOGIN
         // ===============================
         $siswa = $this->db->table('user u')
-            ->select('s.id AS siswa_id, s.kelas,s.rombel')
+            ->select('s.id AS siswa_id, s.kelas,s.rombel, s.jenis')
             ->join('siswa s', 's.nisn = u.nisn')
             ->where('u.id', $userId)
             ->get()
@@ -91,11 +91,25 @@ class BookingBus extends BaseController
             
             // HARDCODE BLOKIR BERDASARKAN NOMOR KURSI
             // ======================
-            $lockedSeats = ['3', '4', '21', '22', '53']; 
+            // $lockedSeats = ['3', '4', '21', '22'];
+            $lockedSeats = [
+                                '3'  => 'Untuk Guru Pendamping1',
+                                '4'  => 'Untuk Guru Pendamping2',
+                                '21' => 'Untuk Guru Pendamping3',
+                                '22' => 'Kursi Cadangan',
+                            ]; 
             // ini adalah NOMOR KURSI (field nomor_kursi)
 
             if ($b['id'] == 1) {
-                    $lockedSeats = ['1','3', '4', '21', '22', '53']; 
+                   $lockedSeats = [
+                                    '1'  => 'Untuk Kepala Sekolah',
+                                    '2'  => 'Untuk Komite',
+                                    '3'  => 'Untuk Komite',
+                                    '4'  => 'Guru Pendamping1',
+                                    '21' => 'Guru Pendamping2',
+                                    '22' => 'Guru Pendamping3',
+                                    '48' => 'Kursi Cadangan',
+                                ];
             }
 
             $lockedCount = 0;
@@ -108,8 +122,13 @@ class BookingBus extends BaseController
                 $seat['booked_by']  = null;
 
                 // 🔒 LOCKED
-                if (in_array($seat['nomor_kursi'], $lockedSeats)) {
+                // if (in_array($seat['nomor_kursi'], $lockedSeats)) {
+                //     $seat['is_blocked'] = true;
+                //     $lockedCount++;
+                // }
+                if (array_key_exists($seat['nomor_kursi'], $lockedSeats)) {
                     $seat['is_blocked'] = true;
+                    $seat['blocked_reason'] = $lockedSeats[$seat['nomor_kursi']];
                     $lockedCount++;
                 }
 
@@ -168,8 +187,13 @@ class BookingBus extends BaseController
     | BOOK KURSI
     |--------------------------------------------------------------------------
     */
-    public function book($seatId)
+    public function book()
     {
+        $request = $this->request->getJSON(true);
+
+        $seatId    = $request['seat_id'] ?? null;
+        $adminPass = $request['admin_pass'] ?? null;
+
         $userId = \Config\Services::login()->id;
 
         $siswa = $this->siswaModel
@@ -177,10 +201,12 @@ class BookingBus extends BaseController
             ->first();
 
         if (!$siswa) {
-            return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Data siswa tidak ditemukan.'
+            ]);
         }
 
-        // Ambil data kursi + bus
         $seat = $this->seatModel
             ->select('bus_seat.*, bus.id as bus_id')
             ->join('bus', 'bus.id = bus_seat.bus_id')
@@ -188,29 +214,47 @@ class BookingBus extends BaseController
             ->first();
 
         if (!$seat) {
-            return redirect()->back()->with('error', 'Kursi tidak ditemukan.');
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Kursi tidak ditemukan.'
+            ]);
         }
 
         // ===============================
-        // CEK APAKAH BUS SESUAI ROMBEL
+        // 🔥 CEK ZONA PEREMPUAN (1–24)
         // ===============================
-        $allowed = $this->db->table('bus_kelas')
-            ->where('bus_id', $seat['bus_id'])
-            ->where('rombel', $siswa['rombel'])
-            ->countAllResults();
+        $nomorKursi = (int)$seat['nomor_kursi'];
 
-        if (!$allowed) {
-            return redirect()->back()->with('error', 'Anda tidak diizinkan memilih bus ini.');
+        if ($nomorKursi >= 1 && $nomorKursi <= 24) {
+
+            if ($siswa['jenis'] == 'L') {
+
+                // 🔐 Validasi password admin
+                $adminPasswordSystem = 'ADMIN123'; // ganti dengan config/env
+
+                if ($adminPass !== $adminPasswordSystem) {
+                    return $this->response->setJSON([
+                        'status' => 'error',
+                        'message' => 'Password admin salah. Kursi ini khusus perempuan.'
+                    ]);
+                }
+            }
         }
 
         // Cek sudah booking
         if ($this->bookingModel->where('siswa_id', $siswa['id'])->first()) {
-            return redirect()->back()->with('error', 'Anda sudah memilih kursi.');
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Anda sudah memilih kursi.'
+            ]);
         }
 
-        // Cek kursi sudah terisi
+        // Cek kursi terisi
         if ($this->bookingModel->where('seat_id', $seatId)->first()) {
-            return redirect()->back()->with('error', 'Kursi sudah dipilih.');
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Kursi sudah dipilih.'
+            ]);
         }
 
         $this->bookingModel->insert([
@@ -218,8 +262,10 @@ class BookingBus extends BaseController
             'siswa_id' => $siswa['id'],
         ]);
 
-        return redirect()->to('/siswa/bookingbus')
-            ->with('success', 'Kursi berhasil dibooking.');
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Kursi berhasil dibooking.'
+        ]);
     }
 
     public function simpan()
@@ -234,19 +280,14 @@ class BookingBus extends BaseController
         $userId = Services::login()->id;
 
         // ===============================
-        // AMBIL DATA SISWA DARI USER LOGIN
+        // AMBIL DATA SISWA + STATUS BAYAR + JENIS
         // ===============================
         $siswa = $this->db->table('user u')
-            ->select('s.id AS siswa_id, s.kelas,s.rombel')
+            ->select('s.id AS siswa_id, s.kelas, s.rombel, s.status_bayar, s.jenis')
             ->join('siswa s', 's.nisn = u.nisn')
             ->where('u.id', $userId)
             ->get()
             ->getRowArray();
-
-        if (!$siswa) {
-            return redirect()->back()
-                ->with('error', 'Data siswa tidak ditemukan.');
-        }
 
         if (!$siswa) {
             return $this->response->setJSON([
@@ -255,9 +296,17 @@ class BookingBus extends BaseController
             ]);
         }
 
-        $data = $this->request->getJSON(true);
-        $seatId = $data['seat_id'] ?? null;
-        $busId  = $data['bus_id'] ?? null;
+        if ($siswa['status_bayar'] != 1) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Anda belum lunas. Silakan lakukan pembayaran terlebih dahulu.'
+            ]);
+        }
+
+        $data      = $this->request->getJSON(true);
+        $seatId    = $data['seat_id'] ?? null;
+        $busId     = $data['bus_id'] ?? null;
+        $adminPass = $data['admin_pass'] ?? null;
 
         if (!$seatId || !$busId) {
             return $this->response->setJSON([
@@ -266,7 +315,41 @@ class BookingBus extends BaseController
             ]);
         }
 
-        // Cek sudah booking
+        // 🔹 Ambil data kursi
+        $seat = $this->db->table('bus_seat')
+            ->select('nomor_kursi')
+            ->where('id', $seatId)
+            ->get()
+            ->getRowArray();
+
+        if (!$seat) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Kursi tidak ditemukan.'
+            ]);
+        }
+
+        $nomorKursi = (int) $seat['nomor_kursi'];
+
+        $zonaPerempuan = $nomorKursi >= 1 && $nomorKursi <= 24;
+        $zonaLaki      = $nomorKursi >= 25 && $nomorKursi <= 50;
+
+        if (
+            ($zonaPerempuan && $siswa['jenis'] === 'L') ||
+            ($zonaLaki && $siswa['jenis'] === 'P')
+        ) {
+
+            $adminPasswordSystem = env('ADMIN_BOOKING_PASSWORD');
+
+            if (!$adminPass || $adminPass !== $adminPasswordSystem) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'message' => 'Zona kursi ini khusus gender tertentu. Password admin diperlukan.'
+                ]);
+            }
+        }
+
+        // 🔹 Cek sudah booking kursi
         if ($this->bookingModel->sudahBooking($siswa['siswa_id'])) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -274,7 +357,7 @@ class BookingBus extends BaseController
             ]);
         }
 
-        // Cek kursi sudah terisi
+        // 🔹 Cek kursi sudah terisi
         if ($this->bookingModel->kursiTerisi($seatId)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -282,11 +365,11 @@ class BookingBus extends BaseController
             ]);
         }
 
-        // Simpan booking
+        // 🔹 Simpan booking
         $this->bookingModel->insert([
-            'bus_id'  => $busId,
-            'seat_id'  => $seatId,
-            'siswa_id' => $siswa['siswa_id'],
+            'bus_id'     => $busId,
+            'seat_id'    => $seatId,
+            'siswa_id'   => $siswa['siswa_id'],
             'created_at' => date('Y-m-d H:i:s')
         ]);
 
@@ -295,7 +378,6 @@ class BookingBus extends BaseController
             'message' => 'Kursi berhasil dibooking.'
         ]);
     }
-
 
 
     /*

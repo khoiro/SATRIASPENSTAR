@@ -24,22 +24,59 @@ $title = "Kursi $nomorKursi";
 
 
 // 1️⃣ BLOKIR MANUAL
+// if (!empty($isLocked)) {
+//     $class = 'seat-booked';
+//     $disabled = 'disabled';
+//     $attrClick = '';
+//     $title = "Kursi $nomorKursi (Diblokir)";
+// }
 if (!empty($isLocked)) {
-    $class = 'seat-booked';
-    $disabled = 'disabled';
-    $attrClick = '';
-    $title = "Kursi $nomorKursi (Diblokir)";
+
+    $class = 'seat-locked';
+    $disabled = ''; // jangan disabled supaya bisa klik
+
+    $reason = $seat['blocked_reason'] ?? 'Kursi diblokir';
+
+    $attrClick = "onclick=\"lihatBlokir('"
+        . esc($reason)
+        . "','"
+        . $nomorKursi
+        . "')\"";
+
+    $title = "Klik untuk melihat keterangan";
 }
 
 // 2️⃣ SUDAH DIBOOKING ORANG LAIN
+// elseif ($isBooked) {
+//     $class = 'seat-booked';
+//     $disabled = 'disabled';
+//     $attrClick = '';
+
+//     if ($bookedBy) {
+//         $title = "Sudah dibooking oleh $bookedBy ($bookedKls $bookedRombel)";
+//     } else {
+//         $title = "Kursi sudah dibooking";
+//     }
+// }
+
+// 2️⃣ SUDAH DIBOOKING ORANG LAIN
 elseif ($isBooked) {
+
+    // Kalau milik sendiri nanti ditimpa di bawah
     $class = 'seat-booked';
-    $disabled = 'disabled';
-    $attrClick = '';
+    $disabled = ''; // ❗ jangan disabled supaya bisa diklik
 
     if ($bookedBy) {
-        $title = "Sudah dibooking oleh $bookedBy ($bookedKls $bookedRombel)";
+        $attrClick = "onclick=\"lihatBooking('"
+            . esc($bookedBy) . "','"
+            . esc($bookedKls) . "','"
+            . esc($bookedRombel) . "','"
+            . $nomorKursi
+            . "')\"";
+
+        $title = "Klik untuk melihat detail booking";
     } else {
+        $attrClick = '';
         $title = "Kursi sudah dibooking";
     }
 }
