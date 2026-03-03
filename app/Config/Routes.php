@@ -43,6 +43,8 @@ $routes->group('admin', function($routes) {
     $routes->get('reportajaxstatusabsensi', 'ReportAdminController::ajaxRekap');
     $routes->get('reportbookseat', 'ReportAdminController::reportbookseat');
     $routes->get('report/printbus', 'ReportAdminController::printbus');
+    $routes->post('generatepassword', 'Admin::generatePasswordMassal');
+    $routes->post('getuserpassword/(:num)', 'Admin::getuserpassword/$1');
     // =========================
     // RESET KAMAR (FIX)
     // =========================

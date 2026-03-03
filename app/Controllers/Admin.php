@@ -320,14 +320,24 @@ class Admin extends BaseController
         $no = 1;
 
         foreach ($data as $item) {
-            $deleteButton = '
-                <button type="button" class="btn btn-danger btn-sm btn-delete-user" data-id="' . esc($item->id ?? 0) . '">
-                    <i class="fa fa-trash"></i> Hapus
+
+            $viewButton = '
+                <button type="button" class="btn btn-info btn-sm mr-1 btn-view-password" 
+                    data-id="' . esc($item->id ?? 0) . '">
+                    <i class="fa fa-eye"></i> View
                 </button>';
+
             $editButton = '
-                <a href="' . site_url('admin/manage/edit/' . ($item->id ?? 0)) . '" class="btn btn-warning btn-sm mr-1">
+                <a href="' . site_url('admin/manage/edit/' . ($item->id ?? 0)) . '" 
+                class="btn btn-warning btn-sm mr-1">
                     <i class="fa fa-edit"></i> Edit
                 </a>';
+
+            $deleteButton = '
+                <button type="button" class="btn btn-danger btn-sm btn-delete-user" 
+                    data-id="' . esc($item->id ?? 0) . '">
+                    <i class="fa fa-trash"></i> Hapus
+                </button>';
 
             $response[] = [
                 $no++,
@@ -335,12 +345,40 @@ class Admin extends BaseController
                 esc($item->email ?? ''),
                 esc($item->role ?? ''),
                 esc(ucfirst($item->nisn ?? '')),
-                $editButton . $deleteButton
+                $viewButton . $editButton . $deleteButton
             ];
         }
+
         return $this->response->setJSON([
             'data' => $response
         ]);
+    }
+
+    public function getuserpassword($id)
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'error']);
+        }
+
+        $model = new UserModel();
+        $user = $model->find($id);
+
+        if (!$user) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'data' => [
+                'nama' => $user->name ?? '',
+                'username' => $user->email ?? '',
+                'nisn' => $user->nisn ?? '',
+                'password' => $user->password_default ?? 'Tidak tersedia'
+            ]
+        ]);  
     }
 
 	public function datatablearticle()
@@ -1341,6 +1379,72 @@ class Admin extends BaseController
 
         return $this->response->setJSON([
             'data' => $data
+        ]);
+    }
+
+    public function generatePasswordMassal()
+    {
+        // 🔐 Proteksi hanya admin
+        if (session()->get('role') !== 'admin') {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ]);
+        }
+
+        // 🔹 Gunakan model UserModel
+        $model = new \App\Models\UserModel();
+
+        // 🔹 Ambil hanya status=1 dan role=siswa
+        $users = $model
+            ->where('status', 1)
+            ->where('role', 'siswa')
+            ->findAll();
+
+        if (empty($users)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Tidak ada data siswa aktif ditemukan.'
+            ]);
+        }
+
+        // 🔹 Mulai transaksi untuk keamanan update massal
+        $this->db->transStart();
+
+        $result = [];
+
+        foreach ($users as $user) {
+
+            // 🔹 Generate password random 8 karakter
+            $plainPassword = substr(
+                str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'),
+                0,
+                8
+            );
+
+            // 🔹 Hash bcrypt
+            $hashedPassword = password_hash($plainPassword, PASSWORD_BCRYPT);
+
+            // 🔹 Update ke database
+            $model->update($user->id, [
+                'password' => $hashedPassword,
+                'password_default' => $plainPassword,
+            ]);
+
+            // 🔹 Simpan untuk ditampilkan / export
+            $result[] = [
+                'nama' => $user->name,
+                'nisn' => $user->nisn,
+                'password_baru' => $plainPassword
+            ];
+        }
+
+        $this->db->transComplete();
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'total'  => count($result),
+            'data'   => $result
         ]);
     }
 
