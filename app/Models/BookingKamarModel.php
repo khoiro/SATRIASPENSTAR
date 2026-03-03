@@ -20,7 +20,7 @@ class BookingKamarModel extends Model
     public function getPenghuniByKamar($kamarId)
     {
         return $this->db->table('booking_kamar bk')
-            ->select('s.nama AS nama_siswa,s.rombel')
+            ->select('s.nama AS nama_siswa,s.rombel,s.telp_siswa')
             ->join('siswa s', 's.id = bk.siswa_id')
             ->where('bk.kamar_id', $kamarId)
             ->get()
@@ -30,7 +30,7 @@ class BookingKamarModel extends Model
     public function getPenghuniByKamarPrint($kamarId, $kelas = null)
     {
         $builder = $this->db->table('booking_kamar bk')
-            ->select('s.nama AS nama_siswa, s.rombel')
+            ->select('s.nama AS nama_siswa, s.rombel,s.telp_siswa')
             ->join('siswa s', 's.id = bk.siswa_id')
             ->where('bk.kamar_id', $kamarId);
 

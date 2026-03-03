@@ -274,6 +274,7 @@ class ReportAdminController extends BaseController
             ->select('
                 s.nama AS nama_siswa,
                 s.rombel,
+                s.telp_siswa,
                 k.nomor_kamar,
                 k.id AS kamar_id
             ')
@@ -476,14 +477,19 @@ class ReportAdminController extends BaseController
             ->findAll();
 
         $bookings = $bookingModel
-            ->select('booking_bus.*, siswa.nama')
+            ->select('booking_bus.*, siswa.nama,siswa.rombel,siswa.jenis')
             ->join('siswa','siswa.id = booking_bus.siswa_id')
             ->where('booking_bus.bus_id',$busId)
             ->findAll();
 
         $bookingMap = [];
         foreach ($bookings as $b) {
-            $bookingMap[$b['seat_id']] = $b['nama'];
+
+            $nama   = $b['nama'];
+            $rombel = $b['rombel'] ?? '';
+
+            // Format: Nama (Rombel)
+            $bookingMap[$b['seat_id']] = $nama . ' (' . $rombel . ')';
         }
 
         foreach ($seats as &$seat) {
@@ -504,9 +510,40 @@ class ReportAdminController extends BaseController
             }
         }
 
+        // ===============================
+        // REKAP DATA
+        // ===============================
+        $rekapRombel = [];
+        $rekapGender = [
+            'L' => 0,
+            'P' => 0
+        ];
+
+        foreach ($bookings as $b) {
+
+            // Hitung rombel
+            $rombel = $b['rombel'] ?? '-';
+            if (!isset($rekapRombel[$rombel])) {
+                $rekapRombel[$rombel] = 0;
+            }
+            $rekapRombel[$rombel]++;
+
+            // Hitung gender
+            if ($b['jenis'] == 'L') {
+                $rekapGender['L']++;
+            } elseif ($b['jenis'] == 'P') {
+                $rekapGender['P']++;
+            }
+        }
+
+        $totalSiswa = array_sum($rekapRombel);
+
         return view('admin/report/printbus',[
             'bus'   => $bus,
-            'seats' => $seats
+            'seats' => $seats,
+            'rekapRombel' => $rekapRombel,
+            'rekapGender' => $rekapGender,
+            'totalSiswa'  => $totalSiswa
         ]);
     }
 

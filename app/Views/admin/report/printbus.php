@@ -12,14 +12,15 @@ body{
 
 .container{
     display: flex;
+    align-items: flex-start;
 }
 
 .bus-area{
-    width: 60%;
+    width: 50%;
 }
 
 .student-list{
-    width: 40%;
+    width: 50%;
     padding-left: 20px;
 }
 
@@ -37,14 +38,12 @@ body{
     font-weight:bold;
 }
 
-/* BOOKED */
 .booked{
     background:#ef4444;
     color:white;
     border-color:#ef4444;
 }
 
-/* BLOCKED */
 .locked{
     background:#6b7280;
     color:white;
@@ -85,12 +84,28 @@ body{
     border:1px solid #eee;
 }
 
-/* PRINT SETTING */
+/* ================= RINGKASAN ================= */
+
+.summary-box{
+    margin-top:15px;
+    padding:10px;
+    border:1px solid #ddd;
+    background:#f9fafb;
+    font-size:11px;
+}
+
+.summary-table{
+    width:100%;
+}
+
+.summary-table td{
+    vertical-align:top;
+}
+
+/* PRINT */
 @media print {
     button { display:none; }
-    body{
-        margin:0;
-    }
+    body{ margin:0; }
 }
 </style>
 </head>
@@ -103,7 +118,7 @@ body{
 
 <div class="container">
 
-<!-- ================= DENAH BUS ================= -->
+<!-- ================= KIRI : DENAH + RINGKASAN ================= -->
 <div class="bus-area">
 
 <div class="supir">SUPIR</div>
@@ -138,50 +153,85 @@ ksort($grouped);
 </div>
 <?php endforeach; ?>
 
-</div>
 
-<!-- ================= DAFTAR PENUMPANG ================= -->
+<!-- ================= RINGKASAN ================= -->
+<div class="summary-box">
+
+<strong>Ringkasan Penumpang</strong>
+
+<table class="summary-table">
+<tr>
+<td width="50%">
+
+<strong>Per Rombel:</strong><br>
+<?php foreach($rekapRombel as $rombel => $jumlah): ?>
+    <?= esc($rombel) ?> : <?= $jumlah ?> siswa<br>
+<?php endforeach; ?>
+
+</td>
+
+<td width="50%">
+
+<strong>Per Jenis Kelamin:</strong><br>
+Laki-laki : <?= $rekapGender['L'] ?><br>
+Perempuan : <?= $rekapGender['P'] ?><br>
+<br>
+<strong>Total Siswa : <?= $totalSiswa ?></strong>
+
+</td>
+</tr>
+</table>
+
+</div>
+<!-- END RINGKASAN -->
+
+</div>
+<!-- END BUS AREA -->
+
+
+<!-- ================= KANAN : DAFTAR ================= -->
 <div class="student-list">
 
 <strong>Daftar Penumpang</strong>
 
 <?php
-// Urut berdasarkan nomor kursi
 usort($seats, function($a,$b){
     return $a['nomor_kursi'] <=> $b['nomor_kursi'];
 });
 ?>
 
 <table class="passenger-table">
-    <thead>
-        <tr>
-            <th style="width:25%;">No</th>
-            <th>Nama / Keterangan</th>
-        </tr>
-    </thead>
-    <tbody>
+<thead>
+<tr>
+    <th style="width:25%;">No</th>
+    <th>Nama / Keterangan</th>
+</tr>
+</thead>
+<tbody>
 
-    <?php foreach($seats as $seat): ?>
-        <?php if (!empty($seat['is_blocked']) || !empty($seat['nama'])): ?>
-        <tr>
-            <td><strong><?= $seat['nomor_kursi'] ?></strong></td>
-            <td>
-                <?php if (!empty($seat['is_blocked'])): ?>
-                    <?= esc($seat['blocked_reason']) ?>
-                <?php else: ?>
-                    <?= esc($seat['nama']) ?>
-                <?php endif; ?>
-            </td>
-        </tr>
-        <?php endif; ?>
-    <?php endforeach; ?>
+<?php foreach($seats as $seat): ?>
+    <?php if (!empty($seat['is_blocked']) || !empty($seat['nama'])): ?>
+    <tr>
+        <td><strong><?= $seat['nomor_kursi'] ?></strong></td>
+        <td>
+            <?php if (!empty($seat['is_blocked'])): ?>
+                <?= esc($seat['blocked_reason']) ?>
+            <?php else: ?>
+                <?= esc($seat['nama']) ?>
+            <?php endif; ?>
+        </td>
+    </tr>
+    <?php endif; ?>
+<?php endforeach; ?>
 
-    </tbody>
+</tbody>
 </table>
 
 </div>
+<!-- END STUDENT LIST -->
 
 </div>
+<!-- END CONTAINER -->
 
 </body>
 </html>

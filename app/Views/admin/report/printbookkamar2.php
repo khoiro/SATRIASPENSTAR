@@ -39,7 +39,7 @@
         <?php $no = 1; foreach ($rows as $r): ?>
         <tr>
             <td align="center"><?= $no++ ?></td>
-            <td><?= esc($r['nama_siswa']) ?></td>
+            <td><?= esc($r['nama_siswa']) ?><br><small><?= esc($r['telp_siswa']) ?></small></td>
             <td><?= esc($r['rombel']) ?></td>
             <td align="center"><?= esc($r['nomor_kamar']) ?></td>
             <td>

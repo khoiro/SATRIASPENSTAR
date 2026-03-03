@@ -30,7 +30,7 @@
 
         <ul>
             <?php foreach ($kamar['penghuni'] as $p): ?>
-                <li><?= esc($p['nama_siswa']) ?> (<?= esc($p['rombel']) ?>)</li>
+                <li><?= esc($p['nama_siswa']) ?> (<?= esc($p['rombel']) ?>) (<?= esc($p['telp_siswa']) ?>)</li>
             <?php endforeach; ?>
         </ul>
     </div>
