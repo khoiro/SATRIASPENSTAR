@@ -247,36 +247,54 @@ class Admin extends BaseController
     }
 
 
-	public function datatablesiswa()
+    public function datatablesiswa()
     {
         $request = service('request');
         $model = new SiswaModel();
 
-        // Anda mungkin ingin menambahkan logika filter/pencarian DataTables di sini
-        // Berdasarkan parameter DataTables seperti start, length, search, order
-        // Untuk contoh ini, kita hanya mengambil semua data status 1
+        // Ambil semua siswa dengan status = 1
         $data = $model->where('status', 1)->findAll();
 
         $response = [];
         $no = 1;
 
         foreach ($data as $item) {
-            // Bangun tombol Hapus secara manual agar bisa menambahkan atribut data-id dan class
-            $deleteButton = '
-                <button type="button" class="btn btn-danger btn-sm btn-delete-siswa" data-id="' . esc($item->id ?? 0) . '">
-                    <i class="fa fa-trash"></i> Hapus
-                </button>';
 
-         $editButton = '
-                        <a href="' . site_url('admin/siswa/edit/' . ($item->id ?? 0)) . '" 
-                        class="btn btn-warning btn-sm">
-                            <i class="fa fa-edit"></i> Edit
-                        </a>';
+            $id = esc($item->id ?? 0);
 
+            // Tombol View
             $viewButton = '
-                <button type="button" class="btn btn-success btn-sm btn-view-siswa" data-id="' . esc($item->id ?? 0) . '" title="Lihat Detail Siswa">
+                <button type="button" 
+                    class="btn btn-success btn-sm btn-view-siswa" 
+                    data-id="' . $id . '" 
+                    title="Lihat Detail Siswa">
                     <i class="fa fa-eye"></i>
                 </button>';
+
+            // Tombol Edit
+            $editButton = '
+                <a href="' . site_url('admin/siswa/edit/' . $id) . '" 
+                class="btn btn-warning btn-sm" 
+                title="Edit Siswa">
+                    <i class="fa fa-edit"></i>
+                </a>';
+
+            // Tombol Hapus
+            $deleteButton = '
+                <button type="button" 
+                    class="btn btn-danger btn-sm btn-delete-siswa" 
+                    data-id="' . $id . '" 
+                    title="Hapus Siswa">
+                    <i class="fa fa-trash"></i>
+                </button>';
+
+            // Gabungkan dalam satu baris menggunakan btn-group
+            $actionButtons = '
+                <div class="btn-group btn-group-sm" role="group">
+                    ' . $viewButton . '
+                    ' . $editButton . '
+                    ' . $deleteButton . '
+                </div>';
 
             $response[] = [
                 $no++,
@@ -284,8 +302,7 @@ class Admin extends BaseController
                 esc($item->nama ?? ''),
                 esc($item->alamat ?? ''),
                 esc(ucfirst($item->rombel ?? '')),
-                // Gabungkan tombol edit dan delete
-                $editButton . $deleteButton . $viewButton
+                $actionButtons
             ];
         }
 
