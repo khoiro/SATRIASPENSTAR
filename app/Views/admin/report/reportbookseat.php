@@ -61,51 +61,73 @@
 <div class="card-body">
 
 <!-- ================= FILTER ================= -->
-<form method="get" class="mb-4 bg-light p-3 rounded border">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-3">
-            <label class="small fw-bold">Jenjang</label>
-            <select class="form-select form-select-sm" name="jenjang" id="jenjang">
-                <option value="">-- Semua Jenjang --</option>
-                <?php foreach ($jenjangList as $j): ?>
-                    <option value="<?= $j ?>" <?= ($j == $jenjang) ? 'selected' : '' ?>>
-                        <?= $j ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+<form method="get" class="mb-4">
+
+    <div class="row g-3">
+
+        <!-- ================= LEFT SIDE (FILTER) ================= -->
+        <div class="col-md-8">
+            <div class="p-3 rounded border bg-light h-100">
+                <div class="row g-2 align-items-end">
+                    
+                    <div class="col-md-5">
+                        <label class="small fw-bold">Jenjang</label>
+                        <select class="form-select form-select-sm" name="jenjang" id="jenjang">
+                            <option value="">-- Semua Jenjang --</option>
+                            <?php foreach ($jenjangList as $j): ?>
+                                <option value="<?= $j ?>" <?= ($j == $jenjang) ? 'selected' : '' ?>>
+                                    <?= $j ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="small fw-bold">Kelas</label>
+                        <select class="form-select form-select-sm" name="kelas" id="kelas">
+                            <option value="">-- Semua Kelas --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
+                    </div>
+
+                </div>
+            </div>
         </div>
 
-        <div class="col-md-3">
-            <label class="small fw-bold">Kelas</label>
-            <select class="form-select form-select-sm" name="kelas" id="kelas">
-                <option value="">-- Semua Kelas --</option>
-            </select>
+        <!-- ================= RIGHT SIDE (CETAK BUS) ================= -->
+        <div class="col-md-4">
+            <div class="p-3 rounded border bg-warning bg-opacity-25 h-100">
+                <div class="row g-2 align-items-end">
+                    
+                    <div class="col-md-8">
+                        <label class="small fw-bold">Cetak Bus</label>
+                        <select class="form-select form-select-sm" id="bus_print">
+                            <option value="">-- Pilih Bus --</option>
+                            <?php foreach ($allBus as $b): ?>
+                                <option value="<?= $b['id'] ?>">
+                                    <?= esc($b['nama_bus']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-success btn-sm w-100" onclick="cetakBus()">
+                            <i class="fas fa-print me-1"></i> Cetak
+                        </button>
+                    </div>
+
+                </div>
+            </div>
         </div>
 
-       <div class="col-md-2">
-            <button type="submit" class="btn btn-primary btn-sm w-100">
-                <i class="fas fa-search me-1"></i> Filter
-            </button>
-        </div>
-
-        <div class="col-md-3">
-            <label class="small fw-bold">Cetak Bus</label>
-            <select class="form-select form-select-sm" id="bus_print">
-                <option value="">-- Pilih Bus --</option>
-                <?php foreach ($allBus as $b): ?>
-                    <option value="<?= $b['id'] ?>">
-                        <?= esc($b['nama_bus']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <div class="col-md-1">
-            <button type="button" class="btn btn-success btn-sm w-100" onclick="cetakBus()">
-                <i class="fas fa-print me-1"></i> Cetak
-            </button>
-        </div>
     </div>
+
 </form>
 
 <!-- ================= LEGEND ================= -->

@@ -94,62 +94,62 @@
                             window.location.href = '<?= base_url('admin/manage/add') ?>';
                         }
                     },
-                    // Tombol Generate Password Massal
-                    {
-                        text: '<i class="fas fa-key"></i> Generate Password Massal',
-                        className: 'btn btn-warning btn-sm mr-2',
-                        action: function (e, dt, node, config) {
-                            Swal.fire({
-                                title: 'Generate Password Massal',
-                                text: "Apakah Anda yakin ingin generate password semua siswa aktif?",
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Ya, Generate!',
-                                cancelButtonText: 'Batal'
-                            }).then((result) => {
-                                if(result.isConfirmed){
-                                    fetch('<?= base_url('admin/generatepassword') ?>', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-Requested-With': 'XMLHttpRequest',
-                                            '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
-                                        }
-                                    })
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if(data.status === 'success'){
-                                            // Tampilkan hasil di modal SweetAlert
-                                            let html = `<table class="table table-bordered">
-                                                <thead><tr><th>No</th><th>Nama</th><th>NISN</th><th>Password Baru</th></tr></thead><tbody>`;
-                                            data.data.forEach((item, i) => {
-                                                html += `<tr>
-                                                    <td>${i+1}</td>
-                                                    <td>${item.nama}</td>
-                                                    <td>${item.nisn}</td>
-                                                    <td>${item.password_baru}</td>
-                                                </tr>`;
-                                            });
-                                            html += `</tbody></table>`;
+                    // // Tombol Generate Password Massal
+                    // {
+                    //     text: '<i class="fas fa-key"></i> Generate Password Massal',
+                    //     className: 'btn btn-warning btn-sm mr-2',
+                    //     action: function (e, dt, node, config) {
+                    //         Swal.fire({
+                    //             title: 'Generate Password Massal',
+                    //             text: "Apakah Anda yakin ingin generate password semua siswa aktif?",
+                    //             icon: 'warning',
+                    //             showCancelButton: true,
+                    //             confirmButtonText: 'Ya, Generate!',
+                    //             cancelButtonText: 'Batal'
+                    //         }).then((result) => {
+                    //             if(result.isConfirmed){
+                    //                 fetch('<?= base_url('admin/generatepassword') ?>', {
+                    //                     method: 'POST',
+                    //                     headers: {
+                    //                         'Content-Type': 'application/json',
+                    //                         'X-Requested-With': 'XMLHttpRequest',
+                    //                         '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+                    //                     }
+                    //                 })
+                    //                 .then(res => res.json())
+                    //                 .then(data => {
+                    //                     if(data.status === 'success'){
+                    //                         // Tampilkan hasil di modal SweetAlert
+                    //                         let html = `<table class="table table-bordered">
+                    //                             <thead><tr><th>No</th><th>Nama</th><th>NISN</th><th>Password Baru</th></tr></thead><tbody>`;
+                    //                         data.data.forEach((item, i) => {
+                    //                             html += `<tr>
+                    //                                 <td>${i+1}</td>
+                    //                                 <td>${item.nama}</td>
+                    //                                 <td>${item.nisn}</td>
+                    //                                 <td>${item.password_baru}</td>
+                    //                             </tr>`;
+                    //                         });
+                    //                         html += `</tbody></table>`;
 
-                                            Swal.fire({
-                                                title: 'Password Berhasil Digenerate',
-                                                html: html,
-                                                width: '800px',
-                                                scrollbarPadding: false,
-                                                confirmButtonText: 'Tutup'
-                                            });
-                                        } else {
-                                            Swal.fire('Gagal', data.message, 'error');
-                                        }
-                                    })
-                                    .catch(err => {
-                                        Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
-                                    });
-                                }
-                            });
-                        }
-                    },
+                    //                         Swal.fire({
+                    //                             title: 'Password Berhasil Digenerate',
+                    //                             html: html,
+                    //                             width: '800px',
+                    //                             scrollbarPadding: false,
+                    //                             confirmButtonText: 'Tutup'
+                    //                         });
+                    //                     } else {
+                    //                         Swal.fire('Gagal', data.message, 'error');
+                    //                     }
+                    //                 })
+                    //                 .catch(err => {
+                    //                     Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                    //                 });
+                    //             }
+                    //         });
+                    //     }
+                    // },
                 ],
                 language: {
                     search: "Cari:",

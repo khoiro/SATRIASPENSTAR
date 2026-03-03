@@ -3,7 +3,8 @@
 <?= view('shared/head') ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<body class="text-center" style="background: url(https://images.unsplash.com/photo-1764818958908-d5efcec563d1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D) center/cover #004494; position: relative">
+<!-- <body class="text-center" style="background: url(https://images.unsplash.com/photo-1764818958908-d5efcec563d1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D) center/cover #004494; position: relative"> -->
+<body class="text-center" style="background: url('<?= base_url('bg.jpg') ?>') center/cover no-repeat #004494; position: relative;">
     <?= view('home/styling') ?>
     <div class="justify-content-center container d-flex flex-column" style="min-height: 100vh; max-width: 476px">
         <p class="mt-5">
@@ -18,19 +19,19 @@
             <input type="text" name="email" placeholder="Email / Username" class="form-control mb-2">
             <input type="password" name="password" autocomplete="current-password" placeholder="Password" class="form-control mb-2">
             <input type="submit" value="Sign In" class="btn-primary btn btn-block mb-3">
-            <div class="separator mb-3">Or</div>
+            <!-- <div class="separator mb-3">Or</div>
             <a href="/register" class="btn d-flex align-items-center btn-light border-secondary mb-2">
                 <span class="mx-auto">Register With NISN</span>
             </a>
             <a href="/" class="btn d-flex align-items-center btn-light border-secondary mb-2">
                 <span class="mx-auto">Back</span>
-            </a>
+            </a> -->
         </form>
-        <div class="floating">
+        <!-- <div class="floating">
             <small>
                 <a href="https://unsplash.com/photos/ukvgqriuOgo" target="_blank" rel="noopener noreferrer">Background by Henning Witzel</a>
             </small>
-        </div>
+        </div> -->
     </div>
 
     <?php if (session()->getFlashdata('error')): ?>
