@@ -144,6 +144,7 @@ $routes->group('siswa', function($routes) {
     // Halaman menampilkan booking bus
     $routes->get('bookingbus', 'BookingBus::index');
     $routes->post('booking/simpan', 'BookingBus::simpan');
+    $routes->post('update-telp', 'BookingBus::updateTelp');
 
 
 });

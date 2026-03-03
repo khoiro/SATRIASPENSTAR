@@ -39,7 +39,7 @@ class BookingBus extends BaseController
         // AMBIL DATA SISWA DARI USER LOGIN
         // ===============================
         $siswa = $this->db->table('user u')
-            ->select('s.id AS siswa_id, s.kelas,s.rombel, s.jenis')
+            ->select('s.id AS siswa_id, s.kelas,s.rombel, s.jenis,s.telp_siswa')
             ->join('siswa s', 's.nisn = u.nisn')
             ->where('u.id', $userId)
             ->get()
@@ -152,12 +152,22 @@ class BookingBus extends BaseController
         }
         unset($b);
 
+        // ===============================
+        // CEK NOMOR TELEPON
+        // ===============================
+        $wajibIsiTelp = false;
+
+        if (empty($siswa->telp_siswa)) {
+            $wajibIsiTelp = true;
+        }
+
     
 
         return view('booking_bus/index', [
             'siswa'        => $siswa,
             'busList'      => $busList,
-            'sudahBooking' => $sudahBooking
+            'sudahBooking' => $sudahBooking,
+            'wajibIsiTelp'   => $wajibIsiTelp
         ]);
     }
 
@@ -426,5 +436,53 @@ class BookingBus extends BaseController
             ->delete();
 
         return redirect()->back()->with('success', 'Booking berhasil dibatalkan.');
+    }
+
+    public function updateTelp()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['status' => 'error']);
+        }
+
+        $userId = Services::login()->id;
+
+        $telp = $this->request->getJSON()->telp ?? '';
+
+        if (empty($telp)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Nomor HP tidak boleh kosong'
+            ]);
+        }
+
+        // ===============================
+        // AMBIL NISN DARI USER LOGIN
+        // ===============================
+        $user = $this->db->table('user')
+            ->select('nisn')
+            ->where('id', $userId)
+            ->get()
+            ->getRow();
+
+        if (!$user) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'User tidak ditemukan'
+            ]);
+        }
+
+        // ===============================
+        // UPDATE KE TABEL SISWA
+        // ===============================
+        $this->db->table('siswa')
+            ->where('nisn', $user->nisn)
+            ->update([
+                'telp_siswa' => $telp
+            ]);
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Nomor HP berhasil disimpan'
+        ]);
     }
 }

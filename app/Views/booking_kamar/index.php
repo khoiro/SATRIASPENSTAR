@@ -115,7 +115,66 @@
     </div>
 </div>
 
+<?php if (!empty($wajibIsiTelp)): ?>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    Swal.fire({
+        title: 'Lengkapi Data Nomor HP',
+        html: `
+            <div style="text-align:left">
+                Nomor HP wajib diisi sebelum melakukan booking.<br><br>
+                <input type="text" id="telpSiswa" class="swal2-input" 
+                       placeholder="Masukkan Nomor HP" maxlength="15">
+            </div>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonText: 'Simpan',
+        preConfirm: () => {
+            let telp = document.getElementById('telpSiswa').value;
+
+            if (!telp) {
+                Swal.showValidationMessage('Nomor HP wajib diisi');
+                return false;
+            }
+
+            return telp;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            simpanNomorHP(result.value);
+        }
+    });
+
+});
+</script>
+<?php endif; ?>
+
+<script>
+function simpanNomorHP(nomor) {
+
+    fetch('<?= base_url('siswa/update-telp') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+        },
+        body: JSON.stringify({
+            telp: nomor
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Berhasil', data.message, 'success')
+                .then(() => location.reload());
+        } else {
+            Swal.fire('Gagal', data.message, 'error');
+        }
+    });
+}
 $(document).ready(function () {
 
     // ✅ ALERT SUCCESS

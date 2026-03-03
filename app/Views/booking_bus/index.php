@@ -112,6 +112,30 @@
     margin-bottom: 15px;
 }
 
+/* 🟡 ZONA ADMIN 25-28 */
+.seat-admin {
+    background: #fef08a;
+    border: 1px solid #facc15;
+    color: #92400e;
+}
+
+.seat-admin:hover {
+    background: #facc15;
+    color: #000;
+}
+
+/* 🟣 ZONA LAKI 29-50 */
+.seat-laki {
+    background: #ede9fe;
+    border: 1px solid #7c3aed;
+    color: #5b21b6;
+}
+
+.seat-laki:hover {
+    background: #7c3aed;
+    color: #fff;
+}
+
 
 @media (max-width: 576px) {
 
@@ -169,7 +193,7 @@
 <div class="card-body">
 <div class="mb-3 text-center">
     <span class="badge" style="background:#c77dff">Zona Perempuan (1-24)</span>
-    <span class="badge" style="background:#808080">Zona Netral (25-28)</span>
+    <span class="badge" style="background:#fef08a">Zona Netral (25-28)</span>
     <span class="badge" style="background:#4dabf7">Zona Laki-laki (29-50)</span>
 </div>
 <?php if (!empty($sudahBooking)): ?>
@@ -281,7 +305,66 @@ ksort($grouped);
 </div>
 </div>
 
+<?php if (!empty($wajibIsiTelp)): ?>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    Swal.fire({
+        title: 'Lengkapi Data Nomor HP',
+        html: `
+            <div style="text-align:left">
+                Nomor HP wajib diisi sebelum melakukan booking.<br><br>
+                <input type="text" id="telpSiswa" class="swal2-input" 
+                       placeholder="Masukkan Nomor HP" maxlength="15">
+            </div>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        confirmButtonText: 'Simpan',
+        preConfirm: () => {
+            let telp = document.getElementById('telpSiswa').value;
+
+            if (!telp) {
+                Swal.showValidationMessage('Nomor HP wajib diisi');
+                return false;
+            }
+
+            return telp;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            simpanNomorHP(result.value);
+        }
+    });
+
+});
+</script>
+<?php endif; ?>
+
+<script>
+function simpanNomorHP(nomor) {
+
+    fetch('<?= base_url('siswa/update-telp') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            '<?= csrf_header() ?>': '<?= csrf_hash() ?>'
+        },
+        body: JSON.stringify({
+            telp: nomor
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire('Berhasil', data.message, 'success')
+                .then(() => location.reload());
+        } else {
+            Swal.fire('Gagal', data.message, 'error');
+        }
+    });
+}
 function lihatBlokir(reason, nomor) {
     Swal.fire({
         icon: 'warning',

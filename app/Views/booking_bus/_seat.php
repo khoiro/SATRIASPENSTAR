@@ -10,30 +10,27 @@ $nomorKursi = esc($seat['nomor_kursi']);
 $seatId     = $seat['id'];
 $busId      = $seat['bus_id'] ?? null;
 
+$nomorInt = (int)$seat['nomor_kursi'];
+
 // Status booking dari controller
 $isBooked   = $seat['is_booked'] ?? false;
 $bookedBy   = $seat['booked_by'] ?? null;
 $bookedKls  = $seat['booked_kelas'] ?? null;
 $bookedRombel = $seat['booked_rombel'] ?? null;
 
-// Default: kosong
+// Default
 $class = 'seat-empty';
 $disabled = '';
 $attrClick = "onclick=\"pilihKursi('$nomorKursi','$busId','$seatId')\"";
 $title = "Kursi $nomorKursi";
 
 
+// ==========================
 // 1️⃣ BLOKIR MANUAL
-// if (!empty($isLocked)) {
-//     $class = 'seat-booked';
-//     $disabled = 'disabled';
-//     $attrClick = '';
-//     $title = "Kursi $nomorKursi (Diblokir)";
-// }
+// ==========================
 if (!empty($isLocked)) {
 
     $class = 'seat-locked';
-    $disabled = ''; // jangan disabled supaya bisa klik
 
     $reason = $seat['blocked_reason'] ?? 'Kursi diblokir';
 
@@ -46,25 +43,12 @@ if (!empty($isLocked)) {
     $title = "Klik untuk melihat keterangan";
 }
 
-// 2️⃣ SUDAH DIBOOKING ORANG LAIN
-// elseif ($isBooked) {
-//     $class = 'seat-booked';
-//     $disabled = 'disabled';
-//     $attrClick = '';
-
-//     if ($bookedBy) {
-//         $title = "Sudah dibooking oleh $bookedBy ($bookedKls $bookedRombel)";
-//     } else {
-//         $title = "Kursi sudah dibooking";
-//     }
-// }
-
-// 2️⃣ SUDAH DIBOOKING ORANG LAIN
+// ==========================
+// 2️⃣ SUDAH DIBOOKING
+// ==========================
 elseif ($isBooked) {
 
-    // Kalau milik sendiri nanti ditimpa di bawah
     $class = 'seat-booked';
-    $disabled = ''; // ❗ jangan disabled supaya bisa diklik
 
     if ($bookedBy) {
         $attrClick = "onclick=\"lihatBooking('"
@@ -81,10 +65,29 @@ elseif ($isBooked) {
     }
 }
 
-// 3️⃣ MILIK SENDIRI
+// ==========================
+// 3️⃣ ZONA ADMIN (25–28)
+// ==========================
+elseif ($nomorInt >= 25 && $nomorInt <= 28) {
+
+    $class = 'seat-admin';
+    $title = "Zona Admin (25-28)";
+}
+
+// ==========================
+// 4️⃣ ZONA LAKI (29–50)
+// ==========================
+elseif ($nomorInt >= 29 && $nomorInt <= 50) {
+
+    $class = 'seat-laki';
+    $title = "Zona Laki-laki (29-50)";
+}
+
+// ==========================
+// 4️⃣ MILIK SENDIRI
+// ==========================
 if (!empty($sudahBooking) && $sudahBooking['seat_id'] == $seatId) {
     $class = 'seat-own';
-    $disabled = '';
     $attrClick = "onclick=\"Swal.fire('Info', 'Ini adalah kursi Anda.', 'info')\"";
     $title = "Kursi Anda";
 }

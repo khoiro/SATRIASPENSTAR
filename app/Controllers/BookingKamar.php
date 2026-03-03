@@ -31,7 +31,7 @@ class BookingKamar extends BaseController
         // AMBIL DATA SISWA DARI USER LOGIN
         // ===============================
         $siswa = $this->db->table('user u')
-            ->select('s.id AS siswa_id, s.kelas')
+            ->select('s.id AS siswa_id, s.kelas,s.telp_siswa')
             ->join('siswa s', 's.nisn = u.nisn')
             ->where('u.id', $userId)
             ->get()
@@ -86,10 +86,17 @@ class BookingKamar extends BaseController
             $k->terisi   = count($penghuni);
         }
         unset($k);
+        
+        $wajibIsiTelp = false; // default
+        
+        if (empty($siswa->telp_siswa)) {
+            $wajibIsiTelp = true;
+        }
 
         return view('booking_kamar/index', [
             'kamar'        => $kamar,
-            'sudahBooking' => $sudahBooking
+            'sudahBooking' => $sudahBooking,
+            'wajibIsiTelp'   => $wajibIsiTelp
         ]);
     }
 
