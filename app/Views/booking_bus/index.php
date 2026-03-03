@@ -169,7 +169,8 @@
 <div class="card-body">
 <div class="mb-3 text-center">
     <span class="badge" style="background:#c77dff">Zona Perempuan (1-24)</span>
-    <span class="badge" style="background:#4dabf7">Zona Laki-laki (25-50)</span>
+    <span class="badge" style="background:#808080">Zona Netral (25-28)</span>
+    <span class="badge" style="background:#4dabf7">Zona Laki-laki (29-50)</span>
 </div>
 <?php if (!empty($sudahBooking)): ?>
     <div class="alert alert-info">
@@ -316,26 +317,40 @@ function pilihKursi(nomorKursi, busId, seatId) {
     let nomor = parseInt(nomorKursi);
 
     let zonaPerempuan = nomor >= 1 && nomor <= 24;
-    let zonaLaki = nomor >= 25 && nomor <= 50;
+    let zonaAdminMix  = nomor >= 25 && nomor <= 28; // WAJIB ADMIN
+    let zonaLaki      = nomor >= 29 && nomor <= 50;
 
     let perluPassword = false;
     let pesanZona = "";
 
-    // 🔥 CEK ZONA
+    // ===============================
+    // ZONA KHUSUS PEREMPUAN
+    // ===============================
     if (zonaPerempuan && jenisSiswa === 'L') {
         perluPassword = true;
         pesanZona = "Kursi ini khusus siswa perempuan.";
     }
 
+    // ===============================
+    // ZONA KHUSUS LAKI
+    // ===============================
     if (zonaLaki && jenisSiswa === 'P') {
         perluPassword = true;
         pesanZona = "Kursi ini khusus siswa laki-laki.";
     }
 
+    // ===============================
+    // ZONA 25-28 WAJIB ADMIN
+    // ===============================
+    if (zonaAdminMix) {
+        perluPassword = true;
+        pesanZona = "Kursi 25-28 hanya bisa dibooking dengan password admin, hubungi guru.";
+    }
+
     if (perluPassword) {
 
         Swal.fire({
-            title: 'Zona Kursi Khusus',
+            title: 'Konfirmasi Admin',
             html: `
                 <div style="text-align:left">
                     ${pesanZona}<br><br>

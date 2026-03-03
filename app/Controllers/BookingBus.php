@@ -100,7 +100,7 @@ class BookingBus extends BaseController
                             ]; 
             // ini adalah NOMOR KURSI (field nomor_kursi)
 
-            if ($b['id'] == 1) {
+            if (in_array($b['id'], [1, 7, 17])) {
                    $lockedSeats = [
                                     '1'  => 'Untuk Kepala Sekolah',
                                     '2'  => 'Untuk Komite',
@@ -332,19 +332,43 @@ class BookingBus extends BaseController
         $nomorKursi = (int) $seat['nomor_kursi'];
 
         $zonaPerempuan = $nomorKursi >= 1 && $nomorKursi <= 24;
-        $zonaLaki      = $nomorKursi >= 25 && $nomorKursi <= 50;
+        $zonaAdminMix  = $nomorKursi >= 25 && $nomorKursi <= 28; // WAJIB ADMIN
+        $zonaLaki      = $nomorKursi >= 29 && $nomorKursi <= 50;
 
-        if (
-            ($zonaPerempuan && $siswa['jenis'] === 'L') ||
-            ($zonaLaki && $siswa['jenis'] === 'P')
-        ) {
+        $adminPasswordSystem = env('ADMIN_BOOKING_PASSWORD');
 
-            $adminPasswordSystem = env('ADMIN_BOOKING_PASSWORD');
-
+        // ===============================
+        // ZONA KHUSUS PEREMPUAN
+        // ===============================
+        if ($zonaPerempuan && $siswa['jenis'] === 'L') {
             if (!$adminPass || $adminPass !== $adminPasswordSystem) {
                 return $this->response->setJSON([
-                    'status' => 'error',
-                    'message' => 'Zona kursi ini khusus gender tertentu. Password admin diperlukan.'
+                    'status'  => 'error',
+                    'message' => 'Kursi ini khusus siswa perempuan. Password admin diperlukan.'
+                ]);
+            }
+        }
+
+        // ===============================
+        // ZONA KHUSUS LAKI
+        // ===============================
+        if ($zonaLaki && $siswa['jenis'] === 'P') {
+            if (!$adminPass || $adminPass !== $adminPasswordSystem) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kursi ini khusus siswa laki-laki. Password admin diperlukan.'
+                ]);
+            }
+        }
+
+        // ===============================
+        // ZONA 25-28 WAJIB ADMIN
+        // ===============================
+        if ($zonaAdminMix) {
+            if (!$adminPass || $adminPass !== $adminPasswordSystem) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Kursi 25-28 hanya bisa dibooking dengan password admin.'
                 ]);
             }
         }
