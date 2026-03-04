@@ -203,7 +203,7 @@ usort($seats, function($a,$b){
 <table class="passenger-table">
 <thead>
 <tr>
-    <th style="width:25%;">No</th>
+    <th style="width:10%;">No</th>
     <th>Nama / Keterangan</th>
 </tr>
 </thead>

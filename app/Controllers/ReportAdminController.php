@@ -477,7 +477,7 @@ class ReportAdminController extends BaseController
             ->findAll();
 
         $bookings = $bookingModel
-            ->select('booking_bus.*, siswa.nama,siswa.rombel,siswa.jenis')
+            ->select('booking_bus.*, siswa.nama,siswa.rombel,siswa.jenis,siswa.telp_siswa')
             ->join('siswa','siswa.id = booking_bus.siswa_id')
             ->where('booking_bus.bus_id',$busId)
             ->findAll();
@@ -487,9 +487,10 @@ class ReportAdminController extends BaseController
 
             $nama   = $b['nama'];
             $rombel = $b['rombel'] ?? '';
+            $telp = $b['telp_siswa'] ?? '';
 
             // Format: Nama (Rombel)
-            $bookingMap[$b['seat_id']] = $nama . ' (' . $rombel . ')';
+            $bookingMap[$b['seat_id']] = $nama . ' (' . $rombel . ') '. $telp ;
         }
 
         foreach ($seats as &$seat) {
