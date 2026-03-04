@@ -192,9 +192,9 @@
 
 <div class="card-body">
 <div class="mb-3 text-center">
-    <span class="badge" style="background:#c77dff">Zona Perempuan (1-24)</span>
-    <span class="badge" style="background:#fef08a">Zona Netral (25-28)</span>
-    <span class="badge" style="background:#4dabf7">Zona Laki-laki (29-50)</span>
+    <span class="badge" style="background:#c77dff">Zona Perempuan (1-28)</span>
+    <span class="badge" style="background:#fef08a">Zona Netral (29-32)</span>
+    <span class="badge" style="background:#4dabf7">Zona Laki-laki (33-50)</span>
 </div>
 <?php if (!empty($sudahBooking)): ?>
     <div class="alert alert-info">
@@ -260,7 +260,8 @@ ksort($grouped);
                 <?= view('booking_bus/_seat', [
                     'seat' => $seat,
                     'sudahBooking' => $sudahBooking,
-                    'isLocked' => !empty($seat['is_blocked'])
+                    'isLocked' => !empty($seat['is_blocked']),
+                    'nama_bus' => $b['nama_bus']
                 ]) ?>
             <?php endforeach; ?>
         </div>
@@ -273,7 +274,8 @@ ksort($grouped);
                     <?= view('booking_bus/_seat', [
                         'seat' => $seat,
                         'sudahBooking' => $sudahBooking,
-                        'isLocked' => !empty($seat['is_blocked'])
+                        'isLocked' => !empty($seat['is_blocked']),
+                        'nama_bus' => $b['nama_bus']
                     ]) ?>
                 <?php endforeach; ?>
             </div>
@@ -283,7 +285,8 @@ ksort($grouped);
                     <?= view('booking_bus/_seat', [
                         'seat' => $seat,
                         'sudahBooking' => $sudahBooking,
-                        'isLocked' => !empty($seat['is_blocked'])
+                        'isLocked' => !empty($seat['is_blocked']),
+                        'nama_bus' => $b['nama_bus']
                     ]) ?>
                 <?php endforeach; ?>
             </div>
@@ -394,68 +397,151 @@ function lihatBooking(nama, kelas, rombel, nomor) {
         confirmButtonText: 'OK'
     });
 }
-function pilihKursi(nomorKursi, busId, seatId) {
+// function pilihKursi(nomorKursi, busId, seatId) {
+
+//     let jenisSiswa = "<?= $siswa->jenis ?>"; // L atau P
+//     let nomor = parseInt(nomorKursi);
+
+//     let zonaPerempuan = nomor >= 1 && nomor <= 28;
+//     let zonaAdminMix  = nomor >= 29 && nomor <= 32; // WAJIB ADMIN
+//     let zonaLaki      = nomor >= 33 && nomor <= 50;
+
+//     let perluPassword = false;
+//     let pesanZona = "";
+
+//     // ===============================
+//     // ZONA KHUSUS PEREMPUAN
+//     // ===============================
+//     if (zonaPerempuan && jenisSiswa === 'L') {
+//         perluPassword = true;
+//         pesanZona = "Kursi ini khusus siswa perempuan.";
+//     }
+
+//     // ===============================
+//     // ZONA KHUSUS LAKI
+//     // ===============================
+//     if (zonaLaki && jenisSiswa === 'P') {
+//         perluPassword = true;
+//         pesanZona = "Kursi ini khusus siswa laki-laki.";
+//     }
+
+//     // ===============================
+//     // ZONA 25-28 WAJIB ADMIN
+//     // ===============================
+//     if (zonaAdminMix) {
+//         perluPassword = true;
+//         pesanZona = "Kursi 29-32 hanya bisa dibooking dengan password admin, hubungi guru.";
+//     }
+
+//     if (perluPassword) {
+
+//         Swal.fire({
+//             title: 'Konfirmasi Admin',
+//             html: `
+//                 <div style="text-align:left">
+//                     ${pesanZona}<br><br>
+//                     Masukkan password admin untuk melanjutkan:
+//                     <input type="password" id="adminPass" class="swal2-input" placeholder="Password Admin">
+//                 </div>
+//             `,
+//             showCancelButton: true,
+//             confirmButtonText: 'Lanjutkan',
+//             cancelButtonText: 'Batal',
+//             preConfirm: () => {
+//                 return document.getElementById('adminPass').value;
+//             }
+//         }).then((result) => {
+//             if (result.isConfirmed) {
+//                 kirimBooking(busId, seatId, result.value);
+//             }
+//         });
+
+//     } else {
+//         kirimBooking(busId, seatId, null);
+//     }
+// }
+function pilihKursi(nomorKursi, busId, seatId,namaBus) {
 
     let jenisSiswa = "<?= $siswa->jenis ?>"; // L atau P
     let nomor = parseInt(nomorKursi);
 
-    let zonaPerempuan = nomor >= 1 && nomor <= 24;
-    let zonaAdminMix  = nomor >= 25 && nomor <= 28; // WAJIB ADMIN
-    let zonaLaki      = nomor >= 29 && nomor <= 50;
-
-    let perluPassword = false;
-    let pesanZona = "";
-
     // ===============================
-    // ZONA KHUSUS PEREMPUAN
+    // KONFIRMASI AWAL
     // ===============================
-    if (zonaPerempuan && jenisSiswa === 'L') {
-        perluPassword = true;
-        pesanZona = "Kursi ini khusus siswa perempuan.";
-    }
+    Swal.fire({
+        icon: 'question',
+        title: 'Konfirmasi Pilih Kursi',
+        html: `
+            <div style="text-align:left">
+                Apakah Anda yakin ingin memilih:<br><br>
+                <b>Kursi ${nomorKursi}</b><br>
+                pada <b> ${namaBus}</b> ?
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Pilih',
+        cancelButtonText: 'Batal'
+    }).then((confirmResult) => {
 
-    // ===============================
-    // ZONA KHUSUS LAKI
-    // ===============================
-    if (zonaLaki && jenisSiswa === 'P') {
-        perluPassword = true;
-        pesanZona = "Kursi ini khusus siswa laki-laki.";
-    }
+        if (!confirmResult.isConfirmed) return;
 
-    // ===============================
-    // ZONA 25-28 WAJIB ADMIN
-    // ===============================
-    if (zonaAdminMix) {
-        perluPassword = true;
-        pesanZona = "Kursi 25-28 hanya bisa dibooking dengan password admin, hubungi guru.";
-    }
+        // ===============================
+        // CEK ZONA
+        // ===============================
 
-    if (perluPassword) {
+        let zonaPerempuan = nomor >= 1 && nomor <= 28;
+        let zonaAdminMix  = nomor >= 29 && nomor <= 32;
+        let zonaLaki      = nomor >= 33 && nomor <= 50;
 
-        Swal.fire({
-            title: 'Konfirmasi Admin',
-            html: `
-                <div style="text-align:left">
-                    ${pesanZona}<br><br>
-                    Masukkan password admin untuk melanjutkan:
-                    <input type="password" id="adminPass" class="swal2-input" placeholder="Password Admin">
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: 'Lanjutkan',
-            cancelButtonText: 'Batal',
-            preConfirm: () => {
-                return document.getElementById('adminPass').value;
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                kirimBooking(busId, seatId, result.value);
-            }
-        });
+        let perluPassword = false;
+        let pesanZona = "";
 
-    } else {
-        kirimBooking(busId, seatId, null);
-    }
+        // ZONA PEREMPUAN
+        if (zonaPerempuan && jenisSiswa === 'L') {
+            perluPassword = true;
+            pesanZona = "Kursi ini khusus siswa perempuan.";
+        }
+
+        // ZONA LAKI
+        if (zonaLaki && jenisSiswa === 'P') {
+            perluPassword = true;
+            pesanZona = "Kursi ini khusus siswa laki-laki.";
+        }
+
+        // ZONA ADMIN
+        if (zonaAdminMix) {
+            perluPassword = true;
+            pesanZona = "Kursi 29-32 hanya bisa dibooking dengan password admin, hubungi guru.";
+        }
+
+        if (perluPassword) {
+
+            Swal.fire({
+                title: 'Konfirmasi Admin',
+                html: `
+                    <div style="text-align:left">
+                        ${pesanZona}<br><br>
+                        Masukkan password admin untuk melanjutkan:
+                        <input type="password" id="adminPass" class="swal2-input" placeholder="Password Admin">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    return document.getElementById('adminPass').value;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    kirimBooking(busId, seatId, result.value);
+                }
+            });
+
+        } else {
+            kirimBooking(busId, seatId, null);
+        }
+
+    });
 }
 function kirimBooking(busId, seatId, adminPass = null) {
 

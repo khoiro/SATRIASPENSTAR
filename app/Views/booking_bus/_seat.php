@@ -8,6 +8,7 @@
 
 $nomorKursi = esc($seat['nomor_kursi']);
 $seatId     = $seat['id'];
+$busName    = $nama_bus;
 $busId      = $seat['bus_id'] ?? null;
 
 $nomorInt = (int)$seat['nomor_kursi'];
@@ -21,7 +22,7 @@ $bookedRombel = $seat['booked_rombel'] ?? null;
 // Default
 $class = 'seat-empty';
 $disabled = '';
-$attrClick = "onclick=\"pilihKursi('$nomorKursi','$busId','$seatId')\"";
+$attrClick = "onclick=\"pilihKursi('$nomorKursi','$busId','$seatId','$busName')\"";
 $title = "Kursi $nomorKursi";
 
 
@@ -66,21 +67,21 @@ elseif ($isBooked) {
 }
 
 // ==========================
-// 3️⃣ ZONA ADMIN (25–28)
+// 3️⃣ ZONA ADMIN (29-32)
 // ==========================
-elseif ($nomorInt >= 25 && $nomorInt <= 28) {
+elseif ($nomorInt >= 29 && $nomorInt <= 32) {
 
     $class = 'seat-admin';
-    $title = "Zona Admin (25-28)";
+    $title = "Zona Admin (29-32)";
 }
 
 // ==========================
-// 4️⃣ ZONA LAKI (29–50)
+// 4️⃣ ZONA LAKI (33–50)
 // ==========================
-elseif ($nomorInt >= 29 && $nomorInt <= 50) {
+elseif ($nomorInt >= 33 && $nomorInt <= 50) {
 
     $class = 'seat-laki';
-    $title = "Zona Laki-laki (29-50)";
+    $title = "Zona Laki-laki (33-50)";
 }
 
 // ==========================

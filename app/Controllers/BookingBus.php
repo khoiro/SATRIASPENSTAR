@@ -197,86 +197,86 @@ class BookingBus extends BaseController
     | BOOK KURSI
     |--------------------------------------------------------------------------
     */
-    public function book()
-    {
-        $request = $this->request->getJSON(true);
+    // public function book()
+    // {
+    //     $request = $this->request->getJSON(true);
 
-        $seatId    = $request['seat_id'] ?? null;
-        $adminPass = $request['admin_pass'] ?? null;
+    //     $seatId    = $request['seat_id'] ?? null;
+    //     $adminPass = $request['admin_pass'] ?? null;
 
-        $userId = \Config\Services::login()->id;
+    //     $userId = \Config\Services::login()->id;
 
-        $siswa = $this->siswaModel
-            ->where('user_id', $userId)
-            ->first();
+    //     $siswa = $this->siswaModel
+    //         ->where('user_id', $userId)
+    //         ->first();
 
-        if (!$siswa) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Data siswa tidak ditemukan.'
-            ]);
-        }
+    //     if (!$siswa) {
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => 'Data siswa tidak ditemukan.'
+    //         ]);
+    //     }
 
-        $seat = $this->seatModel
-            ->select('bus_seat.*, bus.id as bus_id')
-            ->join('bus', 'bus.id = bus_seat.bus_id')
-            ->where('bus_seat.id', $seatId)
-            ->first();
+    //     $seat = $this->seatModel
+    //         ->select('bus_seat.*, bus.id as bus_id')
+    //         ->join('bus', 'bus.id = bus_seat.bus_id')
+    //         ->where('bus_seat.id', $seatId)
+    //         ->first();
 
-        if (!$seat) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Kursi tidak ditemukan.'
-            ]);
-        }
+    //     if (!$seat) {
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => 'Kursi tidak ditemukan.'
+    //         ]);
+    //     }
 
-        // ===============================
-        // 🔥 CEK ZONA PEREMPUAN (1–24)
-        // ===============================
-        $nomorKursi = (int)$seat['nomor_kursi'];
+    //     // ===============================
+    //     // 🔥 CEK ZONA PEREMPUAN (1–28)
+    //     // ===============================
+    //     $nomorKursi = (int)$seat['nomor_kursi'];
 
-        if ($nomorKursi >= 1 && $nomorKursi <= 24) {
+    //     if ($nomorKursi >= 1 && $nomorKursi <= 28) {
 
-            if ($siswa['jenis'] == 'L') {
+    //         if ($siswa['jenis'] == 'L') {
 
-                // 🔐 Validasi password admin
-                $adminPasswordSystem = 'ADMIN123'; // ganti dengan config/env
+    //             // 🔐 Validasi password admin
+    //             $adminPasswordSystem = 'ADMIN123'; // ganti dengan config/env
 
-                if ($adminPass !== $adminPasswordSystem) {
-                    return $this->response->setJSON([
-                        'status' => 'error',
-                        'message' => 'Password admin salah. Kursi ini khusus perempuan.'
-                    ]);
-                }
-            }
-        }
+    //             if ($adminPass !== $adminPasswordSystem) {
+    //                 return $this->response->setJSON([
+    //                     'status' => 'error',
+    //                     'message' => 'Password admin salah. Kursi ini khusus perempuan.'
+    //                 ]);
+    //             }
+    //         }
+    //     }
 
-        // Cek sudah booking
-        if ($this->bookingModel->where('siswa_id', $siswa['id'])->first()) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Anda sudah memilih kursi.'
-            ]);
-        }
+    //     // Cek sudah booking
+    //     if ($this->bookingModel->where('siswa_id', $siswa['id'])->first()) {
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => 'Anda sudah memilih kursi.'
+    //         ]);
+    //     }
 
-        // Cek kursi terisi
-        if ($this->bookingModel->where('seat_id', $seatId)->first()) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Kursi sudah dipilih.'
-            ]);
-        }
+    //     // Cek kursi terisi
+    //     if ($this->bookingModel->where('seat_id', $seatId)->first()) {
+    //         return $this->response->setJSON([
+    //             'status' => 'error',
+    //             'message' => 'Kursi sudah dipilih.'
+    //         ]);
+    //     }
 
-        $this->bookingModel->insert([
-            'seat_id'  => $seatId,
-            'siswa_id' => $siswa['id'],
-        ]);
+    //     $this->bookingModel->insert([
+    //         'seat_id'  => $seatId,
+    //         'siswa_id' => $siswa['id'],
+    //     ]);
 
-        return $this->response->setJSON([
-            'status' => 'success',
-            'message' => 'Kursi berhasil dibooking.'
-        ]);
-    }
+    //     return $this->response->setJSON([
+    //         'status' => 'success',
+    //         'message' => 'Kursi berhasil dibooking.'
+    //     ]);
+    // }
 
     public function simpan()
     {
@@ -341,9 +341,9 @@ class BookingBus extends BaseController
 
         $nomorKursi = (int) $seat['nomor_kursi'];
 
-        $zonaPerempuan = $nomorKursi >= 1 && $nomorKursi <= 24;
-        $zonaAdminMix  = $nomorKursi >= 25 && $nomorKursi <= 28; // WAJIB ADMIN
-        $zonaLaki      = $nomorKursi >= 29 && $nomorKursi <= 50;
+        $zonaPerempuan = $nomorKursi >= 1 && $nomorKursi <= 28;
+        $zonaAdminMix  = $nomorKursi >= 29 && $nomorKursi <= 32; // WAJIB ADMIN
+        $zonaLaki      = $nomorKursi >= 33 && $nomorKursi <= 50;
 
         $adminPasswordSystem = env('ADMIN_BOOKING_PASSWORD');
 
@@ -372,13 +372,13 @@ class BookingBus extends BaseController
         }
 
         // ===============================
-        // ZONA 25-28 WAJIB ADMIN
+        // ZONA 29-32 WAJIB ADMIN
         // ===============================
         if ($zonaAdminMix) {
             if (!$adminPass || $adminPass !== $adminPasswordSystem) {
                 return $this->response->setJSON([
                     'status'  => 'error',
-                    'message' => 'Kursi 25-28 hanya bisa dibooking dengan password admin.'
+                    'message' => 'Kursi 29-32 hanya bisa dibooking dengan password admin.'
                 ]);
             }
         }
