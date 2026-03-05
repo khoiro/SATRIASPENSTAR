@@ -1344,49 +1344,120 @@ class Admin extends BaseController
         ]);
     }
 
-    public function datatableUpdateBayar()
+    // public function datatableUpdateBayar()
+    // {
+    //     $model = new \App\Models\SiswaModel();
+
+    //     $siswa = $model
+    //         ->select('id, nisn, nama, kelas, rombel, status_bayar')
+    //         ->where('deleted_at', null)
+    //         ->where('status', '1')
+    //         ->findAll();
+
+    //     $data = [];
+    //     $no = 1;
+
+    //     foreach ($siswa as $row) {
+
+    //         $status = $row->status_bayar == 1
+    //             ? '<span class="badge bg-success">Lunas</span>'
+    //             : '<span class="badge bg-danger">Belum Bayar</span>';
+
+    //         if ($row->status_bayar == 0) {
+    //            $aksi = '<button class="btn btn-success btn-sm btn-konfirmasi"
+    //                         data-id="'.$row->id.'"
+    //                         data-nama="'.$row->nama.'"
+    //                         data-kelas="'.$row->rombel.'">
+    //                         Konfirmasi
+    //                     </button>';
+    //         } else {
+    //             $aksi = '-';
+    //         }
+
+    //         $data[] = [
+    //             'no'            => $no++,
+    //             'nisn'          => $row->nisn,
+    //             'nama'          => $row->nama,
+    //             'kelas'         => $row->kelas . ' - ' . $row->rombel,
+    //             'status_bayar'  => $status,
+    //             'aksi'          => $aksi,
+    //             'id'            => $row->id
+    //         ];
+    //     }
+
+    //     return $this->response->setJSON([
+    //         'data' => $data
+    //     ]);
+    // }
+
+    public function datatableupdatebayar()
     {
-        $model = new \App\Models\SiswaModel();
+        $jenjang = $this->request->getGet('jenjang');
+        $kelas   = $this->request->getGet('kelas');
+        $status  = $this->request->getGet('status');
 
-        $siswa = $model
-            ->select('id, nisn, nama, kelas, rombel, status_bayar')
-            ->where('deleted_at', null)
-            ->where('status', '1')
-            ->findAll();
+        $db = \Config\Database::connect();
+        $builder = $db->table('siswa');
 
-        $data = [];
+        if ($jenjang != '') {
+            $builder->like('kelas', $jenjang, 'after');
+        }
+
+        if ($kelas != '') {
+            $builder->where('rombel', $kelas);
+        }
+
+        if ($status != '') {
+
+            if ($status == '1') {
+                $builder->where('status_bayar', 1);
+            } else {
+                $builder->groupStart()
+                        ->where('status_bayar', null)
+                        ->orWhere('status_bayar', '')
+                        ->orWhere('status_bayar', 0)
+                        ->groupEnd();
+            }
+        }
+
+        $data = $builder->get()->getResultArray();
+
+        $result = [];
         $no = 1;
 
-        foreach ($siswa as $row) {
+        foreach ($data as $row) {
 
-            $status = $row->status_bayar == 1
-                ? '<span class="badge bg-success">Lunas</span>'
-                : '<span class="badge bg-danger">Belum Bayar</span>';
+            // STATUS
+            if (!empty($row['status_bayar']) && $row['status_bayar'] == 1) {
+                $status_label = '<span class="badge badge-success">Lunas</span>';
+            } else {
+                $status_label = '<span class="badge badge-danger">Belum</span>';
+            }
 
-            if ($row->status_bayar == 0) {
-               $aksi = '<button class="btn btn-success btn-sm btn-konfirmasi"
-                            data-id="'.$row->id.'"
-                            data-nama="'.$row->nama.'"
-                            data-kelas="'.$row->rombel.'">
+            // AKSI
+            if (empty($row['status_bayar'])) {
+                $aksi = '<button class="btn btn-success btn-sm btn-konfirmasi"
+                            data-id="'.$row['id'].'"
+                            data-nama="'.$row['nama'].'"
+                            data-kelas="'.$row['rombel'].'">
                             Konfirmasi
                         </button>';
             } else {
-                $aksi = '-';
+                $aksi = '<span class="text-muted">-</span>';
             }
 
-            $data[] = [
-                'no'            => $no++,
-                'nisn'          => $row->nisn,
-                'nama'          => $row->nama,
-                'kelas'         => $row->kelas . ' - ' . $row->rombel,
-                'status_bayar'  => $status,
-                'aksi'          => $aksi,
-                'id'            => $row->id
+            $result[] = [
+                'no' => $no++,
+                'nisn' => $row['nisn'],
+                'nama' => $row['nama'],
+                'kelas' => $row['rombel'],
+                'status_bayar' => $status_label,
+                'aksi' => $aksi
             ];
         }
 
         return $this->response->setJSON([
-            'data' => $data
+            'data' => $result
         ]);
     }
 
