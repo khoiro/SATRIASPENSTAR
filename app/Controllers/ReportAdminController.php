@@ -358,7 +358,7 @@ class ReportAdminController extends BaseController
                     $lockedSeats = ['3', '4', '21', '22']; 
                     // ini adalah NOMOR KURSI (field nomor_kursi)
 
-                    if (in_array($bus['id'], [1, 7, 17]))  {
+                    if (in_array($bus['id'], [1, 7, 13]))  {
                          $lockedSeats = ['1','2', '3', '4', '21', '22','48']; 
                     }
 
@@ -453,7 +453,7 @@ class ReportAdminController extends BaseController
         /* ===============================
         KHUSUS BUS ID = 1
         =============================== */
-        if (in_array($busId, [1, 7, 17])) {
+        if (in_array($busId, [1, 7, 13])) {
             $lockedSeats = [
                 '1'  => 'Kepala Sekolah',
                 '2'  => 'Komite 1',

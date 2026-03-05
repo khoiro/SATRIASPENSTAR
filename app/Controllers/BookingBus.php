@@ -100,7 +100,7 @@ class BookingBus extends BaseController
                             ]; 
             // ini adalah NOMOR KURSI (field nomor_kursi)
 
-            if (in_array($b['id'], [1, 7, 17])) {
+            if (in_array($b['id'], [1, 7, 13])) {
                    $lockedSeats = [
                                     '1'  => 'Untuk Kepala Sekolah',
                                     '2'  => 'Untuk Komite',
