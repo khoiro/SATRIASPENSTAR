@@ -715,6 +715,7 @@ class Admin extends BaseController
             s.nama AS nama_siswa,
             s.kelas,
             s.rombel,
+            s.jenis,
             k.id AS kamar_id,
             k.nomor_kamar
         ');
@@ -734,17 +735,24 @@ class Admin extends BaseController
             */
             $penghuniBuilder = $db->table('booking_kamar bk2');
             $penghuniBuilder = $db->table('booking_kamar bk2');
-            $penghuniBuilder->select('s2.nama, s2.rombel');
+            $penghuniBuilder->select('s2.nama, s2.rombel,s2.jenis');
             $penghuniBuilder->join('siswa s2', 's2.id = bk2.siswa_id', 'left');
             $penghuniBuilder->where('bk2.kamar_id', $row['kamar_id']);
 
             $penghuni = $penghuniBuilder->get()->getResultArray();
 
-            if ($penghuni) {
+           if ($penghuni) {
                 $listPenghuni = '<ul class="mb-0 pl-3">';
                 foreach ($penghuni as $p) {
+
+                    // Tentukan label jenis kelamin
+                    $jk = '';
+                    if (!empty($p['jenis'])) {
+                        $jk = ($p['jenis'] == 'L') ? ' (L)' : ' (P)';
+                    }
+
                     $listPenghuni .= '<li>'
-                        . esc($p['nama'])
+                        . esc($p['nama']) . $jk
                         . ' <span class="text-muted">(' . esc($p['rombel']) . ')</span>'
                         . '</li>';
                 }

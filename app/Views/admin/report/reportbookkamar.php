@@ -143,7 +143,7 @@
                                         <?php foreach ($kamar['penghuni'] as $p): ?>
                                             <li>
                                                 <i class="fas fa-user"></i>
-                                                <?= esc($p['nama_siswa'] . ' (' . $p['rombel'] . ')') ?>
+                                                <?= esc($p['nama_siswa'] .' ('.$p['jenis'].') (' . $p['rombel'] . ')') ?>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
