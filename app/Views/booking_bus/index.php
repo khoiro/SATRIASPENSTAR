@@ -191,6 +191,40 @@
 </div>
 
 <div class="card-body">
+<!-- ================= FILTER ================= -->
+<form method="get" class="mb-3">
+    <div class="row justify-content-end">
+        
+        <!-- CETAK BUS -->
+        <div class="col-md-12 col-lg-12">
+            <div class="border rounded p-3 bg-light">
+
+                <label class="form-label fw-bold small mb-2">
+                    Cetak Data Bus
+                </label>
+
+                <div class="input-group input-group-sm">
+                    <select class="form-select" id="bus_print">
+                        <option value="">-- Pilih Bus --</option>
+                        <?php foreach ($allBus as $b): ?>
+                            <option value="<?= $b['id'] ?>">
+                                <?= esc($b['nama_bus']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <button type="button" 
+                            class="btn btn-success"
+                            onclick="cetakBus()">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</form>
 <div class="mb-3 text-center">
     <span class="badge" style="background:#c77dff">Zona Perempuan (1-28)</span>
     <span class="badge" style="background:#fef08a">Zona Netral (29-32)</span>
@@ -460,7 +494,7 @@ function lihatBooking(nama, kelas, rombel, nomor) {
 //         kirimBooking(busId, seatId, null);
 //     }
 // }
-function pilihKursi(nomorKursi, busId, seatId,namaBus) {
+function pilihKursi(nomorKursi, busId, seatId, namaBus) {
 
     let jenisSiswa = "<?= $siswa->jenis ?>"; // L atau P
     let nomor = parseInt(nomorKursi);
@@ -475,7 +509,7 @@ function pilihKursi(nomorKursi, busId, seatId,namaBus) {
             <div style="text-align:left">
                 Apakah Anda yakin ingin memilih:<br><br>
                 <b>Kursi ${nomorKursi}</b><br>
-                pada <b> ${namaBus}</b> ?
+                pada <b>${namaBus}</b> ?
             </div>
         `,
         showCancelButton: true,
@@ -493,27 +527,40 @@ function pilihKursi(nomorKursi, busId, seatId,namaBus) {
         let zonaAdminMix  = nomor >= 29 && nomor <= 32;
         let zonaLaki      = nomor >= 33 && nomor <= 50;
 
+        let kursiAdminKhusus = nomor === 21; // ✅ kursi khusus admin
+
         let perluPassword = false;
         let pesanZona = "";
 
+        // ===============================
+        // PRIORITAS: KURSI KHUSUS ADMIN
+        // ===============================
+        if (kursiAdminKhusus) {
+            perluPassword = true;
+            pesanZona = "Kursi 21 hanya bisa dibooking dengan password admin.";
+        }
+
         // ZONA PEREMPUAN
-        if (zonaPerempuan && jenisSiswa === 'L') {
+        else if (zonaPerempuan && jenisSiswa === 'L') {
             perluPassword = true;
             pesanZona = "Kursi ini khusus siswa perempuan.";
         }
 
         // ZONA LAKI
-        if (zonaLaki && jenisSiswa === 'P') {
+        else if (zonaLaki && jenisSiswa === 'P') {
             perluPassword = true;
             pesanZona = "Kursi ini khusus siswa laki-laki.";
         }
 
-        // ZONA ADMIN
-        if (zonaAdminMix) {
+        // ZONA ADMIN (29-32)
+        else if (zonaAdminMix) {
             perluPassword = true;
             pesanZona = "Kursi 29-32 hanya bisa dibooking dengan password admin, hubungi guru.";
         }
 
+        // ===============================
+        // JIKA PERLU PASSWORD
+        // ===============================
         if (perluPassword) {
 
             Swal.fire({
@@ -567,6 +614,14 @@ function kirimBooking(busId, seatId, adminPass = null) {
             Swal.fire('Gagal!', data.message, 'error');
         }
     });
+}
+function cetakBus() {
+    const busId = document.getElementById('bus_print').value;
+    if(!busId){
+        alert('Pilih bus terlebih dahulu');
+        return;
+    }
+    window.open("<?= base_url('admin/report/printbus') ?>?bus_id=" + busId, "_blank");
 }
 </script>
 

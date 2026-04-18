@@ -224,7 +224,24 @@ $title =
         <?php foreach ($siswaBelumBooking as $s): ?>
         <div class="list-group-item d-flex justify-content-between align-items-center px-2 py-1">
             <span><?= esc($s->nama) ?></span>
-            <span class="badge bg-secondary small"><?= esc($s->rombel) ?></span>
+
+            <div class="d-flex gap-1">
+                <span class="badge bg-secondary small">
+                    <?= esc($s->rombel) ?>
+                </span>
+
+                <?php if ($s->status_bayar == '1'): ?>
+                    <span class="badge bg-success small">L</span>
+                <?php else: ?>
+                    <!-- <span class="badge bg-danger small">Belum</span> -->
+                <?php endif; ?>
+                <?php if ($s->keterangan_odl == 'TIDAK'): ?>
+                    <span class="badge bg-danger small">N</span>
+                <?php else: ?>
+                    <!-- <span class="badge bg-danger small">Belum</span> -->
+                <?php endif; ?>
+            </div>
+
         </div>
         <?php endforeach; ?>
     </div>

@@ -61,6 +61,22 @@
                   }, \App\Models\SiswaModel::$rombel)) ?>
                 </select>
               </label>
+              <label class="d-block mb-3">
+                  <span>Keterangan ODL</span>
+                  <select name="keterangan_odl" class="form-control">
+                      
+                      <!-- opsi kosong -->
+                      <option value="" <?= empty($item->keterangan_odl) ? 'selected' : '' ?>>
+                          -- Pilih --
+                      </option>
+
+                      <?= implode('', array_map(function ($x) use ($item) {
+                          return '<option ' . ($item->keterangan_odl === $x ? 'selected' : '') .
+                              ' value="' . esc($x) . '">' . esc($x) . '</option>';
+                      }, ['YA', 'TIDAK'])) ?>
+
+                  </select>
+              </label>
               <div class="d-flex mb-3">
                 <input type="submit" value="Save" class="btn btn-primary mr-auto">
                 <?php if ($item->id) : ?>

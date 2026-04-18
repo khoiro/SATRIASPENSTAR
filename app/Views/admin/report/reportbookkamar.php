@@ -173,14 +173,28 @@
                     <div class="p-3">
                         <?php if ($siswaBelumBooking): ?>
                             <?php foreach ($siswaBelumBooking as $s): ?>
-                                <div class="siswa-item">
+                               <div class="siswa-item d-flex justify-content-between align-items-center">
                                     <div>
                                         <i class="fas fa-user text-warning"></i>
                                         <?= esc($s['nama_siswa']) ?>
                                     </div>
-                                    <span class="badge bg-secondary">
-                                        <?= esc($s['rombel']) ?>
-                                    </span>
+
+                                    <div class="d-flex gap-1">
+                                        <span class="badge bg-secondary">
+                                            <?= esc($s['rombel']) ?>
+                                        </span>
+
+                                        <?php if ($s['status_bayar'] == '1'): ?>
+                                            <span class="badge bg-success">L</span>
+                                        <?php else: ?>
+                                            <!-- <span class="badge bg-danger">TL</span> -->
+                                        <?php endif; ?>
+                                        <?php if ($s['keterangan_odl'] == 'TIDAK'): ?>
+                                            <span class="badge bg-danger">N</span>
+                                        <?php else: ?>
+                                            <!-- <span class="badge bg-danger">TL</span> -->
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>

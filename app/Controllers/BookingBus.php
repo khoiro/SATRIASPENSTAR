@@ -53,6 +53,7 @@ class BookingBus extends BaseController
         $siswaId = $siswa->siswa_id;
         $jenjang = $siswa->kelas;
         $rombel  = $siswa->rombel;
+        $busModel     = new \App\Models\BusModel();
 
         // ===============================
         // CEK SUDAH BOOKING
@@ -95,7 +96,7 @@ class BookingBus extends BaseController
             $lockedSeats = [
                                 '3'  => 'Untuk Guru Pendamping1',
                                 '4'  => 'Untuk Guru Pendamping2',
-                                '21' => 'Untuk Guru Pendamping3',
+                                // '21' => 'Untuk Guru Pendamping3',
                                 '22' => 'Kursi Cadangan',
                             ]; 
             // ini adalah NOMOR KURSI (field nomor_kursi)
@@ -106,7 +107,7 @@ class BookingBus extends BaseController
                                     '2'  => 'Untuk Komite',
                                     '3'  => 'Untuk Komite',
                                     '4'  => 'Guru Pendamping1',
-                                    '21' => 'Guru Pendamping2',
+                                    // '21' => 'Guru Pendamping2',
                                     '22' => 'Guru Pendamping3',
                                     '48' => 'Kursi Cadangan',
                                 ];
@@ -161,12 +162,17 @@ class BookingBus extends BaseController
             $wajibIsiTelp = true;
         }
 
+         $allBus = $busModel
+            ->where('status', 1)
+            ->findAll();
+
     
 
         return view('booking_bus/index', [
             'siswa'        => $siswa,
             'busList'      => $busList,
             'sudahBooking' => $sudahBooking,
+            'allBus'      => $allBus,
             'wajibIsiTelp'   => $wajibIsiTelp
         ]);
     }

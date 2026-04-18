@@ -44,7 +44,7 @@ class SiswaModel extends Model
 
     protected $table         = 'siswa';
     protected $allowedFields = [
-        'nisn', 'nis', 'nama', 'tgl_lahir','alamat','telp_siswa','telp_ortu','kelas','rombel','status','user_id','status_bayar'
+        'nisn', 'nis', 'nama', 'tgl_lahir','alamat','telp_siswa','telp_ortu','kelas','rombel','status','user_id','status_bayar','keterangan_odl'
     ];
     protected $primaryKey = 'id';
     protected $returnType = 'App\Entities\Siswa';
@@ -116,7 +116,7 @@ class SiswaModel extends Model
     public function getSiswaBelumBooking($jenjang = null, $kelas = null)
     {
         $builder = $this->db->table('siswa s');
-        $builder->select('s.nama AS nama_siswa, s.rombel');
+        $builder->select('s.nama AS nama_siswa, s.rombel,s.status_bayar,s.keterangan_odl');
         $builder->where('s.status', 1);
 
         if ($kelas) {

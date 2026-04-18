@@ -219,6 +219,10 @@ class ReportAdminController extends BaseController
 
         $dataKamar = [];
 
+        // 🔥 REKAP
+        $totalSiswa = 0;
+        $rekapKelas = [];
+
         $kamars = $kamarModel->getKamarWithStatus($jenjang);
 
         foreach ($kamars as $k) {
@@ -229,25 +233,40 @@ class ReportAdminController extends BaseController
             }
 
             // ===============================
-            // JIKA KELAS DIPILIH → CEK SAJA
+            // FILTER KELAS (JIKA DIPILIH)
             // ===============================
             if ($kelas) {
                 $adaKelas = $bookingModel
                     ->getPenghuniByKamarPrint($k['id'], $kelas);
 
-                // kalau kamar ini tidak ada siswa kelas tsb → skip
                 if (!$adaKelas) {
                     continue;
                 }
             }
 
             // ===============================
-            // AMBIL SEMUA PENGHUNI (TANPA FILTER KELAS)
+            // AMBIL SEMUA PENGHUNI
             // ===============================
             $penghuni = $bookingModel->getPenghuniByKamarPrint(
                 $k['id'],
                 null
             );
+
+            // ===============================
+            // HITUNG TOTAL & PER KELAS
+            // ===============================
+            foreach ($penghuni as $p) {
+
+                $totalSiswa++;
+
+                $rombel = $p['rombel'] ?? '-';
+
+                if (!isset($rekapKelas[$rombel])) {
+                    $rekapKelas[$rombel] = 0;
+                }
+
+                $rekapKelas[$rombel]++;
+            }
 
             $dataKamar[] = [
                 'nama_kamar' => 'Kamar ' . $k['nomor_kamar'],
@@ -256,10 +275,15 @@ class ReportAdminController extends BaseController
             ];
         }
 
+        // urutkan kelas biar rapi
+        ksort($rekapKelas);
+
         return view('admin/report/printbookkamar', [
-            'jenjang'   => $jenjang,
-            'kelas'     => $kelas,
-            'dataKamar' => $dataKamar
+            'jenjang'     => $jenjang,
+            'kelas'       => $kelas,
+            'dataKamar'   => $dataKamar,
+            'totalSiswa'  => $totalSiswa,
+            'rekapKelas'  => $rekapKelas
         ]);
     }
 
@@ -369,7 +393,7 @@ class ReportAdminController extends BaseController
                         ->findAll();
 
                     $bookings = $bookingModel
-                        ->select('booking_bus.*, siswa.nama, siswa.kelas, siswa.rombel')
+                        ->select('booking_bus.*, siswa.nama, siswa.kelas, siswa.rombel,siswa.status_bayar')
                         ->join('siswa', 'siswa.id = booking_bus.siswa_id')
                         ->where('booking_bus.bus_id', $bus['id'])
                         ->findAll();
@@ -444,9 +468,9 @@ class ReportAdminController extends BaseController
         DEFAULT LOCKED SEAT (SEMUA BUS)
         =============================== */
         $lockedSeats = [
-            '3'  => 'Pendamping 1',
-            '4'  => 'Pendamping 2',
-            '21' => 'Pendamping 3',
+            '3'  => 'Pendamping',
+            '4'  => 'Pendamping',
+            '21' => 'Pendamping',
             '22' => 'Cadangan',
         ];
 
@@ -458,9 +482,9 @@ class ReportAdminController extends BaseController
                 '1'  => 'Kepala Sekolah',
                 '2'  => 'Komite 1',
                 '3'  => 'Komite 2',
-                '4' => 'Pendamping 1',
-                '21' => 'Pendamping 2',
-                '22' => 'Pendamping 3'
+                '4' => 'Pendamping',
+                '21' => 'Pendamping',
+                '22' => 'Pendamping'
             ];
         }
 
@@ -499,15 +523,18 @@ class ReportAdminController extends BaseController
             $seat['is_blocked'] = false;
             $seat['blocked_reason'] = null;
 
-            // 🔒 CEK BLOCKED BERDASARKAN NOMOR KURSI
-            if (array_key_exists($seat['nomor_kursi'], $lockedSeats)) {
-                $seat['is_blocked'] = true;
-                $seat['blocked_reason'] = $lockedSeats[$seat['nomor_kursi']];
-            }
-
-            // 🔴 CEK BOOKING (booking tetap bisa tampil)
+            // 🔴 PRIORITAS 1: CEK BOOKING DULU
             if (isset($bookingMap[$seat['id']])) {
                 $seat['nama'] = $bookingMap[$seat['id']];
+
+                // 👉 jika sudah dibooking, anggap tidak blocked
+                $seat['is_blocked'] = false;
+                $seat['blocked_reason'] = null;
+            } 
+            // 🔒 PRIORITAS 2: BARU CEK BLOCKED
+            else if (array_key_exists($seat['nomor_kursi'], $lockedSeats)) {
+                $seat['is_blocked'] = true;
+                $seat['blocked_reason'] = $lockedSeats[$seat['nomor_kursi']];
             }
         }
 

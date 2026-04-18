@@ -21,6 +21,19 @@
     Kelas: <strong><?= esc($kelas ?: 'Semua') ?></strong>
 </p>
 
+<hr>
+
+<h3>Rekap Siswa</h3>
+<p><strong>Total Siswa: <?= $totalSiswa ?></strong></p>
+
+<ul>
+    <?php foreach ($rekapKelas as $kls => $jumlah): ?>
+        <li><?= esc($kls) ?> : <?= $jumlah ?> siswa</li>
+    <?php endforeach; ?>
+</ul>
+
+<hr>
+
 <?php foreach ($dataKamar as $kamar): ?>
     <div class="kamar">
         <h3>
@@ -30,7 +43,11 @@
 
         <ul>
             <?php foreach ($kamar['penghuni'] as $p): ?>
-                <li><?= esc($p['nama_siswa']) ?> (<?= esc($p['rombel']) ?>) (<?= esc($p['telp_siswa']) ?>)</li>
+                <li>
+                    <?= esc($p['nama_siswa']) ?> 
+                    (<?= esc($p['rombel']) ?>) 
+                    (<?= esc($p['telp_siswa']) ?>)
+                </li>
             <?php endforeach; ?>
         </ul>
     </div>
