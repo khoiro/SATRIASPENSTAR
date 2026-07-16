@@ -55,7 +55,7 @@
             </p>
           </a>
         </li> -->
-        <!-- <li class="nav-item">
+        <li class="nav-item">
           <a href="/siswa/" class="nav-link <?= ($page ?? '') === 'dashboard' ? 'active' : '' ?>">
             <i class="nav-icon fas fa-home"></i>
             <p>
@@ -77,7 +77,7 @@
               <i class="nav-icon fas fa-calculator"></i>
               <p>Hitung Kehadiran</p>
           </a>
-        </li> -->
+        </li>
         <li class="nav-item">
           <a href="<?= site_url('siswa/bookingkamar') ?>" 
             class="nav-link <?= ($page ?? '') === 'bookingkamar' ? 'active' : '' ?>">

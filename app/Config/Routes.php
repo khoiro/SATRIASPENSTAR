@@ -119,8 +119,8 @@ $routes->group('admin', function($routes) {
 });
 
 $routes->group('siswa', function($routes) {
-    $routes->get('/', 'BookingKamar::index');
-    // $routes->get('/', 'Siswa::index');
+    // $routes->get('/', 'BookingKamar::index');
+    $routes->get('/', 'Siswa::index');
     $routes->get('profile', 'Siswa::profile');
     $routes->get('logout', 'Siswa::logout');
     $routes->post('profile', 'Siswa::profile');

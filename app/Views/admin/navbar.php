@@ -141,7 +141,7 @@
         </li>
 
         <!-- PENGATURAN -->
-        <!-- <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['location','holiday']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['location','holiday']) ? 'menu-open' : '' ?>">
           <a href="#"
              class="nav-link <?= in_array(($page ?? ''), ['location','holiday']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-cogs"></i>
@@ -166,10 +166,10 @@
               </a>
             </li>
           </ul>
-        </li> -->
+        </li>
 
         <!-- LAPORAN -->
-        <!-- <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'menu-open' : '' ?>">
+        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'menu-open' : '' ?>">
            <a href="#"
              class="nav-link <?= in_array(($page ?? ''), ['report_absensi','reportstatusabsensi']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-chart-bar"></i>
@@ -194,10 +194,10 @@
               </a>
             </li>
           </ul>
-        </li> -->
+        </li>
 
         <!-- ODL -->
-        <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat','reportbookseat','updatebayar']) ? 'menu-open' : '' ?>">
+        <!-- <li class="nav-item has-treeview <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat','reportbookseat','updatebayar']) ? 'menu-open' : '' ?>">
            <a href="#"
              class="nav-link <?= in_array(($page ?? ''), ['resetkamar','reportbookkamar','resetseat','reportbookseat','updatebayar']) ? 'active' : '' ?>">
             <i class="nav-icon fas fa-tree"></i>
@@ -243,7 +243,7 @@
               </a>
             </li>
           </ul>
-        </li>
+        </li> -->
 
       </ul>
     </nav>
